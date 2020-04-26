@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using _24hplusdotnetcore.Middleware;
 using _24hplusdotnetcore.Models;
 using _24hplusdotnetcore.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -110,6 +111,8 @@ namespace _24hplusdotnetcore
             app.UseRouting();
 
             app.UseAuthorization();
+
+            app.RequestAPIMiddleware();
 
             app.UseEndpoints(endpoints =>
             {
