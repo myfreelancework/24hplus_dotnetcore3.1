@@ -42,11 +42,14 @@ namespace _24hplusdotnetcore.Middleware
             }
             else
             {
-                if (!context.Request.Path.Value.Contains("api/auth/userlogin") && !context.Request.Path.Value.Contains("swagger") && !context.Request.Path.Value.Contains("api/checkversion"))
+                if (!context.Request.Path.Value.Contains("api/auth/userlogin")
+                 && !context.Request.Path.Value.Contains("swagger")
+                 && !context.Request.Path.Value.Contains("api/checkversion")
+                 && !context.Request.Path.Value.Contains("api/config/banner"))
                 {
                     context.Response.StatusCode = StatusCodes.Status401Unauthorized;
                     context.Response.Headers.Clear();
-                    
+
                 }
                 else
                 {
@@ -54,7 +57,7 @@ namespace _24hplusdotnetcore.Middleware
                 }
             }
             // Call the next delegate/middleware in the pipeline
-            
+
         }
     }
     public static class RequestAPIMiddlewareExtensions
@@ -64,5 +67,5 @@ namespace _24hplusdotnetcore.Middleware
         {
             return builder.UseMiddleware<RequestMiddleware>();
         }
-    }    
+    }
 }

@@ -22,7 +22,7 @@ namespace _24hplusdotnetcore.Controllers
         }
         [HttpGet]
         [Route("api/checkinfo")]
-        public ActionResult<ResponseContext> CheckInfo([FromQuery] string greentype, [FromQuery] string citizenId, [FromQuery] string customerName )
+        public ActionResult<ResponseContext> CheckInfo([FromQuery] string greentype, [FromQuery] string citizenId, [FromQuery] string customerName)
         {
             try
             {
@@ -44,6 +44,7 @@ namespace _24hplusdotnetcore.Controllers
                 });
             }
         }
+
         [HttpGet]
         [Route("api/checkduplicate")]
         public ActionResult<ResponseContext> CheckDuplicate([FromQuery] string greentype, [FromQuery] string citizenId)
@@ -55,6 +56,37 @@ namespace _24hplusdotnetcore.Controllers
                 {
                     code = (int)Common.ResponseCode.SUCCESS,
                     message = response.returnMes,
+                    data = response
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseMessage
+                {
+                    status = "ERROR",
+                    message = ex.Message
+                });
+            }
+        }
+
+        [HttpGet]
+        [Route("api/checkcat")]
+        public ActionResult<ResponseContext> CheckCat([FromQuery] string greentype, [FromQuery] string companyTaxNumber)
+        {
+            try
+            {
+                dynamic response = new {
+                compName = "CÔNG TY TNHH EB CẦN THƠ",
+                catType = "CAT B",
+                compAddrStreet = "LÔ SỐ 1, KDC HƯNG PHÚ 1, PHƯỜNG HƯNG PHÚ, QUẬN CÁI RĂNG, TP CẦN THƠ",
+                officeNumber = "",
+                companyTaxNumber = "1801210593",
+                };
+                return Ok(new ResponseContext
+                {
+                    code = (int)Common.ResponseCode.SUCCESS,
+                    message = Common.Message.SUCCESS,
                     data = response
                 });
             }

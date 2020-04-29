@@ -33,8 +33,34 @@ namespace _24hplusdotnetcore.Controllers
                     code = (int)Common.ResponseCode.SUCCESS,
                     message = Common.Message.SUCCESS,
                     data = lstpayment,
-                    pagenumber = pagenumber.HasValue? (int)pagenumber : 1,
+                    pagenumber = pagenumber.HasValue ? (int)pagenumber : 1,
                     totalpage = totalpage
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseMessage
+                {
+                    status = "ERROR",
+                    message = ex.Message
+                });
+            }
+        }
+
+        [HttpPost]
+        [Route("api/payment/calc")]
+        public ActionResult<ResponseContext> CalculatorPayment(PaymentCalc paymentCalc)
+        {
+            try
+            {
+                dynamic a = new { paymentMonthly = "1500000", firstDate = "10/05/2020" };
+
+                return Ok(new ResponseContext
+                {
+                    code = (int)Common.ResponseCode.SUCCESS,
+                    message = Common.Message.SUCCESS,
+                    data = a
                 });
             }
             catch (Exception ex)

@@ -54,6 +54,7 @@ namespace _24hplusdotnetcore
             services.AddSingleton<FileUploadServices>();
             services.AddSingleton<PaymentServices>();
             services.AddSingleton<CheckInfoServices>();
+            services.AddSingleton<NotificationServices>();
             #endregion
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
