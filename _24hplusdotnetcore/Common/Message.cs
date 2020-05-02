@@ -1,3 +1,5 @@
+using System;
+
 namespace _24hplusdotnetcore.Common
 {
     public static class Message
@@ -10,6 +12,10 @@ namespace _24hplusdotnetcore.Common
         public static string UNAUTHORIZED = "";
         public static string ERROR = "Lỗi hệ thống, Vui lòng liên hệ IT!";
         internal static string VERSION_IS_OLD = "Phiên bản của bạn đã cũ, Vui lòng cập nhập phiên bản mới!";
+        internal static string NotificationAdd = "{0} vừa thêm mới khách hàng {1}";
+        internal static string NotificationUpdate = "{0} vừa cập nhật thông tin khách hàng  {1}";
+        public static string TeamLeadReject = "{0} vừa reject khách hàng {1}";
+        public static string TeamLeadApprove = "{0} vừa approve khách hàng {1}";
     }
     public enum ResponseCode : int
     {
