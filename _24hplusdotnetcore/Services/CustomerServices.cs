@@ -13,12 +13,16 @@ namespace _24hplusdotnetcore.Services
     {
         private readonly ILogger<CustomerServices> _logger;
         private readonly IMongoCollection<Customer> _customer;
-        public CustomerServices(IMongoDbConnection connection, ILogger<CustomerServices> logger)
+        private readonly NotificationServices _notificationServices;
+        private readonly UserRoleServices _userroleServices;
+        public CustomerServices(IMongoDbConnection connection, ILogger<CustomerServices> logger, NotificationServices notificationServices, UserRoleServices userroleServices)
         {
             var client = new MongoClient(connection.ConnectionString);
             var database = client.GetDatabase(connection.DataBase);
             _customer = database.GetCollection<Customer>(MongoCollection.CustomerCollection);
             _logger = logger;
+            _notificationServices = notificationServices;
+            _userroleServices = userroleServices;
         }
         public List<Customer> GetList(string UserName, DateTime? DateFrom, DateTime? DateTo, string Status, string greentype,string customername, int? pagenumber, int? pagesize, ref int totalPage, ref int totalrecord)
         {
@@ -107,6 +111,21 @@ namespace _24hplusdotnetcore.Services
                 customer.CreatedDate = Convert.ToDateTime(DateTime.Today.ToShortDateString());
                 customer.ModifiedDate = Convert.ToDateTime(DateTime.Today.ToShortDateString());
                 _customer.InsertOne(customer);
+                if (customer.Status.ToUpper() != CustomerStatus.DRAFT)
+                {
+                    var objNoti = new Notification
+                    {
+                        green = GeenType.GreenC,
+                        recordId = customer.Id,
+                        isRead = false,
+                        type = NotificationType.Add,
+                        userName = customer.UserName,
+                        message = string.Format(Message.NotificationAdd, customer.UserName, customer.Personal.Name),
+                        createAt = Convert.ToDateTime(DateTime.Today.ToLongDateString())
+                    };
+                    _notificationServices.CreateOne(objNoti);
+                }               
+
                 return customer;
             }
             catch (Exception ex)
@@ -120,9 +139,39 @@ namespace _24hplusdotnetcore.Services
             long updateCount = 0;
             try
             {
+                string prvStaus = _customer.Find(c => c.Id == customer.Id).FirstOrDefault().Status;
                 customer.ModifiedDate = Convert.ToDateTime(DateTime.Today.ToShortDateString());
                 customer.CreatedDate = _customer.Find(c => c.Id == customer.Id).FirstOrDefault().CreatedDate;
                 updateCount = _customer.ReplaceOne(c => c.Id == customer.Id, customer).ModifiedCount;
+                string currStatus = customer.Status;
+                string message = "",type = "";
+                string teamlead = _userroleServices.GetUserRoleByUserName(customer.UserName).TeamLead;
+                if (prvStaus.ToUpper() != CustomerStatus.DRAFT && currStatus.ToUpper() == CustomerStatus.REJECT)
+                {
+                    message = string.Format(Message.TeamLeadReject, teamlead, customer.Personal.Name);
+                    type = NotificationType.TeamLeadReject;
+                }
+                if (prvStaus.ToUpper() != CustomerStatus.DRAFT && currStatus.ToUpper() == CustomerStatus.APPROVE)
+                {
+                    message = string.Format(Message.TeamLeadApprove, teamlead, customer.Personal.Name);
+                    type = NotificationType.TeamLeadApprove;
+                }
+                if (prvStaus.ToUpper() == CustomerStatus.DRAFT && currStatus.ToUpper() == CustomerStatus.SUBMIT)
+                {
+                    message = string.Format(Message.NotificationAdd, customer.UserName, customer.Personal.Name);
+                    type = NotificationType.Add;
+                }
+                var objNoti = new Notification
+                {
+                    green = GeenType.GreenC,
+                    recordId = customer.Id,
+                    isRead = false,
+                    type = type,
+                    userName = customer.UserName,
+                    message = message,
+                    createAt = Convert.ToDateTime(DateTime.Today.ToLongDateString())
+                };
+                _notificationServices.CreateOne(objNoti);
             }
             catch (Exception ex)
             {

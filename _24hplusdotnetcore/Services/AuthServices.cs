@@ -66,6 +66,7 @@ namespace _24hplusdotnetcore.Services
                         resLogin.UserFullName = loginUser.UserLastName + " " + loginUser.UserMiddleName + " " + loginUser.UserFirstName;
                         resLogin.Role = loginUser.RoleName;
                         resLogin.token = token;
+                        resLogin.registration_token = requestLoginInfo.registration_token;
                     }
                 }
             }

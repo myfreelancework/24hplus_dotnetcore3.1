@@ -13,6 +13,7 @@ namespace _24hplusdotnetcore.Models
         public string uuid { get; set; }
         public string ostype { get; set; }
         public string token { get; set; }
-        
+        public string registration_token { get; set; }
+
     }
 }
