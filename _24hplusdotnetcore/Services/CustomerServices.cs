@@ -104,8 +104,8 @@ namespace _24hplusdotnetcore.Services
         {
             try
             {
-                customer.CreatedDate = Convert.ToDateTime(DateTime.Today.ToShortDateString());
-                customer.ModifiedDate = Convert.ToDateTime(DateTime.Today.ToShortDateString());
+                customer.CreatedDate = Convert.ToDateTime(DateTime.Now);
+                customer.ModifiedDate = Convert.ToDateTime(DateTime.Now);
                 _customer.InsertOne(customer);
                 return customer;
             }
@@ -120,7 +120,7 @@ namespace _24hplusdotnetcore.Services
             long updateCount = 0;
             try
             {
-                customer.ModifiedDate = Convert.ToDateTime(DateTime.Today.ToShortDateString());
+                customer.ModifiedDate = Convert.ToDateTime(DateTime.Now);
                 customer.CreatedDate = _customer.Find(c => c.Id == customer.Id).FirstOrDefault().CreatedDate;
                 updateCount = _customer.ReplaceOne(c => c.Id == customer.Id, customer).ModifiedCount;
             }
