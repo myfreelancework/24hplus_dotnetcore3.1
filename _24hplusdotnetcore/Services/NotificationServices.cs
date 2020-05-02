@@ -49,7 +49,7 @@ namespace _24hplusdotnetcore.Services
         {
             try
             {
-                noti.createAt = Convert.ToDateTime(DateTime.Today.ToShortDateString());
+                noti.createAt = Convert.ToDateTime(DateTime.Now.ToLocalTime());
                 _notification.InsertOne(noti);
                 return noti;
             }

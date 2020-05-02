@@ -45,7 +45,8 @@ namespace _24hplusdotnetcore.Middleware
                 if (!context.Request.Path.Value.Contains("api/auth/userlogin")
                  && !context.Request.Path.Value.Contains("swagger")
                  && !context.Request.Path.Value.Contains("api/checkversion")
-                 && !context.Request.Path.Value.Contains("api/config/banner"))
+                 && !context.Request.Path.Value.Contains("api/config/banner")
+                 && !context.Request.Path.Value.Contains("api/gcc/personal"))
                 {
                     context.Response.StatusCode = StatusCodes.Status401Unauthorized;
                     context.Response.Headers.Clear();

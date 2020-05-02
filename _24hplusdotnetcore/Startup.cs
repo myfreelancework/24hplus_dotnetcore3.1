@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using _24hplusdotnetcore.Middleware;
 using _24hplusdotnetcore.Models;
 using _24hplusdotnetcore.Services;
+using _24hplusdotnetcore.Services.GCC;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -59,6 +60,10 @@ namespace _24hplusdotnetcore
             services.AddSingleton<PaymentServices>();
             services.AddSingleton<CheckInfoServices>();
             services.AddSingleton<NotificationServices>();
+
+            // GCC Service
+            services.AddSingleton<GCCService>();
+            services.AddSingleton<GCCProductService>();
             #endregion
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
