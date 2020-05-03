@@ -80,7 +80,8 @@ namespace _24hplusdotnetcore.Controllers
                             UserName = requestLoginInfo.UserName,
                             uuid = requestLoginInfo.uuid,
                             ostype = requestLoginInfo.ostype,
-                            token = resLogin.token
+                            token = resLogin.token,
+                            registration_token = resLogin.registration_token
                         };
                         var createdUser = _userLoginServices.Create(newUserLogin);
                         if (createdUser != null)
@@ -109,7 +110,8 @@ namespace _24hplusdotnetcore.Controllers
                             UserName = requestLoginInfo.UserName,
                             uuid = requestLoginInfo.uuid,
                             ostype = requestLoginInfo.ostype,
-                            token = resLogin.token
+                            token = resLogin.token,
+                            registration_token = resLogin.registration_token
                         };
                         var updateCount = _userLoginServices.Update(prevUserLogin.LoginId, updateUserLogin);
                         if (updateCount >= 0)
