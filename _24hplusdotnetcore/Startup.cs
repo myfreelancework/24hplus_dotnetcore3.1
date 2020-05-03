@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,6 +15,7 @@ using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -36,6 +38,8 @@ namespace _24hplusdotnetcore
         {
             services.Configure<MongoDbConnection>(Configuration.GetSection(nameof(MongoDbConnection)));
             services.AddControllers();
+            services.AddDirectoryBrowser();
+
             #region "Adding Singleton"
             services.AddSingleton<IMongoDbConnection>(sp => sp.GetRequiredService<IOptions<MongoDbConnection>>().Value);
             services.AddSingleton<DemoService>();
@@ -112,6 +116,12 @@ namespace _24hplusdotnetcore
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+            });
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(
+            Path.Combine(Directory.GetCurrentDirectory(), "mobileapp")),
+                RequestPath = "/mobileapp"
             });
             app.UseHttpsRedirection();
 
