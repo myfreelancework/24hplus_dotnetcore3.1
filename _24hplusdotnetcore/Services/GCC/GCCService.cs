@@ -46,7 +46,7 @@ namespace _24hplusdotnetcore.Services.GCC
         {
             try
             {
-                var url = Url.GCC_BASE_URL + Url.GCC_PUSH_DATA;
+                var url = Url.GCC_BASE_URL + string.Format(Url.GCC_PUSH_DATA, ConfigRequest.GCC_CLIENT_SECRET, key);
                 dynamic request = HttpRequest(url, Method.POST, key, body);
                 if (request != null && request.code != null)
                 {
@@ -128,9 +128,6 @@ namespace _24hplusdotnetcore.Services.GCC
                 var request = new RestRequest(Method);
 
                 request.AddHeader("Content-Type", "application/json");
-                request.AddHeader("client_code", ConfigRequest.GCC_CLIENT_CODE);
-                request.AddHeader("client_secret", ConfigRequest.GCC_CLIENT_SECRET);
-                request.AddHeader("key", key);
                 if (body != null)
                 {
                     request.AddParameter("application/json", body, ParameterType.RequestBody);

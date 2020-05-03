@@ -22,18 +22,32 @@ namespace _24hplusdotnetcore.Services.GCC
             _collection = database.GetCollection<GCCPersonalProduct>(MongoCollection.GCCProduct);
             _logger = logger;
         }
-        public GCCPersonalProduct FindOneByProductCode(string productCode)
+        public GCCPersonalProduct FindOneByProductName(string productName)
         {
             try
             {
-                var a = _collection.Find(x => x.Id == "5eaa64173a389b00074bca79").FirstOrDefault();
-                return _collection.Find(x => x.product_code == productCode).FirstOrDefault();
+                return _collection.Find(x => x.product_name == productName).FirstOrDefault();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, ex.Message);
                 return null;
             }
+        }
+
+        public string MappingPackage(string key)
+        {
+            var result = "";
+            switch (key)
+            {
+                case "Gói cơ bản":
+                    result = "co_ban";
+                    break;
+                case "Gói thiết yếu":
+                    result = "thiet_yeu";
+                    break;
+            }
+            return result;
         }
     }
 }

@@ -41,20 +41,26 @@ namespace _24hplusdotnetcore.Controllers
                     message = "",
                     data = null
                 };
-                var product = _gccProductService.FindOneByProductCode(body.product_code);
+                var product = _gccProductService.FindOneByProductName(body.product_name);
                 if (product != null)
                 {
                     var currPackage = product.package.Split(";");
 
-                    body.request_code = ConfigRequest.GCC_REQUEST_CODE + DateTime.Now.ToString("yyyyMMddHHmmssffff");
                     body.state = GccState.NEW;
-                    body.agency_id = product.agency_id;
                     body.program = product.program;
+                    body.agency_id = product.agency_id;
+                    body.product_code = product.product_code;
                     body.buy_gender = body.buy_gender == "Nam" ? "m" : "f";
+                    body.begin_date = DateTime.Today.ToString("yyyy-MM-dd");
+                    body.request_code = ConfigRequest.GCC_REQUEST_CODE + DateTime.Now.ToString("yyyyMMddHHmmssffff");
                     body.url_callback = ConfigRequest.GCC_CALLBACK + "?requestCode=" + body.request_code;
                     if (currPackage.Length == 1)
                     {
                         body.package = product.package;
+                    }
+                    else
+                    {
+                        body.package = _gccProductService.MappingPackage(body.package);
                     }
 
                     var currPerson = _gccService.CreateOne(body);
