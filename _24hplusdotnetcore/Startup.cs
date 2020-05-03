@@ -56,6 +56,7 @@ namespace _24hplusdotnetcore
             services.AddSingleton<PaymentServices>();
             services.AddSingleton<CheckInfoServices>();
             services.AddSingleton<NotificationServices>();
+            services.AddSingleton<ConfigServices>();
 
             // GCC Service
             services.AddSingleton<GCCService>();

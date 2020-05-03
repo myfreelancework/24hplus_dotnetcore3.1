@@ -19,6 +19,7 @@
         internal static string FileUpload = "FileUpload";
         internal static string Payment = "Payment";
         internal static string Notification = "Notification";
+        internal static string Config = "Config";
         internal static string GCCPersonalInsurance = "GCCPersonalInsurance";
         internal static string GCCProduct = "GCCProduct";
         internal static string GCCMotoInsurance = "GCCMotoInsurance";
