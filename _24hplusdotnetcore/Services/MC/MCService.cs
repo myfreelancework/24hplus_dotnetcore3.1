@@ -70,6 +70,33 @@ namespace _24hplusdotnetcore.Services.MC
                 return null;
             }
         }
+        public dynamic CheckCAT(string companyTaxNumber)
+        {
+            try
+            {
+                string token = GetMCToken();
+                if (!string.IsNullOrEmpty(token))
+                {
+                    var client = new RestClient(Url.MC_BASE_URL + string.Format(Url.MC_CHECK_CAT, companyTaxNumber));
+                    var request = new RestRequest(Method.GET);
+                    request.AddHeader("Content-type", "application/json");
+                    request.AddHeader("Authorization", "Bearer " + token + "");
+                    request.AddHeader("x-security", "" + Common.Config.CredMC_Security_Key + "");
+                    IRestResponse response = client.Execute(request);
+                    dynamic content = JsonConvert.DeserializeObject<dynamic>(response.Content);
+                    return content;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return null;
+            }
+        }
         public string GetMCToken()
         {
             string token = "";
