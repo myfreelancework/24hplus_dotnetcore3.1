@@ -127,10 +127,24 @@ namespace _24hplusdotnetcore.Services.GCC
                 var client = new RestClient(Url);
                 var request = new RestRequest(Method);
 
-                request.AddHeader("Content-Type", "application/json");
                 if (body != null)
                 {
-                    request.AddParameter("application/json", body, ParameterType.RequestBody);
+                    string person = JsonConvert.SerializeObject(body.person);
+                    request.AlwaysMultipartFormData = true;
+                    request.AddParameter("product_code", body.product_code);
+                    request.AddParameter("agency_id", body.agency_id);
+                    request.AddParameter("program", body.program);
+                    request.AddParameter("package", body.package);
+                    request.AddParameter("request_code", body.request_code);
+                    request.AddParameter("buy_fullname", body.buy_fullname);
+                    request.AddParameter("buy_bod", body.buy_bod);
+                    request.AddParameter("buy_address", body.buy_address);
+                    request.AddParameter("buy_phone", body.buy_phone);
+                    request.AddParameter("buy_cmnd", body.buy_cmnd);
+                    request.AddParameter("buy_email", body.buy_email);
+                    request.AddParameter("buy_gender", body.buy_gender);
+                    request.AddParameter("url_callback", body.url_callback);
+                    request.AddParameter("person", person);
                 }
                 IRestResponse response = client.Execute(request);
                 return JsonConvert.DeserializeObject<dynamic>(response.Content);
