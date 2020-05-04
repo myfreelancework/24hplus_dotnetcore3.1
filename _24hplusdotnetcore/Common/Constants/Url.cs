@@ -6,7 +6,7 @@ namespace _24hplusdotnetcore.Common.Constants
         // GCC url
         public static string GCC_BASE_URL = "https://sandbox.globalcare.vn/";
         public static string GCC_GET_SSO_KEY = "gateway/v1/get-key.json?client_code={0}&client_secret={1}";
-        public static string GCC_PUSH_DATA = "gateway/v1/order-create.json";
+        public static string GCC_PUSH_DATA = "gateway/v1/order-create.json?client_secret={0}&key={1}";
 
         // MC
         public static string MC_BASE_URL = "https://uat-mfs-v2.mcredit.com.vn:8043/mcMobileService/service/v1.0/";

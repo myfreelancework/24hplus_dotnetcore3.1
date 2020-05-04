@@ -14,9 +14,11 @@ namespace _24hplusdotnetcore.Controllers
     public class ConfigController : ControllerBase
     {
         private readonly ILogger<ConfigController> _logger;
-        public ConfigController(ILogger<ConfigController> logger)
+        private readonly ConfigServices _configService;
+        public ConfigController(ILogger<ConfigController> logger, ConfigServices configService)
         {
             _logger = logger;
+            _configService = configService;
         }
         [HttpGet]
         [Route("api/config/banner")]
@@ -24,17 +26,13 @@ namespace _24hplusdotnetcore.Controllers
         {
             try
             {
-                String[] a = {
-                    "https://photos.app.goo.gl/Czfr2A2BeDyZE6Zs9",
-                    "https://photos.app.goo.gl/a7We41Htuz1mYesm8",
-                    "https://photos.app.goo.gl/3uTfrocUKowtmQdVA",
-                    "https://photos.app.goo.gl/npKYnUPja7i3tHDGA"};
 
+                var banner = _configService.FindOneByKey("Banner");
                 return Ok(new ResponseContext
                 {
                     code = (int)Common.ResponseCode.SUCCESS,
                     message = Common.Message.SUCCESS,
-                    data = a
+                    data = banner.Value
                 });
             }
             catch (Exception ex)
