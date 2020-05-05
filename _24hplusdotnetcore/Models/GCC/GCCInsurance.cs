@@ -23,7 +23,6 @@ namespace _24hplusdotnetcore.Models.GCC
         public string buy_email { get; set; }
         public string buy_gender { get; set; }
         public string url_callback { get; set; }
-        public string begin_date { get; set; }
         public Person[] person { get; set; }
 
         public DateTime CreateDate { get; set; }

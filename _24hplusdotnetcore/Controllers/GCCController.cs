@@ -51,7 +51,6 @@ namespace _24hplusdotnetcore.Controllers
                     body.agency_id = product.agency_id;
                     body.product_code = product.product_code;
                     body.buy_gender = body.buy_gender == "Nam" ? "m" : "f";
-                    body.begin_date = DateTime.Today.ToString("yyyy-MM-dd");
                     body.request_code = ConfigRequest.GCC_REQUEST_CODE + DateTime.Now.ToString("yyyyMMddHHmmssffff");
                     body.url_callback = ConfigRequest.GCC_CALLBACK + "?requestCode=" + body.request_code;
                     if (currPackage.Length == 1)
