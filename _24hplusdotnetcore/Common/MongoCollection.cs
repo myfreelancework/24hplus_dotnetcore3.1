@@ -23,5 +23,7 @@
         internal static string GCCPersonalInsurance = "GCCPersonalInsurance";
         internal static string GCCProduct = "GCCProduct";
         internal static string GCCMotoInsurance = "GCCMotoInsurance";
+        internal static string GCCMotoProgram = "GCCMotoProgram";
+        internal static string GCCKindMoto = "GCCKindMoto";
     }
 }
