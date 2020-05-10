@@ -73,6 +73,7 @@ namespace _24hplusdotnetcore
             services.AddSingleton<PaymentServices>();
             services.AddSingleton<CheckInfoServices>();
             services.AddSingleton<NotificationServices>();
+            services.AddSingleton<Services.MC.MCService>();
             services.AddSingleton<ConfigServices>();
 
             // GCC Service
@@ -118,7 +119,7 @@ namespace _24hplusdotnetcore
                     }
                 });
             });
-
+            services.AddMvcCore().AddNewtonsoftJson();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -13,5 +13,6 @@ namespace _24hplusdotnetcore.Common.Constants
         public static string MC_LOGIN = "authorization";
         public static string MC_CHECK_INFO = "mobile-4sales/check-cic/check?citizenID={0}&customerName={1}";
         public static string MC_CHECK_DUPLICATE = "mobile-4sales/check-identifier?citizenId={0}";
+        public static string MC_CHECK_CAT = "mobile-4sales/check-cat?companyTaxNumber={0}";
     }
 }

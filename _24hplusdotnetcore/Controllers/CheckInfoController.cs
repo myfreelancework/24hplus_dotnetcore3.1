@@ -76,13 +76,14 @@ namespace _24hplusdotnetcore.Controllers
         {
             try
             {
-                dynamic response = new {
-                compName = "CÔNG TY TNHH EB CẦN THƠ",
-                catType = "CAT B",
-                compAddrStreet = "LÔ SỐ 1, KDC HƯNG PHÚ 1, PHƯỜNG HƯNG PHÚ, QUẬN CÁI RĂNG, TP CẦN THƠ",
-                officeNumber = "",
-                companyTaxNumber = "1801210593",
-                };
+                //dynamic response = new {
+                //compName = "CÔNG TY TNHH EB CẦN THƠ",
+                //catType = "CAT B",
+                //compAddrStreet = "LÔ SỐ 1, KDC HƯNG PHÚ 1, PHƯỜNG HƯNG PHÚ, QUẬN CÁI RĂNG, TP CẦN THƠ",
+                //officeNumber = "",
+                //companyTaxNumber = "1801210593",
+                //};
+                dynamic response = _checkInforServices.CheckCAT(greentype, companyTaxNumber);
                 return Ok(new ResponseContext
                 {
                     code = (int)Common.ResponseCode.SUCCESS,

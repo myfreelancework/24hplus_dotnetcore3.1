@@ -1,7 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading.Tasks;
+using _24hplusdotnetcore.Common;
 using _24hplusdotnetcore.Models;
 using _24hplusdotnetcore.Services;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -14,10 +20,12 @@ namespace _24hplusdotnetcore.Controllers
     {
         private readonly ILogger<FileUploadController> _logger;
         private readonly FileUploadServices _fileUploadServices;
-        public FileUploadController(ILogger<FileUploadController> logger, FileUploadServices fileUploadServices)
+        private readonly IWebHostEnvironment _hostingEnvironment;
+        public FileUploadController(ILogger<FileUploadController> logger, FileUploadServices fileUploadServices, IWebHostEnvironment hostingEnvironment)
         {
             _logger = logger;
             _fileUploadServices = fileUploadServices;
+            _hostingEnvironment = hostingEnvironment;
         }
         [HttpGet]
         [Route("api/fileuploads/{CustomerId}")]
@@ -135,6 +143,48 @@ namespace _24hplusdotnetcore.Controllers
                     code = (int)Common.ResponseCode.SUCCESS,
                     message = Common.Message.SUCCESS,
                     data = JsonConvert.SerializeObject("" + deleteCount + " records have been delete")
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseMessage
+                {
+                    status = "ERROR",
+                    message = ex.Message
+                });
+            }
+        }
+        [HttpPost]
+        [Route("api/fileupload/upload")]
+        public async Task<ActionResult> UploadAsync([FromForm(Name = "")] IFormFile file, [FromForm] string DocumentCategoryId, [FromForm] string CustomerId)
+        {
+            try
+            {
+                string serverPath = Path.Combine(_hostingEnvironment.ContentRootPath, "FileUpload");
+                if (!Directory.Exists(serverPath))
+                {
+                    DirectoryInfo di = Directory.CreateDirectory(serverPath);
+                }
+                string path = Path.Combine(serverPath, file.FileName);
+                using (var stream = new FileStream(path, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+                var fileUpload = new FileUpload
+                {
+                    CustomerId = CustomerId,
+                    DocumentCategoryId = DocumentCategoryId,
+                    FileUploadName = file.FileName,
+                    FileUploadURL = string.Format(@"{0}://{1}/{2}/{3}/{4}", Request.Scheme, Request.Host.Value, CustomerId, DocumentCategoryId, file.FileName)
+                };
+
+                var newFileUpload = _fileUploadServices.CreateFileUpload(fileUpload);
+                return Ok(new ResponseContext
+                {
+                    code = (int)Common.ResponseCode.SUCCESS,
+                    message = Common.Message.SUCCESS,
+                    data = newFileUpload
                 });
             }
             catch (Exception ex)

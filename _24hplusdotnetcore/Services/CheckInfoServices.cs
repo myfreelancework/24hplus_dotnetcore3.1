@@ -9,9 +9,11 @@ namespace _24hplusdotnetcore.Services
     public class CheckInfoServices
     {
         private readonly ILogger<CheckInfoServices> _logger;
-        public CheckInfoServices(ILogger<CheckInfoServices> logger)
+        private readonly MC.MCService _mcServices;
+        public CheckInfoServices(ILogger<CheckInfoServices> logger, MC.MCService mcServices)
         {
             _logger = logger;
+            _mcServices = mcServices;
         }
         public dynamic CheckInfoByType(string greentype, string citizenID, string customerName)
         {
@@ -95,6 +97,25 @@ namespace _24hplusdotnetcore.Services
                     IRestResponse response = client.Execute(request);
                     List<dynamic> content = JsonConvert.DeserializeObject<List<dynamic>>(response.Content);
                     return content.ToArray()[0];
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return null;
+            }
+        }
+        public dynamic CheckCAT(string GreenType ,string companyTaxNumber)
+        {
+            try
+            {
+                if (GreenType.ToUpper() == Common.GeenType.GreenC)
+                {
+                    return _mcServices.CheckCAT(companyTaxNumber);
                 }
                 else
                 {
