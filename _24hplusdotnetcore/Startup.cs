@@ -26,6 +26,7 @@ namespace _24hplusdotnetcore
 {
     public class Startup
     {
+        readonly string AllowSpecificOrigins = "_allowSpecificOrigins";
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -37,6 +38,18 @@ namespace _24hplusdotnetcore
         public void ConfigureServices(IServiceCollection services)
         {
             services.Configure<MongoDbConnection>(Configuration.GetSection(nameof(MongoDbConnection)));
+
+            services.AddCors(options =>
+            {
+                options.AddPolicy(name: AllowSpecificOrigins,
+                              builder =>
+                              {
+                                  builder.WithOrigins("*")
+                                         .AllowAnyHeader()
+                                         .AllowAnyMethod();
+                              });
+            });
+
             services.AddControllers();
             services.AddDirectoryBrowser();
 
@@ -65,6 +78,8 @@ namespace _24hplusdotnetcore
             // GCC Service
             services.AddSingleton<GCCService>();
             services.AddSingleton<GCCProductService>();
+            services.AddSingleton<GCCMotoProgramService>();
+            services.AddSingleton<GCCMotoService>();
             #endregion
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
@@ -103,6 +118,7 @@ namespace _24hplusdotnetcore
                     }
                 });
             });
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -126,6 +142,8 @@ namespace _24hplusdotnetcore
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            app.UseCors(AllowSpecificOrigins);
 
             app.UseAuthorization();
 
