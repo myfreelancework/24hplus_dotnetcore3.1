@@ -128,7 +128,7 @@ namespace _24hplusdotnetcore.Services.GCC
                         request.AddParameter("product_code", body.product_code);
                         request.AddParameter("agency_id", body.agency_id);
                         request.AddParameter("program", body.program);
-                        request.AddParameter("package", body.package);
+                        request.AddParameter("package", package);
                         request.AddParameter("request_code", body.request_code);
                         request.AddParameter("buy_fullname", body.buy_fullname);
                         request.AddParameter("buy_bod", body.buy_bod);
