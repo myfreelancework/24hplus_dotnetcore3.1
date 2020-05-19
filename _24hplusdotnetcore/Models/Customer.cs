@@ -20,6 +20,7 @@ namespace _24hplusdotnetcore.Models
 
         public Personal Personal { get; set; } // 80%
         public Address ResidentAddress { get; set; } // @todo
+        public Boolean IsTheSameResidentAddress { get; set; }
         public Address TemporaryAddress { get; set; } // @todo
         public Living Living { get; set; }
         public Working Working { get; set; }
@@ -37,7 +38,7 @@ namespace _24hplusdotnetcore.Models
         public CreditContract CreditContract { get; set; }
         public Disburement Disburement { get; set; }
         public Sale SaleInfo { get; set; }
-        public Return Return { get; set; }
+        public Result Result { get; set; }
     }
 
     public class Personal
@@ -56,7 +57,7 @@ namespace _24hplusdotnetcore.Models
 
     public class Address
     {
-        public string Province { get; set; } 
+        public string Province { get; set; }
         public string District { get; set; }
         public string Ward { get; set; }
         public string Street { get; set; }
@@ -79,7 +80,7 @@ namespace _24hplusdotnetcore.Models
         public string Income { get; set; }
         public string IncomeMethod { get; set; }
         public string LaborType { get; set; }
-        public string Spend { get; set; }
+        public string OtherLoans { get; set; }
 
         public string CompanyName { get; set; }
         public string CompanyPhone { get; set; }
@@ -142,7 +143,7 @@ namespace _24hplusdotnetcore.Models
         public string Dependency { get; set; }
         public string Address { get; set; }
     }
-    public class Return
+    public class Result
     {
         public string Department { get; set; }
         public string Status { get; set; }
@@ -157,13 +158,13 @@ namespace _24hplusdotnetcore.Models
         public string OtherPeriod { get; set; }
         public string AvgBill { get; set; }
         public string AvgBalance { get; set; }
-        public string CurrentPrice { get; set; }
+        public string VehiclePrice { get; set; }
     }
     public class CreditContract
     {
         public string ContractNumber { get; set; }
         public string StartDate { get; set; }
-        public string Term { get; set; }
+        public string Period { get; set; }
         public string MonthlyFee { get; set; }
     }
 }
