@@ -70,7 +70,7 @@ namespace _24hplusdotnetcore.Controllers
                     Loan.Name = lstCustomers[i].Loan!= null? lstCustomers[i].Loan.Name: null;
                     item.Loan = Loan;
                     dynamic Return = new ExpandoObject();
-                    Return.Status = lstCustomers[i].Return != null? lstCustomers[i].Return.Status : null;
+                    Return.Status = lstCustomers[i].Result != null? lstCustomers[i].Result.Status : null;
                     item.Return = Return;
                     lstCustomerOptimization.Add(item);
                 }
