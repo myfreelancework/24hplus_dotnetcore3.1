@@ -13,9 +13,11 @@ namespace _24hplusdotnetcore.Services.CRM
     public class CRMServices
     {
         private readonly ILogger<CRMServices> _logger;
-        public CRMServices(ILogger<CRMServices> logger)
+        private readonly CustomerServices _customerServices;
+        public CRMServices(ILogger<CRMServices> logger, CustomerServices customerServices)
         {
             _logger = logger;
+            _customerServices = customerServices;
         }
 
         private string CRMLogin()
@@ -64,6 +66,7 @@ namespace _24hplusdotnetcore.Services.CRM
 
         private long AddNewCustomerFromCRM(CrmCustomerData crmCustomer)
         {
+            long insertCount = 0;
             try
             {
                 
@@ -73,22 +76,38 @@ namespace _24hplusdotnetcore.Services.CRM
                 {
                     foreach (var item in arrCustomer)
                     {
-                        Customer objCustomer = new Customer();
-                        objCustomer.Personal.Name = item.Potentialname;
-                        objCustomer.Personal.Gender = item.Cf1026;
-                        objCustomer.Personal.Phone = item.Cf854;
-                        objCustomer.Personal.IdCard = item.Cf1050;
-                        objCustomer.Personal.Email = item.Cf1028;
-                        objCustomer.Working.Job = item.Cf1246;
-                        objCustomer.Working.Income = item.Cf884;
-                        objCustomer.TemporaryAddress.Province = item.Cf1020;
-                        objCustomer.Loan.Amount = item.Cf968;
-                        objCustomer.Return.Note = item.Description;
-                        objCustomer.Return.Status = item.SalesStage;
-                        objCustomer.UserName = item.Modifiedby.Label.Split("-")[0];
+                        if (_customerServices.GetCustomerByIdCard(item.Cf1050) == null)
+                        {
+                            Customer objCustomer = new Customer();
+                            objCustomer.Personal = new Personal();
+                            objCustomer.Personal.Name = item.Potentialname;
+                            objCustomer.Personal.Gender = item.Cf1026;
+                            objCustomer.Personal.Phone = item.Cf854;
+                            objCustomer.Personal.IdCard = item.Cf1050;
+                            objCustomer.Personal.Email = item.Cf1028;
+                            objCustomer.Working = new Working();
+                            objCustomer.Working.Job = item.Cf1246;
+                            objCustomer.Working.Income = item.Cf884;
+                            objCustomer.TemporaryAddress = new Address();
+                            objCustomer.TemporaryAddress.Province = item.Cf1020;
+                            objCustomer.Loan = new Loan();
+                            objCustomer.Loan.Amount = item.Cf968;
+                            objCustomer.Return = new Return();
+                            objCustomer.Return.Note = item.Description;
+                            objCustomer.Return.Status = item.SalesStage;
+                            objCustomer.UserName = item.Modifiedby.Label.Split("-")[0];
+                            objCustomer.Status = Common.CustomerStatus.SUBMIT;
+                            var newcustomer = _customerServices.CreateCustomer(objCustomer);
+                            if (newcustomer != null)
+                            {
+                                insertCount++;
+                            }
+                        }
+                        
                     }
                 }
-                return 1;
+                _logger.LogInformation("Number of customer from CRM: " + insertCount);
+                return insertCount;
             }
             catch (Exception ex)
             {

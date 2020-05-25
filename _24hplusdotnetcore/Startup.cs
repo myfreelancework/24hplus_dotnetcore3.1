@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using _24hplusdotnetcore.BatchJob;
 using _24hplusdotnetcore.Middleware;
 using _24hplusdotnetcore.Models;
 using _24hplusdotnetcore.Services;
@@ -83,6 +84,9 @@ namespace _24hplusdotnetcore
             services.AddSingleton<GCCProductService>();
             services.AddSingleton<GCCMotoProgramService>();
             services.AddSingleton<GCCMotoService>();
+
+            //Add batchjob
+            services.AddSingleton<IHostedService, AddNewCustomerFromCRM>();
             #endregion
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
