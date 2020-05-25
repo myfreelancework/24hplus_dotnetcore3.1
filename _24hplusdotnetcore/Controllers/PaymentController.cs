@@ -62,7 +62,7 @@ namespace _24hplusdotnetcore.Controllers
                 if (objProduct != null)
                 {
                     CultureInfo provider = CultureInfo.InvariantCulture;
-                    DateTime firstDay = DateTime.ParseExact(paymentCalc.dateReceive, new string[] { "MM.dd.yyyy", "MM-dd-yyyy", "MM/dd/yyyy" }, provider);
+                    DateTime firstDay = DateTime.ParseExact(paymentCalc.dateReceive, new string[] { "dd.MM.yyyy", "dd-MM-yyyy", "dd/MM/yyyy" }, provider);
                     double part1 = 1;
                     double part2 = 1;
 
