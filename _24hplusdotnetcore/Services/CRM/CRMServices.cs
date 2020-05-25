@@ -79,7 +79,13 @@ namespace _24hplusdotnetcore.Services.CRM
                         objCustomer.Personal.Phone = item.Cf854;
                         objCustomer.Personal.IdCard = item.Cf1050;
                         objCustomer.Personal.Email = item.Cf1028;
-
+                        objCustomer.Working.Job = item.Cf1246;
+                        objCustomer.Working.Income = item.Cf884;
+                        objCustomer.TemporaryAddress.Province = item.Cf1020;
+                        objCustomer.Loan.Amount = item.Cf968;
+                        objCustomer.Return.Note = item.Description;
+                        objCustomer.Return.Status = item.SalesStage;
+                        objCustomer.UserName = item.Modifiedby.Label.Split("-")[0];
                     }
                 }
                 return 1;
