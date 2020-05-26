@@ -8,5 +8,6 @@
         public static string SUBMIT = "SUBMIT";
         public static string REJECT = "REJECT";
         public static string APPROVE = "APPROVE";
+        public static string POTENTIAL = "POTENTIAL";
     }
 }

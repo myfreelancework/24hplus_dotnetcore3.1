@@ -92,11 +92,11 @@ namespace _24hplusdotnetcore.Services.CRM
                             objCustomer.TemporaryAddress.Province = item.Cf1020;
                             objCustomer.Loan = new Loan();
                             objCustomer.Loan.Amount = item.Cf968;
-                            objCustomer.Return = new Return();
-                            objCustomer.Return.Note = item.Description;
-                            objCustomer.Return.Status = item.SalesStage;
+                            objCustomer.Result = new Models.Result();
+                            objCustomer.Result.Note = item.Description;
+                            objCustomer.Result.Status = item.SalesStage;
                             objCustomer.UserName = item.Modifiedby.Label.Split("-")[0];
-                            objCustomer.Status = Common.CustomerStatus.SUBMIT;
+                            objCustomer.Status = Common.CustomerStatus.POTENTIAL;
                             var newcustomer = _customerServices.CreateCustomer(objCustomer);
                             if (newcustomer != null)
                             {
