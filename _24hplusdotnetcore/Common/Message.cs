@@ -11,6 +11,7 @@ namespace _24hplusdotnetcore.Common
         public static string IS_LOGGED_IN_ORTHER_DEVICE = "Bạn đã đăng nhập ở một nơi khác, Vui lòng đăng nhập lại!";
         public static string UNAUTHORIZED = "";
         public static string ERROR = "Lỗi hệ thống, Vui lòng liên hệ IT!";
+        public static string NOT_FOUND_PRODUCT = "Không tìm thấy sản phẩm!";
         internal static string VERSION_IS_OLD = "Phiên bản của bạn đã cũ, Vui lòng cập nhập phiên bản mới!";
         internal static string NotificationAdd = "{0} vừa thêm mới khách hàng {1}";
         internal static string NotificationUpdate = "{0} vừa cập nhật thông tin khách hàng  {1}";
