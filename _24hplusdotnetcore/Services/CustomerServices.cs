@@ -246,5 +246,19 @@ namespace _24hplusdotnetcore.Services
                 totalpage
             };
         }
+
+        public Customer GetCustomerByIdCard(string IdCard)
+        {
+            var customer = new Customer();
+            try
+            {
+                customer = _customer.Find(c => c.Personal.IdCard == IdCard).FirstOrDefault();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+            }
+            return customer;
+        }
     }
 }

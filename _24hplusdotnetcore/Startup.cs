@@ -4,9 +4,11 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using _24hplusdotnetcore.BatchJob;
 using _24hplusdotnetcore.Middleware;
 using _24hplusdotnetcore.Models;
 using _24hplusdotnetcore.Services;
+using _24hplusdotnetcore.Services.CRM;
 using _24hplusdotnetcore.Services.GCC;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -75,12 +77,16 @@ namespace _24hplusdotnetcore
             services.AddSingleton<NotificationServices>();
             services.AddSingleton<Services.MC.MCService>();
             services.AddSingleton<ConfigServices>();
+            services.AddSingleton<CRMServices>();
 
             // GCC Service
             services.AddSingleton<GCCService>();
             services.AddSingleton<GCCProductService>();
             services.AddSingleton<GCCMotoProgramService>();
             services.AddSingleton<GCCMotoService>();
+
+            //Add batchjob
+            services.AddSingleton<IHostedService, AddNewCustomerFromCRM>();
             #endregion
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>

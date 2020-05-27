@@ -14,5 +14,10 @@ namespace _24hplusdotnetcore.Common.Constants
         public static string MC_Username = "mekongcredit.3rd";
         public static string MC_NotificationId = "notificationId.mekongcredit.3rd";
         public static string MC_Password = "MK$2DG@4";
+
+        //CRM
+        public static string CRM_UserName = "admin1";
+        public static string CRM_Password = "Abc@123";
+        public static string CRM_Query = "SELECT * FROM Potentials WHERE cf_1050=365422585";
     }
 }
