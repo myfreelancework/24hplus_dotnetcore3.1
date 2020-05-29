@@ -24,7 +24,7 @@ namespace _24hplusdotnetcore.Services
             _notificationServices = notificationServices;
             _userroleServices = userroleServices;
         }
-        public List<Customer> GetList(string UserName, DateTime? DateFrom, DateTime? DateTo, string Status, string greentype,string customername, int? pagenumber, int? pagesize, ref int totalPage, ref int totalrecord)
+        public List<Customer> GetList(string UserName, DateTime? DateFrom, DateTime? DateTo, string Status, string greentype, string customername, int? pagenumber, int? pagesize, ref int totalPage, ref int totalrecord)
         {
             var lstCustomer = new List<Customer>();
             DateTime _datefrom = DateFrom.HasValue ? Convert.ToDateTime(DateFrom) : new DateTime(0001, 01, 01);
@@ -33,7 +33,7 @@ namespace _24hplusdotnetcore.Services
             {
                 int _pagesize = !pagesize.HasValue ? Common.Config.PageSize : (int)pagesize;
                 var filterUserName = Builders<Customer>.Filter.Regex(c => c.UserName, "/^" + UserName + "$/i");
-               
+
                 var filterCreateDate = Builders<Customer>.Filter.Gte(c => c.CreatedDate, _datefrom) & Builders<Customer>.Filter.Lte(c => c.CreatedDate, _dateto);
                 filterUserName = filterUserName & filterCreateDate;
                 if (!string.IsNullOrEmpty(greentype))
@@ -43,7 +43,7 @@ namespace _24hplusdotnetcore.Services
                 }
                 if (!string.IsNullOrEmpty(Status))
                 {
-                    var filterStatus = Builders<Customer>.Filter.Regex(c => c.Status, "/^"+Status+"$/i");
+                    var filterStatus = Builders<Customer>.Filter.Regex(c => c.Status, "/^" + Status + "$/i");
                     filterUserName = filterUserName & filterStatus;
                 }
                 if (!string.IsNullOrEmpty(customername))
@@ -67,7 +67,7 @@ namespace _24hplusdotnetcore.Services
                     }
                     else
                     {
-                        totalPage = lstCount / _pagesize + ((lstCount % _pagesize) > 0? 1 : 0);
+                        totalPage = lstCount / _pagesize + ((lstCount % _pagesize) > 0 ? 1 : 0);
                     }
                 }
 
@@ -111,21 +111,6 @@ namespace _24hplusdotnetcore.Services
                 customer.CreatedDate = Convert.ToDateTime(DateTime.Now);
                 customer.ModifiedDate = Convert.ToDateTime(DateTime.Now);
                 _customer.InsertOne(customer);
-                if (customer.Status.ToUpper() != CustomerStatus.DRAFT)
-                {
-                    var objNoti = new Notification
-                    {
-                        green = GeenType.GreenC,
-                        recordId = customer.Id,
-                        isRead = false,
-                        type = NotificationType.Add,
-                        userName = customer.UserName,
-                        message = string.Format(Message.NotificationAdd, customer.UserName, customer.Personal.Name),
-                        createAt = Convert.ToDateTime(DateTime.Today.ToLongDateString())
-                    };
-                    _notificationServices.CreateOne(objNoti);
-                }               
-
                 return customer;
             }
             catch (Exception ex)
@@ -144,22 +129,34 @@ namespace _24hplusdotnetcore.Services
                 customer.CreatedDate = _customer.Find(c => c.Id == customer.Id).FirstOrDefault().CreatedDate;
                 updateCount = _customer.ReplaceOne(c => c.Id == customer.Id, customer).ModifiedCount;
                 string currStatus = customer.Status;
-                string message = "",type = "";
+                string userName = "";
+                string message = "", type = "";
                 string teamlead = _userroleServices.GetUserRoleByUserName(customer.UserName).TeamLead;
-                if (prvStaus.ToUpper() != CustomerStatus.DRAFT && currStatus.ToUpper() == CustomerStatus.REJECT)
+                if (prvStaus.ToUpper() != CustomerStatus.SUBMIT)
                 {
+                    userName = customer.UserName;
                     message = string.Format(Message.TeamLeadReject, teamlead, customer.Personal.Name);
-                    type = NotificationType.TeamLeadReject;
+                    if (currStatus.ToUpper() == CustomerStatus.REJECT)
+                    {
+                        type = NotificationType.TeamLeadReject;
+                    }
+                    else if (currStatus.ToUpper() == CustomerStatus.APPROVE)
+                    {
+                        type = NotificationType.TeamLeadApprove;
+                    }
                 }
-                if (prvStaus.ToUpper() != CustomerStatus.DRAFT && currStatus.ToUpper() == CustomerStatus.APPROVE)
+                if (currStatus.ToUpper() == CustomerStatus.SUBMIT)
                 {
-                    message = string.Format(Message.TeamLeadApprove, teamlead, customer.Personal.Name);
-                    type = NotificationType.TeamLeadApprove;
-                }
-                if (prvStaus.ToUpper() == CustomerStatus.DRAFT && currStatus.ToUpper() == CustomerStatus.SUBMIT)
-                {
+                    userName = teamlead;
                     message = string.Format(Message.NotificationAdd, customer.UserName, customer.Personal.Name);
-                    type = NotificationType.Add;
+                    if (prvStaus.ToUpper() != CustomerStatus.REJECT)
+                    {
+                        type = NotificationType.Edit;
+                    }
+                    else
+                    {
+                        type = NotificationType.Add;
+                    }
                 }
                 var objNoti = new Notification
                 {
@@ -167,7 +164,7 @@ namespace _24hplusdotnetcore.Services
                     recordId = customer.Id,
                     isRead = false,
                     type = type,
-                    userName = customer.UserName,
+                    userName = userName,
                     message = message,
                     createAt = Convert.ToDateTime(DateTime.Today.ToLongDateString())
                 };
