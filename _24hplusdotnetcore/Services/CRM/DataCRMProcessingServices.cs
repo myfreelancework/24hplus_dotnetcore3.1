@@ -3,6 +3,7 @@ using _24hplusdotnetcore.Models.CRM;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using System;
+using System.Collections.Generic;
 
 namespace _24hplusdotnetcore.Services.CRM
 {
@@ -35,7 +36,32 @@ namespace _24hplusdotnetcore.Services.CRM
 
         public long UpdateByCustomerId(string CustomerId, string Status)
         {
-            return 1;
+            try
+            {
+                var dataCrm = _dataCRMProcessing.Find(d => d.CustomerId == CustomerId).FirstOrDefault();
+                dataCrm.Status = Status;
+                var modifiedCount = _dataCRMProcessing.ReplaceOne(d => d.Id == dataCrm.Id, dataCrm).ModifiedCount;
+                return modifiedCount;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return -1;
+            }
+        }
+
+        public List<DataCRMProcessing> GetDataCRMProcessings(string status)
+        {
+            var listDataCRMProcessing = new List<DataCRMProcessing>();
+            try
+            {
+                listDataCRMProcessing = _dataCRMProcessing.Find(d => d.Status == status).ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+            }
+            return listDataCRMProcessing;
         }
     }
 }
