@@ -78,6 +78,7 @@ namespace _24hplusdotnetcore
             services.AddSingleton<Services.MC.MCService>();
             services.AddSingleton<ConfigServices>();
             services.AddSingleton<CRMServices>();
+            services.AddSingleton<DataCRMProcessingServices>();
 
             // GCC Service
             services.AddSingleton<GCCService>();
