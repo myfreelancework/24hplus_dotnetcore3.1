@@ -35,6 +35,7 @@ namespace _24hplusdotnetcore.Models
         public string IdCardDate { get; set; } // cf_1350
         public string DateOfBirth { get; set; } // cf_948
         public string Phone { get; set; } // cf_854
+        public string SubPhone { get; set; } // cf_854
         public string EducationLevel { get; set; } // @todo
         public string MaritalStatus { get; set; } //cf_1030
         public string Gender { get; set; } // cf_1026
