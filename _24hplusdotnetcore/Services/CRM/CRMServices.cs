@@ -154,18 +154,35 @@ namespace _24hplusdotnetcore.Services.CRM
                         foreach (var item in lstCustomer)
                         {
                             var customer = _customerServices.GetCustomer(item.CustomerId);
-                            var dataCRM = new DataCRM
+                            var dataCRM = new Record
                             {
-                                ContactName = customer.Personal.Name,
-                                City = customer.ResidentAddress.Province,
-                                Gender = customer.Personal.Gender,
-                                IdNo = customer.Personal.IdCard,
-                                LoanAmount = customer.Loan.Amount,
-                                Email = customer.Personal.Email,
-                                Phone = customer.Personal.Phone,
-                                Yearold = (DateTime.Now.Year - Convert.ToDateTime(customer.Personal.DateOfBirth).Year).ToString(),
-                                Income = customer.Working.Income,
-                               
+                                Cf1178 = "MC",
+                                Potentialname = customer.Personal.Name,
+                                Cf1026 = customer.Personal.Gender,
+                                Leadsource = "MC",
+                                Cf854 = customer.Personal.Phone,
+                                Cf1050 = customer.Personal.IdCard,
+                                Cf1028 = customer.Working.Job,
+                                Cf884 = customer.Working.Income,
+                                Cf1020 = customer.ResidentAddress.Province,
+                                Cf1032 = customer.Loan.Product,
+                                Cf1040 = customer.Loan.Name,
+                                Cf968 = customer.Loan.Amount,
+                                Cf990 = customer.Loan.Term,
+                                Cf1052 = "-",
+                                Cf1054 = customer.Loan.SignAddress,
+                                Cf1036 = "CHỨNG MINH NHÂN DÂN |##| HỘ KHẨU",
+                                SalesStage = "1.KH mới",
+                                Cf1184 = "-",
+                                Cf1188 = "-",
+                                AssignedUserId = new AssignedUserId 
+                                { 
+                                   Value = "19x2335" 
+                                },
+                                Cf1244 = "AS",
+                                Cf1256 = "-",
+                                Cf1264 = "????",
+                                Cf1230 = ""
                             };
                             PushDataToCRM(dataCRM, session, item);
                         }
@@ -180,7 +197,7 @@ namespace _24hplusdotnetcore.Services.CRM
         }
 
 
-        private void PushDataToCRM(DataCRM dataCRM, string session, DataCRMProcessing dataCRMProcessing)
+        private void PushDataToCRM(Record dataCRM, string session, DataCRMProcessing dataCRMProcessing)
         {
             try
             {
