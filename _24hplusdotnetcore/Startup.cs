@@ -88,6 +88,7 @@ namespace _24hplusdotnetcore
 
             //Add batchjob
             services.AddSingleton<IHostedService, AddNewCustomerFromCRM>();
+            services.AddSingleton<IHostedService, PushCustomerToCRM>();
             #endregion
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
