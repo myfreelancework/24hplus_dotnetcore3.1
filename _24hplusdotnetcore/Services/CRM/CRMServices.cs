@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using _24hplusdotnetcore.Models.CRM;
 using System.Linq;
 using _24hplusdotnetcore.Models;
+using MongoDB.Bson;
 
 namespace _24hplusdotnetcore.Services.CRM
 {
@@ -14,10 +15,12 @@ namespace _24hplusdotnetcore.Services.CRM
     {
         private readonly ILogger<CRMServices> _logger;
         private readonly CustomerServices _customerServices;
-        public CRMServices(ILogger<CRMServices> logger, CustomerServices customerServices)
+        private readonly DataCRMProcessingServices _dataCRMProcessingServices;
+        public CRMServices(ILogger<CRMServices> logger, CustomerServices customerServices, DataCRMProcessingServices dataCRMProcessingServices)
         {
             _logger = logger;
             _customerServices = customerServices;
+            _dataCRMProcessingServices = dataCRMProcessingServices;
         }
 
         private string CRMLogin()
@@ -135,6 +138,88 @@ namespace _24hplusdotnetcore.Services.CRM
             {
                  _logger.LogError(ex, ex.Message);
                 return -1;
+            }
+        }
+
+        public void AddingDataToCRM()
+        {
+            try
+            {
+                string session = CRMLogin();
+                if (!string.IsNullOrEmpty(session))
+                {
+                    var lstCustomer = _dataCRMProcessingServices.GetDataCRMProcessings(Common.DataCRMProcessingStatus.InProgress);
+                    if (lstCustomer.Count > 0)
+                    {
+                        foreach (var item in lstCustomer)
+                        {
+                            var customer = _customerServices.GetCustomer(item.CustomerId);
+                            var dataCRM = new Record
+                            {
+                                Cf1178 = "MC",
+                                Potentialname = customer.Personal.Name,
+                                Cf1026 = customer.Personal.Gender,
+                                Leadsource = "MC",
+                                Cf854 = customer.Personal.Phone,
+                                Cf1050 = customer.Personal.IdCard,
+                                Cf1028 = customer.Working.Job,
+                                Cf884 = customer.Working.Income,
+                                Cf1020 = customer.ResidentAddress.Province,
+                                Cf1032 = customer.Loan.Product,
+                                Cf1040 = customer.Loan.Name,
+                                Cf968 = customer.Loan.Amount,
+                                Cf990 = customer.Loan.Term,
+                                Cf1052 = "-",
+                                Cf1054 = customer.Loan.SignAddress,
+                                Cf1036 = "CHỨNG MINH NHÂN DÂN |##| HỘ KHẨU",
+                                SalesStage = "1.KH mới",
+                                Cf1184 = "-",
+                                Cf1188 = "-",
+                                AssignedUserId = new AssignedUserId 
+                                { 
+                                   Value = "19x2335" 
+                                },
+                                Cf1244 = "AS",
+                                Cf1256 = "-",
+                                Cf1264 = "????",
+                                Cf1230 = ""
+                            };
+                            PushDataToCRM(dataCRM, session, item);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+                _logger.LogError(ex, ex.Message);
+            }
+        }
+
+
+        private void PushDataToCRM(Record dataCRM, string session, DataCRMProcessing dataCRMProcessing)
+        {
+            try
+            {
+                var client = new RestClient(Common.Constants.Url.CRMURL);
+                client.Timeout = -1;
+                var request = new RestRequest(Method.POST);
+                request.AddHeader("Content-Type", "application/x-www-form-urlencoded");
+                request.AddParameter("_operation", "saveRecord");
+                request.AddParameter("values", ""+ JsonConvert.SerializeObject(dataCRM) +"");
+                request.AddParameter("_session", ""+ session +"");
+                request.AddParameter("module", "Potentials");
+                request.AddParameter("record", "13x55730");
+                IRestResponse response = client.Execute(request);
+                Console.WriteLine(response.Content);
+                dataCRMProcessing.Status = Common.DataCRMProcessingStatus.Done;
+                _dataCRMProcessingServices.UpdateByCustomerId(dataCRMProcessing.CustomerId, Common.DataCRMProcessingStatus.Done);
+                _logger.LogInformation("User was pushed to CRM: {0} - Status: {1}", dataCRMProcessing.CustomerId, Common.DataCRMProcessingStatus.Done);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+
             }
         }
     }

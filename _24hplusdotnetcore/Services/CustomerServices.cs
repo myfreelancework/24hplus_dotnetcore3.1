@@ -1,5 +1,6 @@
 ﻿using _24hplusdotnetcore.Common;
 using _24hplusdotnetcore.Models;
+using _24hplusdotnetcore.Models.CRM;
 using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -15,7 +16,8 @@ namespace _24hplusdotnetcore.Services
         private readonly IMongoCollection<Customer> _customer;
         private readonly NotificationServices _notificationServices;
         private readonly UserRoleServices _userroleServices;
-        public CustomerServices(IMongoDbConnection connection, ILogger<CustomerServices> logger, NotificationServices notificationServices, UserRoleServices userroleServices)
+        private readonly CRM.DataCRMProcessingServices _dataCRMProcessingServices;
+        public CustomerServices(IMongoDbConnection connection, ILogger<CustomerServices> logger, NotificationServices notificationServices, UserRoleServices userroleServices, CRM.DataCRMProcessingServices dataCRMProcessingServices)
         {
             var client = new MongoClient(connection.ConnectionString);
             var database = client.GetDatabase(connection.DataBase);
@@ -23,6 +25,7 @@ namespace _24hplusdotnetcore.Services
             _logger = logger;
             _notificationServices = notificationServices;
             _userroleServices = userroleServices;
+            _dataCRMProcessingServices = dataCRMProcessingServices;
         }
         public List<Customer> GetList(string UserName, DateTime? DateFrom, DateTime? DateTo, string Status, string greentype, string customername, int? pagenumber, int? pagesize, ref int totalPage, ref int totalrecord)
         {
@@ -111,6 +114,15 @@ namespace _24hplusdotnetcore.Services
                 customer.CreatedDate = Convert.ToDateTime(DateTime.Now);
                 customer.ModifiedDate = Convert.ToDateTime(DateTime.Now);
                 _customer.InsertOne(customer);
+                if (customer.Status == CustomerStatus.SUBMIT)
+                {
+                    var dataCRMProcessing = new DataCRMProcessing
+                    {
+                        CustomerId = customer.Id,
+                        Status = DataCRMProcessingStatus.InProgress
+                    };
+                    _dataCRMProcessingServices.CreateOne(dataCRMProcessing);
+                }
                 return customer;
             }
             catch (Exception ex)
@@ -128,6 +140,15 @@ namespace _24hplusdotnetcore.Services
                 customer.ModifiedDate = Convert.ToDateTime(DateTime.Now);
                 customer.CreatedDate = _customer.Find(c => c.Id == customer.Id).FirstOrDefault().CreatedDate;
                 updateCount = _customer.ReplaceOne(c => c.Id == customer.Id, customer).ModifiedCount;
+                if (customer.Status == CustomerStatus.SUBMIT)
+                {
+                    var dataCRMProcessing = new DataCRMProcessing
+                    {
+                        CustomerId = customer.Id,
+                        Status = DataCRMProcessingStatus.InProgress
+                    };
+                    _dataCRMProcessingServices.CreateOne(dataCRMProcessing);
+                }
                 string currStatus = customer.Status;
                 string userName = "";
                 string message = "", type = "";

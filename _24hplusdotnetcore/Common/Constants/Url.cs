@@ -18,5 +18,6 @@ namespace _24hplusdotnetcore.Common.Constants
         //CRM
         public static string CRMLogin = "http://ebanker-vn.com/24hplus/vtigercrm/modules/Mobile/api.php";
         public static string CRMQueryLead = "http://ebanker-vn.com/24hplus/vtigercrm/modules/Mobile/api.php";
+        public static string CRMURL = "http://ebanker-vn.com/24hplus/vtigercrm/modules/Mobile/api.php";
     }
 }
