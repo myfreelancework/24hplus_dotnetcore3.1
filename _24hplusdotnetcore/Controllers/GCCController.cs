@@ -83,6 +83,10 @@ namespace _24hplusdotnetcore.Controllers
                                 {
                                     case 200:
                                         currPerson.state = GccState.SENT_TO_GCC_SUCCEESS;
+                                        currPerson.link = sendObj.result.payment;
+                                        response.data = new {
+                                            link = sendObj.result.payment
+                                        };
                                         response.code = (int)Common.ResponseCode.SUCCESS;
                                         response.message = GCCMessage.SUCCESS;
                                         break;
