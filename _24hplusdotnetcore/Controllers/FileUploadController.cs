@@ -112,7 +112,7 @@ namespace _24hplusdotnetcore.Controllers
                 {
                     code = (int)Common.ResponseCode.SUCCESS,
                     message = Common.Message.SUCCESS,
-                    data = JsonConvert.SerializeObject(""+ updateCount + " records have been updated")
+                    data = JsonConvert.SerializeObject("" + updateCount + " records have been updated")
                 });
             }
             catch (Exception ex)
@@ -199,40 +199,5 @@ namespace _24hplusdotnetcore.Controllers
             }
         }
 
-        
-        // [HttpGet]
-        // [Route("api/fileuploads/checklist")]
-        // public ActionResult<ResponseContext> GetChecklistByCustomerId([FromQuery] string customerId)
-        // {
-        //     try
-        //     {
-
-        //         if ((bool)HttpContext.Items["isLoggedInOtherDevice"])
-        //         {
-        //             return Ok(new ResponseContext
-        //             {
-        //                 code = (int)Common.ResponseCode.IS_LOGGED_IN_ORTHER_DEVICE,
-        //                 message = Common.Message.IS_LOGGED_IN_ORTHER_DEVICE,
-        //                 data = null
-        //             });
-        //         }
-        //         return Ok(new ResponseContext
-        //         {
-        //             code = (int)Common.ResponseCode.SUCCESS,
-        //             message = Common.Message.SUCCESS,
-        //             data = data
-        //         });
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         _logger.LogError(ex, ex.Message);
-        //         _logger.LogError(ex, ex.Message);
-        //         return StatusCode(StatusCodes.Status500InternalServerError, new ResponseMessage
-        //         {
-        //             status = "ERROR",
-        //             message = ex.Message
-        //         });
-        //     }
-        // }
     }
 }
