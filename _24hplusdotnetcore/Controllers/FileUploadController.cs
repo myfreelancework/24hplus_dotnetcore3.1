@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using System.Dynamic;
 
 namespace _24hplusdotnetcore.Controllers
 {
@@ -197,7 +198,6 @@ namespace _24hplusdotnetcore.Controllers
                 });
             }
         }
-
 
     }
 }
