@@ -136,9 +136,10 @@ namespace _24hplusdotnetcore.Services
             long updateCount = 0;
             try
             {
-                string prvStaus = _customer.Find(c => c.Id == customer.Id).FirstOrDefault().Status;
+                dynamic prvCustomer = _customer.Find(c => c.Id == customer.Id).FirstOrDefault();
+                string prvStaus = prvCustomer.Status;
                 customer.ModifiedDate = Convert.ToDateTime(DateTime.Now);
-                customer.CreatedDate = _customer.Find(c => c.Id == customer.Id).FirstOrDefault().CreatedDate;
+                customer.CreatedDate = prvCustomer.CreatedDate;
                 updateCount = _customer.ReplaceOne(c => c.Id == customer.Id, customer).ModifiedCount;
                 if (customer.Status == CustomerStatus.SUBMIT)
                 {
@@ -156,27 +157,29 @@ namespace _24hplusdotnetcore.Services
                 if (prvStaus.ToUpper() != CustomerStatus.SUBMIT)
                 {
                     userName = customer.UserName;
-                    message = string.Format(Message.TeamLeadReject, teamlead, customer.Personal.Name);
                     if (currStatus.ToUpper() == CustomerStatus.REJECT)
                     {
                         type = NotificationType.TeamLeadReject;
+                        message = string.Format(Message.TeamLeadReject, teamlead, customer.Personal.Name);
                     }
                     else if (currStatus.ToUpper() == CustomerStatus.APPROVE)
                     {
                         type = NotificationType.TeamLeadApprove;
+                        message = string.Format(Message.TeamLeadApprove, teamlead, customer.Personal.Name);
                     }
                 }
                 if (currStatus.ToUpper() == CustomerStatus.SUBMIT)
                 {
                     userName = teamlead;
-                    message = string.Format(Message.NotificationAdd, customer.UserName, customer.Personal.Name);
                     if (prvStaus.ToUpper() != CustomerStatus.REJECT)
                     {
                         type = NotificationType.Edit;
+                        message = string.Format(Message.NotificationUpdate, customer.UserName, customer.Personal.Name);
                     }
                     else
                     {
                         type = NotificationType.Add;
+                        message = string.Format(Message.NotificationAdd, customer.UserName, customer.Personal.Name);
                     }
                 }
                 var objNoti = new Notification
