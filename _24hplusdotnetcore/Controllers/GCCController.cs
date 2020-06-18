@@ -256,31 +256,63 @@ namespace _24hplusdotnetcore.Controllers
 
         [HttpGet]
         [Route("api/gcc/postbackPersonal")]
-        public ActionResult<ResponseContext> PersonalInsurancePostback([FromQuery] string request_code, [FromQuery] string status, [FromQuery] string link)
+        public ActionResult<ResponseContext> PersonalInsurancePostback([FromQuery] string requestCode, [FromQuery] string status, [FromQuery] string link)
         {
             try
             {
                 if(status != "") 
                 {
-                    var curPerson = _gccService.FindOneByRequestCode(request_code);
-                    if(status == "true" || status == "1")
+                    var curPerson = _gccService.FindOneByRequestCode(requestCode);
+                    var curMoto = _gccMotoService.FindOneByRequestCode(requestCode);
+                    if(curPerson != null || curMoto != null)
                     {
-                        curPerson.status = true;
+                        if(curPerson != null) 
+                        {
+                            if(status == "true" || status == "1")
+                            {
+                                curPerson.status = true;
+                            }
+                            else 
+                            {
+                                curPerson.status = false;
+                            }
+                            if(link != "") {
+                                curPerson.link = link;
+                            }
+                            _gccService.UpdateOne(curPerson);
+                        }
+                        if(curMoto != null)
+                        {
+                            if(status == "true" || status == "1")
+                            {
+                                curMoto.status = true;
+                            }
+                            else 
+                            {
+                                curMoto.status = false;
+                            }
+                            if(link != "") {
+                                curMoto.link = link;
+                            }
+                            _gccMotoService.UpdateOne(curMoto);
+                        }
+                        
+                        return Ok(new ResponseContext
+                        {
+                            code = (int)Common.ResponseCode.SUCCESS,
+                            message = "",
+                            data = null
+                        });
                     }
                     else 
                     {
-                        curPerson.status = false;
+                        return Ok(new ResponseContext
+                        {
+                            code = (int)Common.ResponseCode.ERROR,
+                            message = "Không tìm thấy request code",
+                            data = null
+                        });
                     }
-                    if(link != "") {
-                        curPerson.link = link;
-                    }
-                    _gccService.UpdateOne(curPerson);
-                    return Ok(new ResponseContext
-                    {
-                        code = (int)Common.ResponseCode.SUCCESS,
-                        message = "",
-                        data = null
-                    });
                 }
                 else
                 {
