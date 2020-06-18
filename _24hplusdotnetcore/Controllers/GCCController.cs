@@ -256,20 +256,34 @@ namespace _24hplusdotnetcore.Controllers
 
         [HttpGet]
         [Route("api/gcc/postbackPersonal")]
-        public ActionResult<ResponseContext> PersonalInsurancePostback([FromQuery] string request_code, [FromQuery] bool status, [FromQuery] string link)
+        public ActionResult<ResponseContext> PersonalInsurancePostback([FromQuery] string request_code, [FromQuery] string status, [FromQuery] string link)
         {
             try
             {
-                var curPerson = _gccService.FindOneByRequestCode(request_code);
-                curPerson.status = status;
-                curPerson.link = link;
-                _gccService.UpdateOne(curPerson);
-                return Ok(new ResponseContext
+                if(status) 
                 {
-                    code = (int)Common.ResponseCode.SUCCESS,
-                    message = "",
-                    data = null
-                });
+                    var curPerson = _gccService.FindOneByRequestCode(request_code);
+                    curPerson.status = status;
+                    if(link) {
+                        curPerson.link = link;
+                    }
+                    _gccService.UpdateOne(curPerson);
+                    return Ok(new ResponseContext
+                    {
+                        code = (int)Common.ResponseCode.SUCCESS,
+                        message = "",
+                        data = null
+                    });
+                }
+                else
+                {
+                    return Ok(new ResponseContext
+                    {
+                        code = (int)Common.ResponseCode.ERROR,
+                        message = "Không tìm thấy status",
+                        data = null
+                    });
+                }
             }
             catch (Exception ex)
             {
