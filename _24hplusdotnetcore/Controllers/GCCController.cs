@@ -260,11 +260,18 @@ namespace _24hplusdotnetcore.Controllers
         {
             try
             {
-                if(status) 
+                if(status != "") 
                 {
                     var curPerson = _gccService.FindOneByRequestCode(request_code);
-                    curPerson.status = status;
-                    if(link) {
+                    if(status == "true" || status == "1")
+                    {
+                        curPerson.status = true;
+                    }
+                    else 
+                    {
+                        curPerson.status = false;
+                    }
+                    if(link != "") {
                         curPerson.link = link;
                     }
                     _gccService.UpdateOne(curPerson);

@@ -30,7 +30,7 @@ namespace _24hplusdotnetcore.Models.GCC
         public DateTime CreateDate { get; set; }
         public string state { get; set; }
         public string message { get; set; }
-        public string status { get; set; }
+        public bool status { get; set; }
         public string link { get; set; }
     }
 
