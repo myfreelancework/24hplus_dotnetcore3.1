@@ -279,6 +279,7 @@ namespace _24hplusdotnetcore.Controllers
                             if(link != "") {
                                 curPerson.link = link;
                             }
+                            curPerson.state = GccState.RECEIVE_POSTBACK;
                             _gccService.UpdateOne(curPerson);
                         }
                         if(curMoto != null)
@@ -294,6 +295,7 @@ namespace _24hplusdotnetcore.Controllers
                             if(link != "") {
                                 curMoto.link = link;
                             }
+                            curMoto.state = GccState.RECEIVE_POSTBACK;
                             _gccMotoService.UpdateOne(curMoto);
                         }
                         
