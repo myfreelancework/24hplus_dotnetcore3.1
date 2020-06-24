@@ -77,6 +77,7 @@ namespace _24hplusdotnetcore.Models
         public string Purpose { get; set; }
         public string Term { get; set; }
         public string Product { get; set; }
+        public string ProductId { get; set; }
         public string Name { get; set; }
         public string Amount { get; set; }
         public string BuyInsurance { get; set; }

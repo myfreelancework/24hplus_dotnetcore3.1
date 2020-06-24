@@ -84,7 +84,8 @@ namespace _24hplusdotnetcore.Controllers
                                     case 200:
                                         currPerson.state = GccState.SENT_TO_GCC_SUCCEESS;
                                         currPerson.link = sendObj.result.payment;
-                                        response.data = new {
+                                        response.data = new
+                                        {
                                             link = sendObj.result.payment
                                         };
                                         response.code = (int)Common.ResponseCode.SUCCESS;
@@ -185,7 +186,8 @@ namespace _24hplusdotnetcore.Controllers
                                         case 200:
                                             currPerson.state = GccState.SENT_TO_GCC_SUCCEESS;
                                             currPerson.link = sendObj.result.payment;
-                                            response.data = new {
+                                            response.data = new
+                                            {
                                                 link = sendObj.result.payment
                                             };
                                             response.code = (int)Common.ResponseCode.SUCCESS;
@@ -260,45 +262,47 @@ namespace _24hplusdotnetcore.Controllers
         {
             try
             {
-                if(status != "") 
+                if (status != "")
                 {
                     var curPerson = _gccService.FindOneByRequestCode(requestCode);
                     var curMoto = _gccMotoService.FindOneByRequestCode(requestCode);
-                    if(curPerson != null || curMoto != null)
+                    if (curPerson != null || curMoto != null)
                     {
-                        if(curPerson != null) 
+                        if (curPerson != null)
                         {
-                            if(status == "true" || status == "1")
+                            if (status == "true" || status == "1")
                             {
                                 curPerson.status = true;
                             }
-                            else 
+                            else
                             {
                                 curPerson.status = false;
                             }
-                            if(link != "") {
+                            if (link != "")
+                            {
                                 curPerson.link = link;
                             }
                             curPerson.state = GccState.RECEIVE_POSTBACK;
                             _gccService.UpdateOne(curPerson);
                         }
-                        if(curMoto != null)
+                        if (curMoto != null)
                         {
-                            if(status == "true" || status == "1")
+                            if (status == "true" || status == "1")
                             {
                                 curMoto.status = true;
                             }
-                            else 
+                            else
                             {
                                 curMoto.status = false;
                             }
-                            if(link != "") {
+                            if (link != "")
+                            {
                                 curMoto.link = link;
                             }
                             curMoto.state = GccState.RECEIVE_POSTBACK;
                             _gccMotoService.UpdateOne(curMoto);
                         }
-                        
+
                         return Ok(new ResponseContext
                         {
                             code = (int)Common.ResponseCode.SUCCESS,
@@ -306,7 +310,7 @@ namespace _24hplusdotnetcore.Controllers
                             data = null
                         });
                     }
-                    else 
+                    else
                     {
                         return Ok(new ResponseContext
                         {
