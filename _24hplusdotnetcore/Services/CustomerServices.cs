@@ -136,42 +136,38 @@ namespace _24hplusdotnetcore.Services
             long updateCount = 0;
             try
             {
+                string teamLead = "";
+                string userName = "";
+                string message = "";
+                string type = "";
+                string prvStaus = "";
+
                 dynamic prvCustomer = _customer.Find(c => c.Id == customer.Id).FirstOrDefault();
-                string prvStaus = prvCustomer.Status;
+                var currUser = _userroleServices.GetUserRoleByUserName(customer.UserName);
+                if (prvCustomer != null)
+                {
+                    prvStaus = prvCustomer.Status;
+                }
+                if (currUser != null)
+                {
+                    teamLead = currUser.TeamLead;
+                }
                 customer.ModifiedDate = Convert.ToDateTime(DateTime.Now);
                 customer.CreatedDate = prvCustomer.CreatedDate;
                 updateCount = _customer.ReplaceOne(c => c.Id == customer.Id, customer).ModifiedCount;
-                if (customer.Status == CustomerStatus.SUBMIT)
+                if (customer.Status.ToUpper() == CustomerStatus.SUBMIT)
                 {
+                    // Update to CRM
                     var dataCRMProcessing = new DataCRMProcessing
                     {
                         CustomerId = customer.Id,
                         Status = DataCRMProcessingStatus.InProgress
                     };
                     _dataCRMProcessingServices.CreateOne(dataCRMProcessing);
-                }
-                string currStatus = customer.Status;
-                string userName = "";
-                string message = "", type = "";
-                string teamlead = _userroleServices.GetUserRoleByUserName(customer.UserName).TeamLead;
-                if (prvStaus.ToUpper() != CustomerStatus.SUBMIT)
-                {
-                    userName = customer.UserName;
-                    if (currStatus.ToUpper() == CustomerStatus.REJECT)
-                    {
-                        type = NotificationType.TeamLeadReject;
-                        message = string.Format(Message.TeamLeadReject, teamlead, customer.Personal.Name);
-                    }
-                    else if (currStatus.ToUpper() == CustomerStatus.APPROVE)
-                    {
-                        type = NotificationType.TeamLeadApprove;
-                        message = string.Format(Message.TeamLeadApprove, teamlead, customer.Personal.Name);
-                    }
-                }
-                if (currStatus.ToUpper() == CustomerStatus.SUBMIT)
-                {
-                    userName = teamlead;
-                    if (prvStaus.ToUpper() != CustomerStatus.REJECT)
+
+                    // Notification
+                    userName = teamLead;
+                    if (prvStaus.ToUpper() == CustomerStatus.REJECT)
                     {
                         type = NotificationType.Edit;
                         message = string.Format(Message.NotificationUpdate, customer.UserName, customer.Personal.Name);
@@ -182,6 +178,19 @@ namespace _24hplusdotnetcore.Services
                         message = string.Format(Message.NotificationAdd, customer.UserName, customer.Personal.Name);
                     }
                 }
+                else if (customer.Status.ToUpper() == CustomerStatus.REJECT)
+                {
+                    userName = customer.UserName;
+                    type = NotificationType.TeamLeadReject;
+                    message = string.Format(Message.TeamLeadReject, teamLead, customer.Personal.Name);
+                }
+                else if (customer.Status.ToUpper() == CustomerStatus.APPROVE)
+                {
+                    userName = customer.UserName;
+                    type = NotificationType.TeamLeadApprove;
+                    message = string.Format(Message.TeamLeadApprove, teamLead, customer.Personal.Name);
+                }
+
                 var objNoti = new Notification
                 {
                     green = GeenType.GreenC,
