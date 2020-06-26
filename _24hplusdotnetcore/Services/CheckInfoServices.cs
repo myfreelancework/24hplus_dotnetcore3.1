@@ -1,19 +1,31 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using _24hplusdotnetcore.ModelDtos;
+using _24hplusdotnetcore.Services.MC;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using RestSharp;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace _24hplusdotnetcore.Services
 {
     public class CheckInfoServices
     {
         private readonly ILogger<CheckInfoServices> _logger;
-        private readonly MC.MCService _mcServices;
-        public CheckInfoServices(ILogger<CheckInfoServices> logger, MC.MCService mcServices)
+        private readonly MCService _mcServices;
+        private readonly IRestMCService _restMCService;
+        private readonly CustomerServices _customerServices;
+
+        public CheckInfoServices(
+            ILogger<CheckInfoServices> logger,
+            MCService mcServices,
+            IRestMCService restMCService,
+            CustomerServices customerServices)
         {
             _logger = logger;
             _mcServices = mcServices;
+            _restMCService = restMCService;
+            _customerServices = customerServices;
         }
         public dynamic CheckInfoByType(string greentype, string citizenID, string customerName)
         {
@@ -150,6 +162,21 @@ namespace _24hplusdotnetcore.Services
                 _logger.LogError(ex, ex.Message);
             }
             return token;
+        }
+
+        public async Task<CustomerCheckListResponseModel> CheckListAsync(string customerId)
+        {
+            try
+            {
+                CustomerCheckListRequestModel customerCheckList = await _customerServices.GetCustomerCheckListAsync(customerId);
+                CustomerCheckListResponseModel result = await _restMCService.CheckListAsync(customerCheckList);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                throw;
+            }
         }
     }
 }

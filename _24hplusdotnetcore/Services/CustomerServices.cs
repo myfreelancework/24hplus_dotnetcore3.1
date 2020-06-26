@@ -1,12 +1,15 @@
 ﻿using _24hplusdotnetcore.Common;
+using _24hplusdotnetcore.ModelDtos;
 using _24hplusdotnetcore.Models;
 using _24hplusdotnetcore.Models.CRM;
 using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace _24hplusdotnetcore.Services
 {
@@ -289,6 +292,43 @@ namespace _24hplusdotnetcore.Services
                 _logger.LogError(ex, ex.Message);
             }
             return customer;
+        }
+
+        public async Task<CustomerCheckListRequestModel> GetCustomerCheckListAsync(string id)
+        {
+            try
+            {
+                var filter = Builders<Customer>.Filter.Eq(c => c.Id, id);
+                var unwindOption = new AggregateUnwindOptions<BsonDocument> { PreserveNullAndEmptyArrays = true };
+                var projectMapping = new BsonDocument()
+                {
+                   {"_id", 0 },
+                   {"MobileSchemaProductCode", "$Loan.Product.ProductCodeMC" },
+                   {"MobileTemResidence", new BsonDocument("$toInt", "$IsTheSameResidentAddress") },
+                   {"LoanAmountAfterInsurrance", "$Loan.Amount" },
+                   {"ShopCode", "$Loan.SignAddress" },
+                   {"CustomerName", "$Personal.Name" },
+                   {"CitizenId", "$Personal.IdCard" },
+                   {"LoanTenor", "$Loan.Term" },
+                   {"HasInsurance", "$Loan.BuyInsurance" },
+                   {"CompanyTaxNumber", "$Working.TaxId" },
+                };
+                BsonDocument document = await _customer
+                    .Aggregate()
+                    .Match(filter)
+                    .Lookup("Product", "Loan.ProductId", "ProductId", "Loan.Product")
+                    .Unwind("Loan.Product", unwindOption)
+                    .Project(projectMapping)
+                    .FirstOrDefaultAsync();
+
+                var result = BsonSerializer.Deserialize<CustomerCheckListRequestModel>(document);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                throw;
+            }
         }
     }
 }

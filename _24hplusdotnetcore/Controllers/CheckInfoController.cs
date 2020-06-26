@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using _24hplusdotnetcore.ModelDtos;
 using _24hplusdotnetcore.Models;
 using _24hplusdotnetcore.Services;
 using Microsoft.AspNetCore.Http;
@@ -89,6 +90,31 @@ namespace _24hplusdotnetcore.Controllers
                     code = (int)Common.ResponseCode.SUCCESS,
                     message = Common.Message.SUCCESS,
                     data = response
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseMessage
+                {
+                    status = "ERROR",
+                    message = ex.Message
+                });
+            }
+        }
+
+        [HttpGet]
+        [Route("api/check-list")]
+        public async Task<ActionResult<ResponseContext>> CheckListAsync([FromQuery] string customerId)
+        {
+            try
+            {
+                CustomerCheckListResponseModel result = await _checkInforServices.CheckListAsync(customerId);
+                return Ok(new ResponseContext
+                {
+                    code = (int)Common.ResponseCode.SUCCESS,
+                    message = Common.Message.SUCCESS,
+                    data = result
                 });
             }
             catch (Exception ex)
