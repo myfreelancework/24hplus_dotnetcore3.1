@@ -212,5 +212,35 @@ namespace _24hplusdotnetcore.Services.MC
                 return null;
             }
         }
+
+        public List<MCProduct> GetProduct()
+        {
+            try
+            {
+                string token = GetMCToken();
+                if (!string.IsNullOrEmpty(token))
+                {
+                    var client = new RestClient(Url.MC_BASE_URL + Url.MC_GET_PRODUCT);
+                    client.Timeout = -1;
+                    var request = new RestRequest(Method.GET);
+                    request.AddHeader("Content-type", "application/json");
+                    request.AddHeader("Authorization", "Bearer "+token+"");
+                    request.AddHeader("x-security", "MEKONG-CREDIT-57d733a9-bcb5-4bff-aca1-f58163122fae");
+                    IRestResponse response = client.Execute(request);
+                    Console.WriteLine(response.Content);
+                    List<MCProduct> content = JsonConvert.DeserializeObject<List<MCProduct>>(response.Content);
+                    return content;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return null;
+            }
+        }
     }
 }

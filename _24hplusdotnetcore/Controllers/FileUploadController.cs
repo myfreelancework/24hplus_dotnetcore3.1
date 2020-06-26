@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using System.Dynamic;
 
 namespace _24hplusdotnetcore.Controllers
 {
@@ -111,7 +112,7 @@ namespace _24hplusdotnetcore.Controllers
                 {
                     code = (int)Common.ResponseCode.SUCCESS,
                     message = Common.Message.SUCCESS,
-                    data = JsonConvert.SerializeObject(""+ updateCount + " records have been updated")
+                    data = JsonConvert.SerializeObject("" + updateCount + " records have been updated")
                 });
             }
             catch (Exception ex)
@@ -197,5 +198,6 @@ namespace _24hplusdotnetcore.Controllers
                 });
             }
         }
+
     }
 }
