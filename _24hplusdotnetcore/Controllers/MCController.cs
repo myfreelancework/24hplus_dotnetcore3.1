@@ -1,10 +1,14 @@
-﻿using _24hplusdotnetcore.Models;
+﻿using _24hplusdotnetcore.ModelDtos;
+using _24hplusdotnetcore.Models;
 using _24hplusdotnetcore.Models.MC;
 using _24hplusdotnetcore.Services.MC;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace _24hplusdotnetcore.Controllers
 {
@@ -38,6 +42,42 @@ namespace _24hplusdotnetcore.Controllers
             {
                 _logger.LogError(ex, ex.Message);
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseMessage { status = "ERROR", message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        [Route("api/check-list")]
+        public async Task<ActionResult<ResponseContext>> CheckListAsync([FromQuery] string customerId)
+        {
+            try
+            {
+                CustomerCheckListResponseModel result = await _mcService.CheckListAsync(customerId);
+                
+                if(result?.CheckList?.Any() != true)
+                {
+                    return Ok(new ResponseContext
+                    {
+                        code = (int)Common.ResponseCode.ERROR,
+                        message = Common.Message.NOT_FOUND_PRODUCT,
+                        data = result
+                    });
+                }
+
+                return Ok(new ResponseContext
+                {
+                    code = (int)Common.ResponseCode.SUCCESS,
+                    message = Common.Message.SUCCESS,
+                    data = result
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return Ok(new ResponseContext
+                {
+                    code = (int)Common.ResponseCode.ERROR,
+                    message = ex.Message,
+                });
             }
         }
     }
