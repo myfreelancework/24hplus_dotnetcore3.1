@@ -17,11 +17,13 @@ namespace _24hplusdotnetcore.Controllers
     {
         private readonly ILogger<CustomerController> _logger;
         private readonly CustomerServices _customerServices;
+        private readonly FileUploadServices _fileUploadServices;
 
-        public CustomerController(ILogger<CustomerController> logger, CustomerServices customerServices)
+        public CustomerController(ILogger<CustomerController> logger, CustomerServices customerServices, FileUploadServices fileUploadServices)
         {
             _logger = logger;
             _customerServices = customerServices;
+            _fileUploadServices = fileUploadServices;
         }
 
         [HttpGet]
@@ -105,13 +107,13 @@ namespace _24hplusdotnetcore.Controllers
                         message = Common.Message.IS_LOGGED_IN_ORTHER_DEVICE,
                         data = null
                     });
-                var objCustomer = new Customer();
-                objCustomer = _customerServices.GetCustomer(Id);
+                dynamic result = _customerServices.GetCustomer(Id);
+                result.listFileUpload = _fileUploadServices.GetListFileUploadByCustomerId(Id);
                 return Ok(new ResponseContext
                 {
                     code = (int)Common.ResponseCode.SUCCESS,
                     message = Common.Message.SUCCESS,
-                    data = objCustomer
+                    data = result
                 });
             }
             catch (Exception ex)
