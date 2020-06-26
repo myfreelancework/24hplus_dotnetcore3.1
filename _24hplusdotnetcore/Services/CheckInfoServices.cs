@@ -1,16 +1,22 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using _24hplusdotnetcore.ModelDtos;
+using _24hplusdotnetcore.Services.MC;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using RestSharp;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace _24hplusdotnetcore.Services
 {
     public class CheckInfoServices
     {
         private readonly ILogger<CheckInfoServices> _logger;
-        private readonly MC.MCService _mcServices;
-        public CheckInfoServices(ILogger<CheckInfoServices> logger, MC.MCService mcServices)
+        private readonly MCService _mcServices;
+
+        public CheckInfoServices(
+            ILogger<CheckInfoServices> logger,
+            MCService mcServices)
         {
             _logger = logger;
             _mcServices = mcServices;

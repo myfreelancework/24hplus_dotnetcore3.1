@@ -1,20 +1,30 @@
 
 using _24hplusdotnetcore.Common.Constants;
+using _24hplusdotnetcore.ModelDtos;
 using _24hplusdotnetcore.Models.MC;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using RestSharp;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace _24hplusdotnetcore.Services.MC
 {
     public class MCService
     {
         private readonly ILogger<MCService> _logger;
-        public MCService(ILogger<MCService> logger)
+        private readonly IRestMCService _restMCService;
+        private readonly CustomerServices _customerServices;
+
+        public MCService(
+            ILogger<MCService> logger,
+            IRestMCService restMCService,
+            CustomerServices customerServices)
         {
             _logger = logger;
+            _restMCService = restMCService;
+            _customerServices = customerServices;
         }
         public dynamic CheckDuplicate(string citizenID)
         {
@@ -173,6 +183,21 @@ namespace _24hplusdotnetcore.Services.MC
             {
                 _logger.LogError(ex, ex.Message);
                 return null;
+            }
+        }
+
+        public async Task<CustomerCheckListResponseModel> CheckListAsync(string customerId)
+        {
+            try
+            {
+                CustomerCheckListRequestModel customerCheckList = await _customerServices.GetCustomerCheckListAsync(customerId);
+                CustomerCheckListResponseModel result = await _restMCService.CheckListAsync(customerCheckList);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                throw;
             }
         }
     }
