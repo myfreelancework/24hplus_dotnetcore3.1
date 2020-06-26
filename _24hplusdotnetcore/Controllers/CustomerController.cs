@@ -108,7 +108,6 @@ namespace _24hplusdotnetcore.Controllers
                         data = null
                     });
                 dynamic result = _customerServices.GetCustomer(Id);
-                result.listFileUpload = _fileUploadServices.GetListFileUploadByCustomerId(Id);
                 return Ok(new ResponseContext
                 {
                     code = (int)Common.ResponseCode.SUCCESS,

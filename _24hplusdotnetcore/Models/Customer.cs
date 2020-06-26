@@ -25,6 +25,7 @@ namespace _24hplusdotnetcore.Models
         public Loan Loan { get; set; }
         public Sale SaleInfo { get; set; }
         public Result Result { get; set; }
+        public FileUpload[] FileUploads { get; set; }
     }
 
     public class Personal
