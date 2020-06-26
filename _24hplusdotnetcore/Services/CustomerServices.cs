@@ -1,6 +1,7 @@
 ﻿using _24hplusdotnetcore.Common;
 using _24hplusdotnetcore.Models;
 using _24hplusdotnetcore.Models.CRM;
+using _24hplusdotnetcore.Models.MC;
 using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -17,7 +18,8 @@ namespace _24hplusdotnetcore.Services
         private readonly NotificationServices _notificationServices;
         private readonly UserRoleServices _userroleServices;
         private readonly CRM.DataCRMProcessingServices _dataCRMProcessingServices;
-        public CustomerServices(IMongoDbConnection connection, ILogger<CustomerServices> logger, NotificationServices notificationServices, UserRoleServices userroleServices, CRM.DataCRMProcessingServices dataCRMProcessingServices)
+        private readonly MC.DataMCProcessingServices _dataMCProcessingServices;
+        public CustomerServices(IMongoDbConnection connection, ILogger<CustomerServices> logger, NotificationServices notificationServices, UserRoleServices userroleServices, CRM.DataCRMProcessingServices dataCRMProcessingServices, MC.DataMCProcessingServices dataMCProcessingServices)
         {
             var client = new MongoClient(connection.ConnectionString);
             var database = client.GetDatabase(connection.DataBase);
@@ -26,6 +28,7 @@ namespace _24hplusdotnetcore.Services
             _notificationServices = notificationServices;
             _userroleServices = userroleServices;
             _dataCRMProcessingServices = dataCRMProcessingServices;
+            _dataMCProcessingServices = dataMCProcessingServices;
         }
         public List<Customer> GetList(string UserName, DateTime? DateFrom, DateTime? DateTo, string Status, string greentype, string customername, int? pagenumber, int? pagesize, ref int totalPage, ref int totalrecord)
         {
@@ -122,6 +125,15 @@ namespace _24hplusdotnetcore.Services
                         Status = DataCRMProcessingStatus.InProgress
                     };
                     _dataCRMProcessingServices.CreateOne(dataCRMProcessing);
+                    if (customer.GreenType == GeenType.GreenC)
+                    {
+                        var dataMCProcessing = new DataMCProcessing
+                        {
+                            CustomerId = customer.Id,
+                            Status = DataCRMProcessingStatus.InProgress
+                        };
+                        _dataMCProcessingServices.CreateOne(dataMCProcessing);
+                    }
                 }
                 return customer;
             }
@@ -148,6 +160,15 @@ namespace _24hplusdotnetcore.Services
                         Status = DataCRMProcessingStatus.InProgress
                     };
                     _dataCRMProcessingServices.CreateOne(dataCRMProcessing);
+                    if (customer.GreenType == GeenType.GreenC)
+                    {
+                        var dataMCProcessing = new DataMCProcessing
+                        {
+                            CustomerId = customer.Id,
+                            Status = DataCRMProcessingStatus.InProgress
+                        };
+                        _dataMCProcessingServices.CreateOne(dataMCProcessing);
+                    }
                 }
                 string currStatus = customer.Status;
                 string userName = "";

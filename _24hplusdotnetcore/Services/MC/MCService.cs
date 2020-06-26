@@ -1,19 +1,31 @@
 
 using _24hplusdotnetcore.Common.Constants;
+using _24hplusdotnetcore.Models;
+using _24hplusdotnetcore.Models.MC;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using RestSharp;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
+using System.Security.Cryptography;
 
 namespace _24hplusdotnetcore.Services.MC
 {
     public class MCService
     {
         private readonly ILogger<MCService> _logger;
-        public MCService(ILogger<MCService> logger)
+        private readonly FileUploadServices _fileUploadServices;
+        private readonly IWebHostEnvironment _hostingEnvironment;
+        private readonly DataMCProcessingServices _dataMCProcessingServices;
+        public MCService(ILogger<MCService> logger, FileUploadServices fileUploadServices, IWebHostEnvironment webHostEnvironment, DataMCProcessingServices dataMCProcessingServices)
         {
             _logger = logger;
+            _fileUploadServices = fileUploadServices;
+            _hostingEnvironment = webHostEnvironment;
+            _dataMCProcessingServices = dataMCProcessingServices;
         }
         public dynamic CheckDuplicate(string citizenID)
         {
@@ -119,6 +131,62 @@ namespace _24hplusdotnetcore.Services.MC
                 _logger.LogError(ex, ex.Message);
             }
             return token;
+        }
+        public void PushDataToMC()
+        {
+            try
+            {
+                var lstMCProcessing = _dataMCProcessingServices.GetDataCRMProcessings(Common.DataCRMProcessingStatus.InProgress);
+                if (lstMCProcessing.Count > 0)
+                {
+                    foreach (var item in lstMCProcessing)
+                    {
+
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+            }
+        }
+        public string[] ZipFiles(string customerId)
+        {
+            try
+            {
+                var listFile = _fileUploadServices.GetListFileUploadByCustomerId(customerId);
+                string serverPath = Path.Combine(_hostingEnvironment.ContentRootPath, "FileUpload");
+                if (listFile.Count > 0)
+                {
+                    Directory.CreateDirectory(Path.Combine(_hostingEnvironment.ContentRootPath, customerId));
+                    string d = Path.Combine(_hostingEnvironment.ContentRootPath, customerId);
+                    for (int i = 0; i < listFile.Count; i++)
+                    {
+                        string s = Path.Combine(serverPath, listFile[i].FileUploadName);
+                        File.Copy(s, d, true);
+                    }
+                    ZipFile.CreateFromDirectory(d, customerId + ".zip");
+                    string fileZip = Path.Combine(_hostingEnvironment.ContentRootPath, customerId + ".zip");
+                    var md5 = MD5.Create();
+                    var stream = File.OpenRead(fileZip);
+                    var hash = md5.ComputeHash(stream);
+                    var hashString = BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+                    return new string[] 
+                    {
+                        fileZip,
+                        hashString
+                    };
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return null;
+            }
         }
 
         private dynamic SendRequest(string Url, string Method, dynamic body)
