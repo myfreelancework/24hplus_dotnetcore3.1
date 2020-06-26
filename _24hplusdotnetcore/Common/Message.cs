@@ -14,9 +14,9 @@ namespace _24hplusdotnetcore.Common
         public static string NOT_FOUND_PRODUCT = "Không tìm thấy sản phẩm!";
         internal static string VERSION_IS_OLD = "Phiên bản của bạn đã cũ, Vui lòng cập nhập phiên bản mới!";
         internal static string NotificationAdd = "{0} vừa thêm mới khách hàng {1}";
-        internal static string NotificationUpdate = "{0} vừa cập nhật thông tin khách hàng  {1}";
-        public static string TeamLeadReject = "{0} vừa reject khách hàng {1}";
-        public static string TeamLeadApprove = "{0} vừa approve khách hàng {1}";
+        internal static string NotificationUpdate = "{0} vừa cập nhật lại thông tin khách hàng  {1}";
+        public static string TeamLeadReject = "{0} vừa từ chối khách hàng {1}";
+        public static string TeamLeadApprove = "{0} vừa duyệt thành công khách hàng {1}";
     }
     public enum ResponseCode : int
     {
