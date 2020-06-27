@@ -1,6 +1,6 @@
 
 using _24hplusdotnetcore.Common.Constants;
-using _24hplusdotnetcore.Models;
+using _24hplusdotnetcore.ModelDtos;
 using _24hplusdotnetcore.Models.MC;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Security.Cryptography;
+using System.Threading.Tasks;
 
 namespace _24hplusdotnetcore.Services.MC
 {
@@ -21,12 +22,14 @@ namespace _24hplusdotnetcore.Services.MC
         private readonly IWebHostEnvironment _hostingEnvironment;
         private readonly DataMCProcessingServices _dataMCProcessingServices;
         private readonly CustomerServices _customerServices;
-        public MCService(ILogger<MCService> logger, FileUploadServices fileUploadServices, IWebHostEnvironment webHostEnvironment, DataMCProcessingServices dataMCProcessingServices, CustomerServices customerServices)
+        private readonly IRestMCService _restMCService;
+        public MCService(ILogger<MCService> logger, FileUploadServices fileUploadServices, IWebHostEnvironment webHostEnvironment, DataMCProcessingServices dataMCProcessingServices, CustomerServices customerServices, IRestMCService restMCService)
         {
             _logger = logger;
             _fileUploadServices = fileUploadServices;
             _hostingEnvironment = webHostEnvironment;
             _dataMCProcessingServices = dataMCProcessingServices;
+            _restMCService = restMCService;
             _customerServices = customerServices;
         }
         public dynamic CheckDuplicate(string citizenID)
@@ -166,10 +169,10 @@ namespace _24hplusdotnetcore.Services.MC
                         foreach (var f in lstFileUpload)
                         {
                             var dataMCFileInfo = new Info();
-                            dataMCFileInfo.DocumentCode = f.documentCode;
+                            dataMCFileInfo.DocumentCode = f.DocumentCode;
                             dataMCFileInfo.FileName = f.FileUploadName;
                             dataMCFileInfo.MimeType = "jpg";
-                            dataMCFileInfo.GroupId = f.groupId;
+                            dataMCFileInfo.GroupId = f.GroupId;
                             dataMC.Info.Add(dataMCFileInfo);
                         }
                         var client = new RestClient(Url.MC_BASE_URL + Url.MC_UPLOAD_DOCUMENT);
@@ -284,6 +287,21 @@ namespace _24hplusdotnetcore.Services.MC
             {
                 _logger.LogError(ex, ex.Message);
                 return null;
+            }
+        }
+
+        public async Task<CustomerCheckListResponseModel> CheckListAsync(string customerId)
+        {
+            try
+            {
+                CustomerCheckListRequestModel customerCheckList = await _customerServices.GetCustomerCheckListAsync(customerId);
+                CustomerCheckListResponseModel result = await _restMCService.CheckListAsync(customerCheckList);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                throw;
             }
         }
     }

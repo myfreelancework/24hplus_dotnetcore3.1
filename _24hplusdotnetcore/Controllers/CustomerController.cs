@@ -12,29 +12,31 @@ using Newtonsoft.Json;
 namespace _24hplusdotnetcore.Controllers
 {
     [ApiController]
-    
+
     public class CustomerController : ControllerBase
     {
         private readonly ILogger<CustomerController> _logger;
         private readonly CustomerServices _customerServices;
+        private readonly FileUploadServices _fileUploadServices;
 
-        public CustomerController(ILogger<CustomerController> logger, CustomerServices customerServices)
+        public CustomerController(ILogger<CustomerController> logger, CustomerServices customerServices, FileUploadServices fileUploadServices)
         {
             _logger = logger;
             _customerServices = customerServices;
+            _fileUploadServices = fileUploadServices;
         }
-        
+
         [HttpGet]
         [Route("api/customers")]
-        public ActionResult<ResponseContext> GetCustomerList([FromQuery] string username,[FromQuery] DateTime? datefrom, [FromQuery] DateTime? dateto,[FromQuery] string status, [FromQuery] string customername, [FromQuery] string greentype, [FromQuery] int? pagenumber, [FromQuery] int? pagesize)
+        public ActionResult<ResponseContext> GetCustomerList([FromQuery] string username, [FromQuery] DateTime? datefrom, [FromQuery] DateTime? dateto, [FromQuery] string status, [FromQuery] string customername, [FromQuery] string greentype, [FromQuery] int? pagenumber, [FromQuery] int? pagesize)
         {
             try
             {
                 if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(greentype))
                 {
-                    return StatusCode(StatusCodes.Status500InternalServerError, new ResponseContext 
-                    { 
-                        code = (int)Common.ResponseCode.ERROR, 
+                    return StatusCode(StatusCodes.Status500InternalServerError, new ResponseContext
+                    {
+                        code = (int)Common.ResponseCode.ERROR,
                         message = "Thiếu username hoặc greentype",
                         data = null
                     });
@@ -49,10 +51,10 @@ namespace _24hplusdotnetcore.Controllers
                 var lstCustomers = new List<Customer>();
                 int totalPage = 0;
                 int totalrecord = 0;
-                lstCustomers = _customerServices.GetList(username, datefrom, dateto, status, greentype, customername, pagenumber, pagesize, ref totalPage, ref totalrecord) ;
+                lstCustomers = _customerServices.GetList(username, datefrom, dateto, status, greentype, customername, pagenumber, pagesize, ref totalPage, ref totalrecord);
 
                 var lstCustomerOptimization = new List<dynamic>();
-                
+
                 for (int i = 0; i < lstCustomers.Count; i++)
                 {
                     dynamic item = new ExpandoObject();
@@ -67,21 +69,21 @@ namespace _24hplusdotnetcore.Controllers
                     Personal.Phone = lstCustomers[i].Personal.Phone;
                     item.Personal = Personal;
                     dynamic Loan = new ExpandoObject();
-                    Loan.Name = lstCustomers[i].Loan!= null? lstCustomers[i].Loan.Name: null;
+                    Loan.Name = lstCustomers[i].Loan != null ? lstCustomers[i].Loan.Name : null;
                     item.Loan = Loan;
                     dynamic Return = new ExpandoObject();
-                    Return.Status = lstCustomers[i].Result != null? lstCustomers[i].Result.Status : null;
+                    Return.Status = lstCustomers[i].Result != null ? lstCustomers[i].Result.Status : null;
                     item.Return = Return;
                     lstCustomerOptimization.Add(item);
                 }
-                
+
                 var datasizeInfo = _customerServices.CustomerPagesize(lstCustomers);
                 return Ok(new PagingDataResponse
                 {
                     code = (int)Common.ResponseCode.SUCCESS,
                     message = Common.Message.SUCCESS,
                     data = lstCustomerOptimization,
-                    pagenumber = pagenumber.HasValue? (int)pagenumber : 1,
+                    pagenumber = pagenumber.HasValue ? (int)pagenumber : 1,
                     totalpage = totalPage,
                     totalrecord = totalrecord
                 });
@@ -89,7 +91,7 @@ namespace _24hplusdotnetcore.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, ex.Message);
-                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseMessage {status = "ERROR", message = ex.Message});
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseMessage { status = "ERROR", message = ex.Message });
             }
         }
         [HttpGet]
@@ -105,13 +107,12 @@ namespace _24hplusdotnetcore.Controllers
                         message = Common.Message.IS_LOGGED_IN_ORTHER_DEVICE,
                         data = null
                     });
-                var objCustomer = new Customer();
-                objCustomer = _customerServices.GetCustomer(Id);
+                dynamic result = _customerServices.GetCustomer(Id);
                 return Ok(new ResponseContext
                 {
                     code = (int)Common.ResponseCode.SUCCESS,
                     message = Common.Message.SUCCESS,
-                    data = objCustomer
+                    data = result
                 });
             }
             catch (Exception ex)
@@ -123,7 +124,7 @@ namespace _24hplusdotnetcore.Controllers
         }
         [HttpGet]
         [Route("api/customer/getcustomerbyusername")]
-        public ActionResult<ResponseContext> GetCustomerByUserName([FromQuery]string username, [FromQuery] int? pagenumber) 
+        public ActionResult<ResponseContext> GetCustomerByUserName([FromQuery] string username, [FromQuery] int? pagenumber)
         {
             try
             {
@@ -135,7 +136,7 @@ namespace _24hplusdotnetcore.Controllers
                         data = null
                     });
                 var lstCustomers = new List<Customer>();
-                lstCustomers = _customerServices.GetCustomerByUserName(username,pagenumber);
+                lstCustomers = _customerServices.GetCustomerByUserName(username, pagenumber);
                 return Ok(new ResponseContext
                 {
                     code = (int)Common.ResponseCode.SUCCESS,
@@ -164,7 +165,7 @@ namespace _24hplusdotnetcore.Controllers
                         data = null
                     });
                 var newCustomer = new Customer();
-                newCustomer =  _customerServices.CreateCustomer(customer);
+                newCustomer = _customerServices.CreateCustomer(customer);
                 return Ok(new ResponseContext
                 {
                     code = (int)Common.ResponseCode.SUCCESS,
@@ -192,7 +193,7 @@ namespace _24hplusdotnetcore.Controllers
                         data = null
                     });
                 long updateCount = _customerServices.UpdateCustomer(customer);
-                if (updateCount >=0)
+                if (updateCount >= 0)
                 {
                     return Ok(new ResponseContext
                     {
@@ -203,9 +204,13 @@ namespace _24hplusdotnetcore.Controllers
                 }
                 else
                 {
-                    return StatusCode(StatusCodes.Status500InternalServerError, new ResponseMessage { status = "ERROR", message = "Cannot update customer" });
+                    return Ok(new ResponseContext
+                    {
+                        code = (int)Common.ResponseCode.ERROR,
+                        message = "Lỗi update customer",
+                    });
                 }
-                
+
             }
             catch (Exception ex)
             {
@@ -233,7 +238,7 @@ namespace _24hplusdotnetcore.Controllers
                     {
                         code = (int)Common.ResponseCode.SUCCESS,
                         message = Common.Message.SUCCESS,
-                        data = JsonConvert.SerializeObject(""+ deleteCount + " have been deleted")
+                        data = JsonConvert.SerializeObject("" + deleteCount + " have been deleted")
                     });
                 }
                 else
@@ -249,7 +254,7 @@ namespace _24hplusdotnetcore.Controllers
         }
         [HttpGet]
         [Route("api/customer/countstatus")]
-        public ActionResult<ResponseContext> CustomerSatusCount([FromQuery]string username, [FromQuery]string greentype)
+        public ActionResult<ResponseContext> CustomerSatusCount([FromQuery] string username, [FromQuery] string greentype)
         {
             try
             {

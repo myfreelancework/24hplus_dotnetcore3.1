@@ -1,13 +1,16 @@
 ﻿using _24hplusdotnetcore.Common;
+using _24hplusdotnetcore.ModelDtos;
 using _24hplusdotnetcore.Models;
 using _24hplusdotnetcore.Models.CRM;
 using _24hplusdotnetcore.Models.MC;
 using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace _24hplusdotnetcore.Services
 {
@@ -148,12 +151,28 @@ namespace _24hplusdotnetcore.Services
             long updateCount = 0;
             try
             {
-                string prvStaus = _customer.Find(c => c.Id == customer.Id).FirstOrDefault().Status;
-                customer.ModifiedDate = Convert.ToDateTime(DateTime.Now);
-                customer.CreatedDate = _customer.Find(c => c.Id == customer.Id).FirstOrDefault().CreatedDate;
-                updateCount = _customer.ReplaceOne(c => c.Id == customer.Id, customer).ModifiedCount;
-                if (customer.Status == CustomerStatus.SUBMIT)
+                string teamLead = "";
+                string userName = "";
+                string message = "";
+                string type = "";
+                string prvStaus = "";
+
+                dynamic prvCustomer = _customer.Find(c => c.Id == customer.Id).FirstOrDefault();
+                var currUser = _userroleServices.GetUserRoleByUserName(customer.UserName);
+                if (prvCustomer != null)
                 {
+                    prvStaus = prvCustomer.Status;
+                }
+                if (currUser != null)
+                {
+                    teamLead = currUser.TeamLead;
+                }
+                customer.ModifiedDate = Convert.ToDateTime(DateTime.Now);
+                customer.CreatedDate = prvCustomer.CreatedDate;
+                updateCount = _customer.ReplaceOne(c => c.Id == customer.Id, customer).ModifiedCount;
+                if (customer.Status.ToUpper() == CustomerStatus.SUBMIT)
+                {
+                    // Update to CRM
                     var dataCRMProcessing = new DataCRMProcessing
                     {
                         CustomerId = customer.Id,
@@ -171,8 +190,6 @@ namespace _24hplusdotnetcore.Services
                     }
                 }
                 string currStatus = customer.Status;
-                string userName = "";
-                string message = "", type = "";
                 string teamlead = _userroleServices.GetUserRoleByUserName(customer.UserName).TeamLead;
                 if (prvStaus.ToUpper() != CustomerStatus.SUBMIT)
                 {
@@ -192,14 +209,33 @@ namespace _24hplusdotnetcore.Services
                     userName = teamlead;
                     message = string.Format(Message.NotificationAdd, customer.UserName, customer.Personal.Name);
                     if (prvStaus.ToUpper() != CustomerStatus.REJECT)
+
+                    // Notification
+                    userName = teamLead;
+                    if (prvStaus.ToUpper() == CustomerStatus.REJECT)
                     {
                         type = NotificationType.Edit;
+                        message = string.Format(Message.NotificationUpdate, customer.UserName, customer.Personal.Name);
                     }
                     else
                     {
                         type = NotificationType.Add;
+                        message = string.Format(Message.NotificationAdd, customer.UserName, customer.Personal.Name);
                     }
                 }
+                else if (customer.Status.ToUpper() == CustomerStatus.REJECT)
+                {
+                    userName = customer.UserName;
+                    type = NotificationType.TeamLeadReject;
+                    message = string.Format(Message.TeamLeadReject, teamLead, customer.Personal.Name);
+                }
+                else if (customer.Status.ToUpper() == CustomerStatus.APPROVE)
+                {
+                    userName = customer.UserName;
+                    type = NotificationType.TeamLeadApprove;
+                    message = string.Format(Message.TeamLeadApprove, teamLead, customer.Personal.Name);
+                }
+
                 var objNoti = new Notification
                 {
                     green = GeenType.GreenC,
@@ -298,6 +334,43 @@ namespace _24hplusdotnetcore.Services
                 _logger.LogError(ex, ex.Message);
             }
             return customer;
+        }
+
+        public async Task<CustomerCheckListRequestModel> GetCustomerCheckListAsync(string id)
+        {
+            try
+            {
+                var filter = Builders<Customer>.Filter.Eq(c => c.Id, id);
+                var unwindOption = new AggregateUnwindOptions<BsonDocument> { PreserveNullAndEmptyArrays = true };
+                var projectMapping = new BsonDocument()
+                {
+                   {"_id", 0 },
+                   {"MobileSchemaProductCode", "$Loan.Product.ProductCodeMC" },
+                   {"MobileTemResidence", new BsonDocument("$toInt", "$IsTheSameResidentAddress") },
+                   {"LoanAmountAfterInsurrance", "$Loan.Amount" },
+                   {"ShopCode", "$Loan.SignAddress" },
+                   {"CustomerName", "$Personal.Name" },
+                   {"CitizenId", "$Personal.IdCard" },
+                   {"LoanTenor", "$Loan.Term" },
+                   {"HasInsurance", "$Loan.BuyInsurance" },
+                   {"CompanyTaxNumber", "$Working.TaxId" },
+                };
+                BsonDocument document = await _customer
+                    .Aggregate()
+                    .Match(filter)
+                    .Lookup("Product", "Loan.ProductId", "ProductId", "Loan.Product")
+                    .Unwind("Loan.Product", unwindOption)
+                    .Project(projectMapping)
+                    .FirstOrDefaultAsync();
+
+                var result = BsonSerializer.Deserialize<CustomerCheckListRequestModel>(document);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                throw;
+            }
         }
     }
 }
