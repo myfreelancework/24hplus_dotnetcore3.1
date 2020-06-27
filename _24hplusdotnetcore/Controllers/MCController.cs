@@ -80,5 +80,41 @@ namespace _24hplusdotnetcore.Controllers
                 });
             }
         }
+
+        [HttpGet]
+        [Route("api/kios")]
+        public async Task<ActionResult<ResponseContext>> GetKiosAsync()
+        {
+            try
+            {
+                IEnumerable<KiosModel> kios = await _mcService.GetKiosAsync();
+
+                if (kios?.Any() != true)
+                {
+                    return Ok(new ResponseContext
+                    {
+                        code = (int)Common.ResponseCode.ERROR,
+                        message = Common.Message.NOT_FOUND_KIOS,
+                        data = kios
+                    });
+                }
+
+                return Ok(new ResponseContext
+                {
+                    code = (int)Common.ResponseCode.SUCCESS,
+                    message = Common.Message.SUCCESS,
+                    data = kios
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return Ok(new ResponseContext
+                {
+                    code = (int)Common.ResponseCode.ERROR,
+                    message = ex.Message,
+                });
+            }
+        }
     }
 }
