@@ -10,6 +10,7 @@ using _24hplusdotnetcore.Models;
 using _24hplusdotnetcore.Services;
 using _24hplusdotnetcore.Services.CRM;
 using _24hplusdotnetcore.Services.GCC;
+using _24hplusdotnetcore.Services.MC;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -79,6 +80,8 @@ namespace _24hplusdotnetcore
             services.AddSingleton<ConfigServices>();
             services.AddSingleton<CRMServices>();
             services.AddSingleton<DataCRMProcessingServices>();
+            services.AddSingleton<MCService>();
+            services.AddSingleton<DataMCProcessingServices>();
 
             // GCC Service
             services.AddSingleton<GCCService>();

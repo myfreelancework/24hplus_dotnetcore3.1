@@ -20,12 +20,14 @@ namespace _24hplusdotnetcore.Services.MC
         private readonly FileUploadServices _fileUploadServices;
         private readonly IWebHostEnvironment _hostingEnvironment;
         private readonly DataMCProcessingServices _dataMCProcessingServices;
-        public MCService(ILogger<MCService> logger, FileUploadServices fileUploadServices, IWebHostEnvironment webHostEnvironment, DataMCProcessingServices dataMCProcessingServices)
+        private readonly CustomerServices _customerServices;
+        public MCService(ILogger<MCService> logger, FileUploadServices fileUploadServices, IWebHostEnvironment webHostEnvironment, DataMCProcessingServices dataMCProcessingServices, CustomerServices customerServices)
         {
             _logger = logger;
             _fileUploadServices = fileUploadServices;
             _hostingEnvironment = webHostEnvironment;
             _dataMCProcessingServices = dataMCProcessingServices;
+            _customerServices = customerServices;
         }
         public dynamic CheckDuplicate(string citizenID)
         {
@@ -136,20 +138,62 @@ namespace _24hplusdotnetcore.Services.MC
         {
             try
             {
-                var lstMCProcessing = _dataMCProcessingServices.GetDataCRMProcessings(Common.DataCRMProcessingStatus.InProgress);
-                if (lstMCProcessing.Count > 0)
+                var lstMCProcessing = _dataMCProcessingServices.GetDataMCProcessings(Common.DataCRMProcessingStatus.InProgress);
+                var token = GetMCToken();
+                if (lstMCProcessing.Count > 0 && !string.IsNullOrEmpty(token))
                 {
                     foreach (var item in lstMCProcessing)
                     {
-
+                        var objCustomer = _customerServices.GetCustomer(item.CustomerId);
+                        var lstFileUpload = _fileUploadServices.GetListFileUploadByCustomerId(item.CustomerId);
+                        var fileZipInfo = ZipFiles(item.CustomerId);
+                        var filePath = fileZipInfo[0];
+                        var hash = fileZipInfo[1];
+                        var dataMC = new DataMC();
+                        dataMC.AppStatus = "1";
+                        dataMC.Request.CitizenId = objCustomer.Personal.IdCard;
+                        dataMC.Request.CustomerName = objCustomer.Personal.Name;
+                        dataMC.Request.ProductId = objCustomer.Loan.Product;
+                        dataMC.Request.SaleCode = objCustomer.UserName;
+                        dataMC.Request.CompanyTaxNumber = objCustomer.Working.TaxId;
+                        dataMC.Request.ShopCode = objCustomer.SaleInfo.Code;
+                        dataMC.Request.LoanAmount = objCustomer.Loan.Amount;
+                        dataMC.Request.LoanTenor = objCustomer.Loan.Term;
+                        dataMC.Request.HasInsurance = objCustomer.Loan.BuyInsurance;
+                        dataMC.Md5 = hash;
+                        dataMC.Info = new List<Info>();
+                        
+                        foreach (var f in lstFileUpload)
+                        {
+                            var dataMCFileInfo = new Info();
+                            dataMCFileInfo.DocumentCode = f.documentCode;
+                            dataMCFileInfo.FileName = f.FileUploadName;
+                            dataMCFileInfo.MimeType = "jpg";
+                            dataMCFileInfo.GroupId = f.groupId;
+                            dataMC.Info.Add(dataMCFileInfo);
+                        }
+                        var client = new RestClient(Url.MC_BASE_URL + Url.MC_UPLOAD_DOCUMENT);
+                        client.Timeout = -1;
+                        var request = new RestRequest(Method.POST);
+                        request.AddHeader("Authorization", "Bearer "+token+"");
+                        request.AddHeader("x-security", "MEKONG-CREDIT-57d733a9-bcb5-4bff-aca1-f58163122fae");
+                        request.AddHeader("Content-Type", "multipart/form-data");
+                        request.AddFile("file", ""+ filePath +"");
+                        request.AddParameter("object", JsonConvert.SerializeObject(dataMC));
+                        IRestResponse response = client.Execute(request);
+                        _logger.LogInformation(response.Content);
+                        _dataMCProcessingServices.UpdateByCustomerId(item.CustomerId, Common.DataCRMProcessingStatus.Done);
                     }
-                }
+                }             
+                
+             
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, ex.Message);
             }
         }
+        
         public string[] ZipFiles(string customerId)
         {
             try

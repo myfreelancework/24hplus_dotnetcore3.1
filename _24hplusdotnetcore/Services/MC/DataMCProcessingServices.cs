@@ -50,7 +50,7 @@ namespace _24hplusdotnetcore.Services.MC
             }
         }
 
-        public List<DataMCProcessing> GetDataCRMProcessings(string status)
+        public List<DataMCProcessing> GetDataMCProcessings(string status)
         {
             var listDataCRMProcessing = new List<DataMCProcessing>();
             try

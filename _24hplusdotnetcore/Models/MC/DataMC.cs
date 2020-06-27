@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System.Collections.Generic;
 
 namespace _24hplusdotnetcore.Models.MC
 {
@@ -14,13 +15,13 @@ namespace _24hplusdotnetcore.Models.MC
         public string MobileIssueDateCitizen { get; set; }
 
         [JsonProperty("appStatus")]
-        public long AppStatus { get; set; }
+        public string AppStatus { get; set; }
 
         [JsonProperty("md5")]
         public string Md5 { get; set; }
 
         [JsonProperty("info")]
-        public Info[] Info { get; set; }
+        public List<Info> Info { get; set; }
     }
 
     public partial class Info
@@ -35,7 +36,7 @@ namespace _24hplusdotnetcore.Models.MC
         public string MimeType { get; set; }
 
         [JsonProperty("groupId")]
-        public long GroupId { get; set; }
+        public string GroupId { get; set; }
     }
 
     public partial class Request
@@ -50,22 +51,22 @@ namespace _24hplusdotnetcore.Models.MC
         public string CustomerName { get; set; }
 
         [JsonProperty("productId")]
-        public long ProductId { get; set; }
+        public string ProductId { get; set; }
 
         [JsonProperty("citizenId")]
         public string CitizenId { get; set; }
 
         [JsonProperty("tempResidence")]
-        public long TempResidence { get; set; }
+        public string TempResidence { get; set; }
 
         [JsonProperty("loanAmount")]
-        public long LoanAmount { get; set; }
+        public string LoanAmount { get; set; }
 
         [JsonProperty("loanTenor")]
-        public long LoanTenor { get; set; }
+        public string LoanTenor { get; set; }
 
         [JsonProperty("hasInsurance")]
-        public long HasInsurance { get; set; }
+        public string HasInsurance { get; set; }
 
         [JsonProperty("issuePlace")]
         public string IssuePlace { get; set; }
@@ -74,6 +75,6 @@ namespace _24hplusdotnetcore.Models.MC
         public string ShopCode { get; set; }
 
         [JsonProperty("companyTaxNumber")]
-        public long CompanyTaxNumber { get; set; }
+        public string CompanyTaxNumber { get; set; }
     }
 }
