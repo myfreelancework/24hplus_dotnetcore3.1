@@ -165,6 +165,7 @@ namespace _24hplusdotnetcore.Services
                 customer.ModifiedDate = Convert.ToDateTime(DateTime.Now);
                 customer.CreatedDate = prvCustomer.CreatedDate;
                 updateCount = _customer.ReplaceOne(c => c.Id == customer.Id, customer).ModifiedCount;
+
                 if (customer.Status.ToUpper() == CustomerStatus.SUBMIT)
                 {
                     // Update to CRM
@@ -174,18 +175,6 @@ namespace _24hplusdotnetcore.Services
                         Status = DataCRMProcessingStatus.InProgress
                     };
                     _dataCRMProcessingServices.CreateOne(dataCRMProcessing);
-                    if (customer.GreenType == GeenType.GreenC)
-                    {
-                        var dataMCProcessing = new DataMCProcessing
-                        {
-                            CustomerId = customer.Id,
-                            Status = DataCRMProcessingStatus.InProgress
-                        };
-                        _dataMCProcessingServices.CreateOne(dataMCProcessing);
-                    }
-                }
-                if (customer.Status.ToUpper() == CustomerStatus.SUBMIT)
-                {
                     // Notification
                     userName = teamLead;
                     if (!String.IsNullOrEmpty(customer.Result?.Reason))
@@ -207,22 +196,35 @@ namespace _24hplusdotnetcore.Services
                 }
                 else if (customer.Status.ToUpper() == CustomerStatus.APPROVE)
                 {
+                    // send data to MC
+                    if (customer.GreenType == GeenType.GreenC)
+                    {
+                        var dataMCProcessing = new DataMCProcessing
+                        {
+                            CustomerId = customer.Id,
+                            Status = DataCRMProcessingStatus.InProgress
+                        };
+                        _dataMCProcessingServices.CreateOne(dataMCProcessing);
+                    }
                     userName = customer.UserName;
                     type = NotificationType.TeamLeadApprove;
                     message = string.Format(Message.TeamLeadApprove, teamLead, customer.Personal.Name);
                 }
 
-                var objNoti = new Notification
+                if (message != "")
                 {
-                    green = GeenType.GreenC,
-                    recordId = customer.Id,
-                    isRead = false,
-                    type = type,
-                    userName = userName,
-                    message = message,
-                    createAt = Convert.ToDateTime(DateTime.Today.ToLongDateString())
-                };
-                _notificationServices.CreateOne(objNoti);
+                    var objNoti = new Notification
+                    {
+                        green = GeenType.GreenC,
+                        recordId = customer.Id,
+                        isRead = false,
+                        type = type,
+                        userName = userName,
+                        message = message,
+                        createAt = Convert.ToDateTime(DateTime.Today.ToLongDateString())
+                    };
+                    _notificationServices.CreateOne(objNoti);
+                }
             }
             catch (Exception ex)
             {
