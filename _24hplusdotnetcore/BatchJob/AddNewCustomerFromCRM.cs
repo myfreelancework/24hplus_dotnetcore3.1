@@ -21,7 +21,7 @@ namespace _24hplusdotnetcore.BatchJob
             while (!cancellationToken.IsCancellationRequested)
             {
                 _crmServices.GetCustomerFromCRM();
-                await Task.Delay(TimeSpan.FromHours(3), cancellationToken);
+                await Task.Delay(TimeSpan.FromHours(2), cancellationToken);
             }
         }
     }

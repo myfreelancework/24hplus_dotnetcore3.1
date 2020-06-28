@@ -85,6 +85,8 @@ namespace _24hplusdotnetcore
             services.AddSingleton<ConfigServices>();
             services.AddSingleton<CRMServices>();
             services.AddSingleton<DataCRMProcessingServices>();
+            services.AddSingleton<MCService>();
+            services.AddSingleton<DataMCProcessingServices>();
 
             // GCC Service
             services.AddSingleton<GCCService>();
@@ -95,6 +97,7 @@ namespace _24hplusdotnetcore
             //Add batchjob
             services.AddSingleton<IHostedService, AddNewCustomerFromCRM>();
             services.AddSingleton<IHostedService, PushCustomerToCRM>();
+            //services.AddSingleton<IHostedService, PushDataToMC>();
             #endregion
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>

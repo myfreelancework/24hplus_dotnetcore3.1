@@ -2,6 +2,7 @@
 using _24hplusdotnetcore.ModelDtos;
 using _24hplusdotnetcore.Models;
 using _24hplusdotnetcore.Models.CRM;
+using _24hplusdotnetcore.Models.MC;
 using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
@@ -20,7 +21,8 @@ namespace _24hplusdotnetcore.Services
         private readonly NotificationServices _notificationServices;
         private readonly UserRoleServices _userroleServices;
         private readonly CRM.DataCRMProcessingServices _dataCRMProcessingServices;
-        public CustomerServices(IMongoDbConnection connection, ILogger<CustomerServices> logger, NotificationServices notificationServices, UserRoleServices userroleServices, CRM.DataCRMProcessingServices dataCRMProcessingServices)
+        private readonly MC.DataMCProcessingServices _dataMCProcessingServices;
+        public CustomerServices(IMongoDbConnection connection, ILogger<CustomerServices> logger, NotificationServices notificationServices, UserRoleServices userroleServices, CRM.DataCRMProcessingServices dataCRMProcessingServices, MC.DataMCProcessingServices dataMCProcessingServices)
         {
             var client = new MongoClient(connection.ConnectionString);
             var database = client.GetDatabase(connection.DataBase);
@@ -29,6 +31,7 @@ namespace _24hplusdotnetcore.Services
             _notificationServices = notificationServices;
             _userroleServices = userroleServices;
             _dataCRMProcessingServices = dataCRMProcessingServices;
+            _dataMCProcessingServices = dataMCProcessingServices;
         }
         public List<Customer> GetList(string UserName, DateTime? DateFrom, DateTime? DateTo, string Status, string greentype, string customername, int? pagenumber, int? pagesize, ref int totalPage, ref int totalrecord)
         {
@@ -125,6 +128,15 @@ namespace _24hplusdotnetcore.Services
                         Status = DataCRMProcessingStatus.InProgress
                     };
                     _dataCRMProcessingServices.CreateOne(dataCRMProcessing);
+                    if (customer.GreenType == GeenType.GreenC)
+                    {
+                        var dataMCProcessing = new DataMCProcessing
+                        {
+                            CustomerId = customer.Id,
+                            Status = DataCRMProcessingStatus.InProgress
+                        };
+                        _dataMCProcessingServices.CreateOne(dataMCProcessing);
+                    }
                 }
                 return customer;
             }
@@ -167,6 +179,36 @@ namespace _24hplusdotnetcore.Services
                         Status = DataCRMProcessingStatus.InProgress
                     };
                     _dataCRMProcessingServices.CreateOne(dataCRMProcessing);
+                    if (customer.GreenType == GeenType.GreenC)
+                    {
+                        var dataMCProcessing = new DataMCProcessing
+                        {
+                            CustomerId = customer.Id,
+                            Status = DataCRMProcessingStatus.InProgress
+                        };
+                        _dataMCProcessingServices.CreateOne(dataMCProcessing);
+                    }
+                }
+                string currStatus = customer.Status;
+                string teamlead = _userroleServices.GetUserRoleByUserName(customer.UserName).TeamLead;
+                if (prvStaus.ToUpper() != CustomerStatus.SUBMIT)
+                {
+                    userName = customer.UserName;
+                    message = string.Format(Message.TeamLeadReject, teamlead, customer.Personal.Name);
+                    if (currStatus.ToUpper() == CustomerStatus.REJECT)
+                    {
+                        type = NotificationType.TeamLeadReject;
+                    }
+                    else if (currStatus.ToUpper() == CustomerStatus.APPROVE)
+                    {
+                        type = NotificationType.TeamLeadApprove;
+                    }
+                }
+                if (currStatus.ToUpper() == CustomerStatus.SUBMIT)
+                {
+                    userName = teamlead;
+                    message = string.Format(Message.NotificationAdd, customer.UserName, customer.Personal.Name);
+                    if (prvStaus.ToUpper() != CustomerStatus.REJECT)
 
                     // Notification
                     userName = teamLead;

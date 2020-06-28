@@ -1,12 +1,18 @@
 
 using _24hplusdotnetcore.Common.Constants;
 using _24hplusdotnetcore.ModelDtos;
+using _24hplusdotnetcore.Models;
 using _24hplusdotnetcore.Models.MC;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using RestSharp;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
+using System.Linq;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 
 namespace _24hplusdotnetcore.Services.MC
@@ -14,15 +20,17 @@ namespace _24hplusdotnetcore.Services.MC
     public class MCService
     {
         private readonly ILogger<MCService> _logger;
-        private readonly IRestMCService _restMCService;
+        private readonly FileUploadServices _fileUploadServices;
+        private readonly IWebHostEnvironment _hostingEnvironment;
+        private readonly DataMCProcessingServices _dataMCProcessingServices;
         private readonly CustomerServices _customerServices;
-
-        public MCService(
-            ILogger<MCService> logger,
-            IRestMCService restMCService,
-            CustomerServices customerServices)
+        private readonly IRestMCService _restMCService;
+        public MCService(ILogger<MCService> logger, FileUploadServices fileUploadServices, IWebHostEnvironment webHostEnvironment, DataMCProcessingServices dataMCProcessingServices, CustomerServices customerServices, IRestMCService restMCService)
         {
             _logger = logger;
+            _fileUploadServices = fileUploadServices;
+            _hostingEnvironment = webHostEnvironment;
+            _dataMCProcessingServices = dataMCProcessingServices;
             _restMCService = restMCService;
             _customerServices = customerServices;
         }
@@ -130,6 +138,113 @@ namespace _24hplusdotnetcore.Services.MC
                 _logger.LogError(ex, ex.Message);
             }
             return token;
+        }
+        public int PushDataToMC()
+        {
+            try
+            {
+                var lstMCProcessing = _dataMCProcessingServices.GetDataMCProcessings(Common.DataCRMProcessingStatus.InProgress);
+                var token = GetMCToken();//"ca5d2357-90be-4bd9-b9d9-732c690dd9c3";//GetMCToken();
+                int uploadCount = 0;
+                if (lstMCProcessing.Count > 0 && !string.IsNullOrEmpty(token))
+                {                    
+                    foreach (var item in lstMCProcessing)
+                    {
+                        var objCustomer = _customerServices.GetCustomer(item.CustomerId);
+                        var lstFileUpload = _fileUploadServices.GetListFileUploadByCustomerId(item.CustomerId);
+                        lstFileUpload = lstFileUpload.Where(l => !string.IsNullOrEmpty(l.DocumentCode)).ToList();
+                        var fileZipInfo = ZipFiles(lstFileUpload, objCustomer.Id);
+                        var filePath = fileZipInfo[0];
+                        var hash = fileZipInfo[1];
+                        var dataMC = new DataMC();
+                        dataMC.AppStatus = "1";
+                        dataMC.Request = new Models.MC.Request();
+                        dataMC.Request.CitizenId = objCustomer.Personal.IdCard;
+                        dataMC.Request.CustomerName = objCustomer.Personal.Name;
+                        dataMC.Request.ProductId = objCustomer.Loan.Product;
+                        dataMC.Request.SaleCode = objCustomer.UserName;
+                        dataMC.Request.CompanyTaxNumber = objCustomer.Working.TaxId;
+                        dataMC.Request.ShopCode = objCustomer.SaleInfo.Code;
+                        dataMC.Request.LoanAmount = objCustomer.Loan.Amount;
+                        dataMC.Request.LoanTenor = objCustomer.Loan.Term;
+                        dataMC.Request.HasInsurance = objCustomer.Loan.BuyInsurance;
+                        dataMC.Md5 = hash;
+                        dataMC.Info = new List<Info>();
+                        
+                        foreach (var f in lstFileUpload)
+                        {
+                            var dataMCFileInfo = new Info();
+                            dataMCFileInfo.DocumentCode = f.DocumentCode;
+                            dataMCFileInfo.FileName = f.FileUploadName;
+                            dataMCFileInfo.MimeType = "jpg";
+                            dataMCFileInfo.GroupId = f.GroupId;
+                            dataMC.Info.Add(dataMCFileInfo);
+                        }
+                        var client = new RestClient(Url.MC_BASE_URL + Url.MC_UPLOAD_DOCUMENT);
+                        client.Timeout = -1;
+                        var request = new RestRequest(Method.POST);
+                        request.AddHeader("Authorization", "Bearer "+token+"");
+                        request.AddHeader("x-security", "MEKONG-CREDIT-57d733a9-bcb5-4bff-aca1-f58163122fae");
+                        request.AddHeader("Content-Type", "multipart/form-data");
+                        request.AddFile("file", ""+ filePath +"");
+                        request.AddParameter("object", JsonConvert.SerializeObject(dataMC));
+                        IRestResponse response = client.Execute(request);
+                        _logger.LogInformation(response.Content);
+                        if (!string.IsNullOrEmpty(response.Content))
+                        {
+                            uploadCount ++;
+                        }
+                        File.Delete(filePath);
+                        _dataMCProcessingServices.UpdateByCustomerId(item.CustomerId, Common.DataCRMProcessingStatus.Done);
+                    }
+                }             
+                return uploadCount;
+             
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return -1;
+            }
+        }
+        
+        public string[] ZipFiles(List<FileUpload> listFile, string customerId)
+        {
+            try
+            {
+                //var listFile = _fileUploadServices.GetListFileUploadByCustomerId(customerId);
+                string serverPath = Path.Combine(_hostingEnvironment.ContentRootPath, "FileUpload");
+                if (listFile.Count > 0)
+                {
+                    Directory.CreateDirectory(Path.Combine(serverPath, customerId));
+                    string d = Path.Combine(serverPath, customerId);
+                    for (int i = 0; i < listFile.Count; i++)
+                    {
+                        string s = Path.Combine(serverPath, listFile[i].FileUploadName);
+                        File.Copy(s, Path.Combine(d, listFile[i].FileUploadName), true);
+                    }
+                    ZipFile.CreateFromDirectory(d, Path.Combine(serverPath, customerId + ".zip"));
+                    string fileZip = Path.Combine(serverPath, customerId + ".zip");
+                    var md5 = MD5.Create();
+                    var stream = File.OpenRead(fileZip);
+                    var hash = md5.ComputeHash(stream);
+                    var hashString = BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+                    return new string[] 
+                    {
+                        fileZip,
+                        hashString
+                    };
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return null;
+            }
         }
 
         private dynamic SendRequest(string Url, string Method, dynamic body)
