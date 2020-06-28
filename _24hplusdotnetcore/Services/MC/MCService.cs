@@ -200,5 +200,19 @@ namespace _24hplusdotnetcore.Services.MC
                 throw;
             }
         }
+
+        public async Task<IEnumerable<KiosModel>> GetKiosAsync()
+        {
+            try
+            {
+                IEnumerable<KiosModel> kios = await _restMCService.GetKiosAsync();
+                return kios;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                throw;
+            }
+        }
     }
 }

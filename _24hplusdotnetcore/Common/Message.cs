@@ -17,6 +17,7 @@ namespace _24hplusdotnetcore.Common
         internal static string NotificationUpdate = "{0} vừa cập nhật lại thông tin khách hàng  {1}";
         public static string TeamLeadReject = "{0} vừa từ chối khách hàng {1}";
         public static string TeamLeadApprove = "{0} vừa duyệt thành công khách hàng {1}";
+        public const string NOT_FOUND_KIOS = "Không tìm thấy kios";
     }
     public enum ResponseCode : int
     {
