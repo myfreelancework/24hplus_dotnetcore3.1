@@ -22,7 +22,7 @@ namespace _24hplusdotnetcore.BatchJob
             while (!cancellationToken.IsCancellationRequested)
             {
                 _crmServices.AddingDataToCRM();
-                await Task.Delay(TimeSpan.FromHours(4), cancellationToken);
+                await Task.Delay(TimeSpan.FromHours(3), cancellationToken);
             }
         }
     }

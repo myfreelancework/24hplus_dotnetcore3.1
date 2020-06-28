@@ -1,6 +1,7 @@
 
 using _24hplusdotnetcore.Common.Constants;
 using _24hplusdotnetcore.ModelDtos;
+using _24hplusdotnetcore.Models;
 using _24hplusdotnetcore.Models.MC;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
@@ -10,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 
@@ -142,18 +144,20 @@ namespace _24hplusdotnetcore.Services.MC
             try
             {
                 var lstMCProcessing = _dataMCProcessingServices.GetDataMCProcessings(Common.DataCRMProcessingStatus.InProgress);
-                var token = GetMCToken();
+                var token = GetMCToken();//"ca5d2357-90be-4bd9-b9d9-732c690dd9c3";//GetMCToken();
                 if (lstMCProcessing.Count > 0 && !string.IsNullOrEmpty(token))
                 {
                     foreach (var item in lstMCProcessing)
                     {
                         var objCustomer = _customerServices.GetCustomer(item.CustomerId);
                         var lstFileUpload = _fileUploadServices.GetListFileUploadByCustomerId(item.CustomerId);
-                        var fileZipInfo = ZipFiles(item.CustomerId);
+                        lstFileUpload = lstFileUpload.Where(l => !string.IsNullOrEmpty(l.DocumentCode)).ToList();
+                        var fileZipInfo = ZipFiles(lstFileUpload, objCustomer.Id);
                         var filePath = fileZipInfo[0];
                         var hash = fileZipInfo[1];
                         var dataMC = new DataMC();
                         dataMC.AppStatus = "1";
+                        dataMC.Request = new Models.MC.Request();
                         dataMC.Request.CitizenId = objCustomer.Personal.IdCard;
                         dataMC.Request.CustomerName = objCustomer.Personal.Name;
                         dataMC.Request.ProductId = objCustomer.Loan.Product;
@@ -185,6 +189,7 @@ namespace _24hplusdotnetcore.Services.MC
                         request.AddParameter("object", JsonConvert.SerializeObject(dataMC));
                         IRestResponse response = client.Execute(request);
                         _logger.LogInformation(response.Content);
+                        File.Delete(filePath);
                         _dataMCProcessingServices.UpdateByCustomerId(item.CustomerId, Common.DataCRMProcessingStatus.Done);
                     }
                 }             
@@ -197,23 +202,23 @@ namespace _24hplusdotnetcore.Services.MC
             }
         }
         
-        public string[] ZipFiles(string customerId)
+        public string[] ZipFiles(List<FileUpload> listFile, string customerId)
         {
             try
             {
-                var listFile = _fileUploadServices.GetListFileUploadByCustomerId(customerId);
+                //var listFile = _fileUploadServices.GetListFileUploadByCustomerId(customerId);
                 string serverPath = Path.Combine(_hostingEnvironment.ContentRootPath, "FileUpload");
                 if (listFile.Count > 0)
                 {
-                    Directory.CreateDirectory(Path.Combine(_hostingEnvironment.ContentRootPath, customerId));
-                    string d = Path.Combine(_hostingEnvironment.ContentRootPath, customerId);
+                    Directory.CreateDirectory(Path.Combine(serverPath, customerId));
+                    string d = Path.Combine(serverPath, customerId);
                     for (int i = 0; i < listFile.Count; i++)
                     {
                         string s = Path.Combine(serverPath, listFile[i].FileUploadName);
-                        File.Copy(s, d, true);
+                        File.Copy(s, Path.Combine(d, listFile[i].FileUploadName), true);
                     }
-                    ZipFile.CreateFromDirectory(d, customerId + ".zip");
-                    string fileZip = Path.Combine(_hostingEnvironment.ContentRootPath, customerId + ".zip");
+                    ZipFile.CreateFromDirectory(d, Path.Combine(serverPath, customerId + ".zip"));
+                    string fileZip = Path.Combine(serverPath, customerId + ".zip");
                     var md5 = MD5.Create();
                     var stream = File.OpenRead(fileZip);
                     var hash = md5.ComputeHash(stream);
