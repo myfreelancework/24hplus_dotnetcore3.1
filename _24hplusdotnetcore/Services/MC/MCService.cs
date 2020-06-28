@@ -139,14 +139,15 @@ namespace _24hplusdotnetcore.Services.MC
             }
             return token;
         }
-        public void PushDataToMC()
+        public int PushDataToMC()
         {
             try
             {
                 var lstMCProcessing = _dataMCProcessingServices.GetDataMCProcessings(Common.DataCRMProcessingStatus.InProgress);
                 var token = GetMCToken();//"ca5d2357-90be-4bd9-b9d9-732c690dd9c3";//GetMCToken();
+                int uploadCount = 0;
                 if (lstMCProcessing.Count > 0 && !string.IsNullOrEmpty(token))
-                {
+                {                    
                     foreach (var item in lstMCProcessing)
                     {
                         var objCustomer = _customerServices.GetCustomer(item.CustomerId);
@@ -189,16 +190,21 @@ namespace _24hplusdotnetcore.Services.MC
                         request.AddParameter("object", JsonConvert.SerializeObject(dataMC));
                         IRestResponse response = client.Execute(request);
                         _logger.LogInformation(response.Content);
+                        if (!string.IsNullOrEmpty(response.Content))
+                        {
+                            uploadCount ++;
+                        }
                         File.Delete(filePath);
                         _dataMCProcessingServices.UpdateByCustomerId(item.CustomerId, Common.DataCRMProcessingStatus.Done);
                     }
                 }             
-                
+                return uploadCount;
              
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, ex.Message);
+                return -1;
             }
         }
         

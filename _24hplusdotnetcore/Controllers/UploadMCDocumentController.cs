@@ -24,8 +24,8 @@ namespace _24hplusdotnetcore.Controllers
         {
             try
             {
-                _mcServices.PushDataToMC();
-                return Ok("Data uploaded!");
+                int fileupload = _mcServices.PushDataToMC();
+                return Ok("number of uploaded documents: " + fileupload + "");
             }
             catch (Exception ex)
             {
