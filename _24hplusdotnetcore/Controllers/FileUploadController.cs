@@ -162,7 +162,7 @@ namespace _24hplusdotnetcore.Controllers
         {
             try
             {
-                string serverPath = Path.Combine(_hostingEnvironment.ContentRootPath, "FileUpload");
+                string serverPath = Path.Combine(_hostingEnvironment.ContentRootPath, "FileUpload/" + CustomerId);
                 if (!Directory.Exists(serverPath))
                 {
                     DirectoryInfo di = Directory.CreateDirectory(serverPath);
@@ -177,7 +177,7 @@ namespace _24hplusdotnetcore.Controllers
                     CustomerId = CustomerId,
                     DocumentCategoryId = DocumentCategoryId,
                     FileUploadName = file.FileName,
-                    FileUploadURL = string.Format(@"{0}://{1}/{2}/{3}/{4}", Request.Scheme, Request.Host.Value, CustomerId, DocumentCategoryId, file.FileName)
+                    FileUploadURL = string.Format(@"{0}://{1}/{2}/{3}/{4}", Request.Scheme, Request.Host.Value, "FileUpload" ,CustomerId, file.FileName)
                 };
 
                 var newFileUpload = _fileUploadServices.CreateFileUpload(fileUpload);

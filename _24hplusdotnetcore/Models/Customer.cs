@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -25,7 +26,7 @@ namespace _24hplusdotnetcore.Models
         public Loan Loan { get; set; }
         public Sale SaleInfo { get; set; }
         public Result Result { get; set; }
-        public dynamic[] Documents  { get; set; }
+        public IEnumerable<GroupDocument> Documents  { get; set; }
     }
 
     public class Personal
@@ -91,5 +92,31 @@ namespace _24hplusdotnetcore.Models
         public string Status { get; set; }
         public string Reason { get; set; }
         public string Note { get; set; }
+    }
+
+    public class GroupDocument
+    {
+        public int GroupId { get; set; }
+        public string GroupName { get; set; }
+        public bool Mandatory { get; set; }
+        public bool HasAlternate { get; set; }
+        public IEnumerable<DocumentUpload> Documents { get; set; }
+        public IEnumerable<int> AlternateGroups { get; set; }
+    }
+
+    public class DocumentUpload
+    {
+        public int Id { get; set; }
+        public string DocumentCode { get; set; }
+        public string DocumentName { get; set; }
+        public string InputDocUid { get; set; }
+        public string MapBpmVar { get; set; }
+        public IEnumerable<UploadedMedia> UploadedMedias { get; set; }
+    }
+    public class UploadedMedia {
+        public string Name { get; set; }
+        public string Type { get; set; }
+        public string Uri { get; set; }
+
     }
 }

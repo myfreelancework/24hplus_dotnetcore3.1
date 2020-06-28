@@ -155,14 +155,9 @@ namespace _24hplusdotnetcore.Services
                 string userName = "";
                 string message = "";
                 string type = "";
-                string prvStaus = "";
 
                 dynamic prvCustomer = _customer.Find(c => c.Id == customer.Id).FirstOrDefault();
                 var currUser = _userroleServices.GetUserRoleByUserName(customer.UserName);
-                if (prvCustomer != null)
-                {
-                    prvStaus = prvCustomer.Status;
-                }
                 if (currUser != null)
                 {
                     teamLead = currUser.TeamLead;
@@ -189,30 +184,11 @@ namespace _24hplusdotnetcore.Services
                         _dataMCProcessingServices.CreateOne(dataMCProcessing);
                     }
                 }
-                string currStatus = customer.Status;
-                string teamlead = _userroleServices.GetUserRoleByUserName(customer.UserName).TeamLead;
-                if (prvStaus.ToUpper() != CustomerStatus.SUBMIT)
+                if (customer.Status.ToUpper() == CustomerStatus.SUBMIT)
                 {
-                    userName = customer.UserName;
-                    message = string.Format(Message.TeamLeadReject, teamlead, customer.Personal.Name);
-                    if (currStatus.ToUpper() == CustomerStatus.REJECT)
-                    {
-                        type = NotificationType.TeamLeadReject;
-                    }
-                    else if (currStatus.ToUpper() == CustomerStatus.APPROVE)
-                    {
-                        type = NotificationType.TeamLeadApprove;
-                    }
-                }
-                if (currStatus.ToUpper() == CustomerStatus.SUBMIT)
-                {
-                    userName = teamlead;
-                    message = string.Format(Message.NotificationAdd, customer.UserName, customer.Personal.Name);
-                    if (prvStaus.ToUpper() != CustomerStatus.REJECT)
-
                     // Notification
                     userName = teamLead;
-                    if (prvStaus.ToUpper() == CustomerStatus.REJECT)
+                    if (!String.IsNullOrEmpty(customer.Result?.Reason))
                     {
                         type = NotificationType.Edit;
                         message = string.Format(Message.NotificationUpdate, customer.UserName, customer.Personal.Name);
