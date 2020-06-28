@@ -17,5 +17,15 @@ namespace _24hplusdotnetcore.Models
         public string FileUploadURL { get; set; }
         [JsonProperty("customerId")]
         public string CustomerId { get; set; }
+        [JsonProperty("groupId")]
+        public string GroupId { get; set; }
+        [JsonProperty("documentCode")]
+        public string DocumentCode { get; set; }
+        [JsonProperty("documentName")]
+        public string DocumentName { get; set; }
+        [JsonProperty("inputDocUid")]
+        public string InputDocUid { get; set; }
+        [JsonProperty("mapBpmVar")]
+        public string MapBpmVar { get; set; }
     }
 }
