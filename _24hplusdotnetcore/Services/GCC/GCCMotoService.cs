@@ -109,6 +109,7 @@ namespace _24hplusdotnetcore.Services.GCC
 
                 if (body != null)
                 {
+                        string[] images = {};
                         dynamic motoInfo = new
                         {
                             info = new
@@ -117,7 +118,7 @@ namespace _24hplusdotnetcore.Services.GCC
                                 sokhung = body.data.info.sokhung,
                                 somay = body.data.info.somay
                             },
-                            images = body.data.images
+                            images = body.data.images != null ? body.data.images : images
                         };
 
                         string data = JsonConvert.SerializeObject(motoInfo);
