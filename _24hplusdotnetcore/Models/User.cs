@@ -25,6 +25,9 @@ namespace _24hplusdotnetcore.Models
         public string UserEmail { get; set; }
 
         [BsonRequired]
+        public string Phone { get; set; }
+
+        [BsonRequired]
         public string UserPassword { get; set; }
 
         [BsonRequired]

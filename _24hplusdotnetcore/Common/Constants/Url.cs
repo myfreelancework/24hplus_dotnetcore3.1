@@ -14,5 +14,12 @@ namespace _24hplusdotnetcore.Common.Constants
         public static string MC_CHECK_INFO = "mobile-4sales/check-cic/check?citizenID={0}&customerName={1}";
         public static string MC_CHECK_DUPLICATE = "mobile-4sales/check-identifier?citizenId={0}";
         public static string MC_CHECK_CAT = "mobile-4sales/check-cat?companyTaxNumber={0}";
+        public static string MC_GET_PRODUCT = "mobile-4sales/products";
+        public static string MC_UPLOAD_DOCUMENT = "mobile-4sales/upload-document";
+
+        //CRM
+        public static string CRMLogin = "http://ebanker-vn.com/24hplus/vtigercrm/modules/Mobile/api.php";
+        public static string CRMQueryLead = "http://ebanker-vn.com/24hplus/vtigercrm/modules/Mobile/api.php";
+        public static string CRMURL = "http://ebanker-vn.com/24hplus/vtigercrm/modules/Mobile/api.php";
     }
 }

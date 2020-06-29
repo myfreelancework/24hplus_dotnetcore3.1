@@ -25,5 +25,7 @@
         internal static string GCCMotoInsurance = "GCCMotoInsurance";
         internal static string GCCMotoProgram = "GCCMotoProgram";
         internal static string GCCKindMoto = "GCCKindMoto";
+        public static string DataCRMProcessing = "DataCRMProcessing";
+        public static string DataMCProcessing = "DataMCProcessing";
     }
 }

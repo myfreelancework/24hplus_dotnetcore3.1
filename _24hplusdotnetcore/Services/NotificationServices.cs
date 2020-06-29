@@ -101,48 +101,57 @@ namespace _24hplusdotnetcore.Services
         }
         private dynamic PushNotification(string notificationType, string userName, string notificationId)
         {
-            var client = new RestClient("https://fcm.googleapis.com/fcm/send");
-            client.Timeout = -1;
-            var request = new RestRequest(Method.POST);
-            request.AddHeader("Content-Type", " application/json");
-            request.AddHeader("Authorization", " key="+_config["FireBase:ServerKey"] +"");
-            string registrationToken = "";
-            FireBaseNotification firebaseNoti = new FireBaseNotification();
-            firebaseNoti.From = _config["FireBase:Sender"];
-            firebaseNoti.CollapseKey = _config["FireBase:collapseKey"];
+            try
+            {
+                var client = new RestClient("https://fcm.googleapis.com/fcm/send");
+                client.Timeout = -1;
+                var request = new RestRequest(Method.POST);
+                request.AddHeader("Content-Type", " application/json");
+                request.AddHeader("Authorization", " key=" + _config["FireBase:ServerKey"] + "");
+                string registrationToken = "";
+                FireBaseNotification firebaseNoti = new FireBaseNotification();
+                firebaseNoti.From = _config["FireBase:Sender"];
+                firebaseNoti.CollapseKey = _config["FireBase:collapseKey"];
 
-            if (notificationType == NotificationType.Add)
-            {
-                string teamLeadId = _userRoleServices.GetUserRoleByUserName(userName).TeamLead;
-                registrationToken = _userLoginservices.Get(teamLeadId).registration_token;
-            }
-            else
-            {
-                registrationToken = _userLoginservices.Get(userName).registration_token;
-            }
-            var notification = FindOne(notificationId);
-            firebaseNoti.RegistrationIds = new string[] {
+                if (notificationType == NotificationType.Add)
+                {
+                    string teamLeadId = _userRoleServices.GetUserRoleByUserName(userName).TeamLead;
+                    registrationToken = _userLoginservices.Get(teamLeadId).registration_token;
+                }
+                else
+                {
+                    registrationToken = _userLoginservices.Get(userName).registration_token;
+                }
+                var notification = FindOne(notificationId);
+                firebaseNoti.RegistrationIds = new string[] {
                 registrationToken
             };
-            firebaseNoti.Notification = new NotificationFireBase
+                firebaseNoti.Notification = new NotificationFireBase
+                {
+                    Body = notification.message
+                };
+
+                firebaseNoti.Data = new Data
+                {
+                    NotificationId = new Random().Next(99999999),
+                    NotificationType = NotificationType.Add,
+                    GreenType = notification.green,
+                    RecordId = notification.Id,
+                    TotalNotifications = 1,
+                    Username = userName
+                };
+
+                request.AddParameter(" application/json", "" + JsonConvert.SerializeObject(firebaseNoti) + "", ParameterType.RequestBody);
+                IRestResponse response = client.Execute(request);
+                Console.WriteLine(response.Content);
+                return JsonConvert.DeserializeObject<dynamic>(response.Content);
+            }
+            catch (Exception ex)
             {
-                Body = notification.message
-            };
-                
-            firebaseNoti.Data = new Data
-            {
-                NotificationId = new Random().Next(99999999),
-                NotificationType = NotificationType.Add,
-                GreenType = notification.green,
-                RecordId = notification.Id,
-                TotalNotifications = 1,
-                Username = userName
-            };           
+                _logger.LogError(ex, ex.Message);
+                return null;
+            }
             
-            request.AddParameter(" application/json", ""+JsonConvert.SerializeObject(firebaseNoti) +"", ParameterType.RequestBody);
-            IRestResponse response = client.Execute(request);
-            Console.WriteLine(response.Content);
-            return JsonConvert.DeserializeObject<dynamic>(response.Content);
         }
     }
 }
