@@ -161,7 +161,7 @@ namespace _24hplusdotnetcore.Services.MC
                         dataMC.Request = new Models.MC.Request();
                         dataMC.Request.CitizenId = objCustomer.Personal.IdCard;
                         dataMC.Request.CustomerName = objCustomer.Personal.Name;
-                        dataMC.Request.ProductId = objCustomer.Loan.Product;
+                        dataMC.Request.ProductId = objCustomer.Loan.ProductId;
                         dataMC.Request.SaleCode = objCustomer.UserName;
                         dataMC.Request.CompanyTaxNumber = objCustomer.Working.TaxId;
                         dataMC.Request.ShopCode = objCustomer.SaleInfo.Code;
