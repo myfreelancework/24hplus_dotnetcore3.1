@@ -4,7 +4,7 @@ namespace _24hplusdotnetcore.Common.Constants
     {
 
         // GCC url
-        public static string GCC_BASE_URL = "https://sandbox.globalcare.vn/";
+        public static string GCC_BASE_URL = "https://globalcare.vn/";
         public static string GCC_GET_SSO_KEY = "gateway/v1/get-key.json?client_code={0}&client_secret={1}";
         public static string GCC_PUSH_DATA = "gateway/v1/order-create.json?client_secret={0}&key={1}";
 

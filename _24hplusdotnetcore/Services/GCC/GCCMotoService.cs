@@ -118,7 +118,7 @@ namespace _24hplusdotnetcore.Services.GCC
                                 sokhung = body.data.info.sokhung,
                                 somay = body.data.info.somay
                             },
-                            images = images
+                            images = body.data.images != null ? body.data.images : images
                         };
 
                         string data = JsonConvert.SerializeObject(motoInfo);
