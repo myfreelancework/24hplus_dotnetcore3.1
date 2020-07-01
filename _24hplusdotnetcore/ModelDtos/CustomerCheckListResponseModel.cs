@@ -14,7 +14,7 @@ namespace _24hplusdotnetcore.ModelDtos
         public bool Mandatory { get; set; }
         public bool HasAlternate { get; set; }
         public IEnumerable<DocumentDtoModel> Documents { get; set; }
-        public IEnumerable<int> AlternateGroups { get; set; }
+        // public IEnumerable<int> AlternateGroups { get; set; }
     }
 
     public class DocumentDtoModel
