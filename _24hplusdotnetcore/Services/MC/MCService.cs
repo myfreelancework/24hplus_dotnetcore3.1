@@ -216,13 +216,13 @@ namespace _24hplusdotnetcore.Services.MC
                 string serverPath = Path.Combine(_hostingEnvironment.ContentRootPath, "FileUpload");
                 if (listFile.Count > 0)
                 {
-                    Directory.CreateDirectory(Path.Combine(serverPath, customerId));
+                    //Directory.CreateDirectory(Path.Combine(serverPath, customerId));
                     string d = Path.Combine(serverPath, customerId);
-                    for (int i = 0; i < listFile.Count; i++)
-                    {
-                        string s = Path.Combine(serverPath, listFile[i].FileUploadName);
-                        File.Copy(s, Path.Combine(d, listFile[i].FileUploadName), true);
-                    }
+                    //for (int i = 0; i < listFile.Count; i++)
+                    //{
+                    //    string s = Path.Combine(serverPath, listFile[i].FileUploadName);
+                    //    File.Copy(s, Path.Combine(d, listFile[i].FileUploadName), true);
+                    //}
                     ZipFile.CreateFromDirectory(d, Path.Combine(serverPath, customerId + ".zip"));
                     string fileZip = Path.Combine(serverPath, customerId + ".zip");
                     var md5 = MD5.Create();
