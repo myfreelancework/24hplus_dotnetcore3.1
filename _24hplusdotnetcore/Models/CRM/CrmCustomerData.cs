@@ -63,10 +63,10 @@ namespace _24hplusdotnetcore.Models.CRM
         public AssignedUserId Campaignid { get; set; }
 
         [JsonProperty("createdtime")]
-        public DateTimeOffset Createdtime { get; set; }
+        public DateTime? Createdtime { get; set; }
 
         [JsonProperty("modifiedtime")]
-        public DateTimeOffset Modifiedtime { get; set; }
+        public DateTime? Modifiedtime { get; set; }
 
         [JsonProperty("modifiedby")]
         public AssignedUserId Modifiedby { get; set; }
@@ -390,7 +390,7 @@ namespace _24hplusdotnetcore.Models.CRM
         public string Cf1264 { get; set; }
 
         [JsonProperty("cf_1266")]
-        public DateTimeOffset Cf1266 { get; set; }
+        public DateTime? Cf1266 { get; set; }
 
         [JsonProperty("cf_1268")]
         public string Cf1268 { get; set; }

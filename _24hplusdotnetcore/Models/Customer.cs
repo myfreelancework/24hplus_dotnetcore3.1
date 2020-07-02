@@ -27,11 +27,13 @@ namespace _24hplusdotnetcore.Models
         public Sale SaleInfo { get; set; }
         public Result Result { get; set; }
         public IEnumerable<GroupDocument> Documents  { get; set; }
+        public Counsel Counsel { get; set; }
     }
 
     public class Personal
     {
         public string Name { get; set; } // potentialname
+        public string PotentialNo { get; set; }
         public string IdCard { get; set; } // cf_1050
         public string IdCardProvince { get; set; } // 
         public string IdCardDate { get; set; } // cf_1350
@@ -42,6 +44,8 @@ namespace _24hplusdotnetcore.Models
         public string MaritalStatus { get; set; } //cf_1030
         public string Gender { get; set; } // cf_1026
         public string Email { get; set; } // cf_1028
+        public Address CurrentAddress { get; set; }
+        public Address PermanentAddress { get; set; }
     }
 
     public class Address
@@ -50,7 +54,9 @@ namespace _24hplusdotnetcore.Models
         public string District { get; set; }
         public string Ward { get; set; }
         public string Street { get; set; }
+        public string FullAddress { get; set; }
     }
+
     public class Working
     {
         public string Job { get; set; }
@@ -64,6 +70,9 @@ namespace _24hplusdotnetcore.Models
         public string CompanyName { get; set; }
         public string CompanyPhone { get; set; }
         public Address CompanyAddress { get; set; }
+        public string WorkPeriod { get; set; }
+        public string TypeOfContract { get; set; }
+        public string HealthCardInssurance { get; set; }
     }
 
     public class Sale
@@ -72,6 +81,7 @@ namespace _24hplusdotnetcore.Models
         public string Code { get; set; }
         public string Phone { get; set; }
         public string Note { get; set; }
+
     }
 
     public class Loan
@@ -85,6 +95,10 @@ namespace _24hplusdotnetcore.Models
         public string Amount { get; set; }
         public string BuyInsurance { get; set; }
         public string SignAddress { get; set; }
+        public string RequestDocuments { get; set; }
+        public DateTime? GenarateToLead { get; set; }
+        public DateTime? FollowedDate { get; set; }
+
     }
 
     public class Result
@@ -114,10 +128,22 @@ namespace _24hplusdotnetcore.Models
         public string MapBpmVar { get; set; }
         public IEnumerable<UploadedMedia> UploadedMedias { get; set; }
     }
+
     public class UploadedMedia {
         public string Name { get; set; }
         public string Type { get; set; }
         public string Uri { get; set; }
 
+    }
+
+    public class Counsel
+    {
+        public DateTime? LastCounselling { get; set; }
+        public string ApptSchedule { get; set; }
+        public string TeleSalesCode { get; set; }
+        public string Name { get; set; }
+        public string Campain { get; set; }
+        public string Remark { get; set; }
+        public string Occupation { get; set; }
     }
 }

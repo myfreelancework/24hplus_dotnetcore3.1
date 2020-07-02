@@ -8,6 +8,7 @@ using _24hplusdotnetcore.Models.CRM;
 using System.Linq;
 using _24hplusdotnetcore.Models;
 using MongoDB.Bson;
+using _24hplusdotnetcore.Common;
 
 namespace _24hplusdotnetcore.Services.CRM
 {
@@ -16,11 +17,20 @@ namespace _24hplusdotnetcore.Services.CRM
         private readonly ILogger<CRMServices> _logger;
         private readonly CustomerServices _customerServices;
         private readonly DataCRMProcessingServices _dataCRMProcessingServices;
-        public CRMServices(ILogger<CRMServices> logger, CustomerServices customerServices, DataCRMProcessingServices dataCRMProcessingServices)
+        private readonly ProductServices _productServices;
+        private readonly DataProcessingService _dataProcessingService;
+
+        public CRMServices(ILogger<CRMServices> logger, 
+            CustomerServices customerServices, 
+            DataCRMProcessingServices dataCRMProcessingServices, 
+            ProductServices productServices,
+            DataProcessingService dataProcessingService)
         {
             _logger = logger;
             _customerServices = customerServices;
             _dataCRMProcessingServices = dataCRMProcessingServices;
+            _productServices = productServices;
+            _dataProcessingService = dataProcessingService;
         }
 
         private string CRMLogin()
@@ -119,6 +129,111 @@ namespace _24hplusdotnetcore.Services.CRM
             }
         }
 
+        private long AddNewCustomerFromCRM(CrmCustomerData crmCustomer, string customerStatus, string dataProcessingType)
+        {
+            try
+            {
+                if (crmCustomer?.Result?.Records?.Any() != true)
+                {
+                    return 0;
+                }
+
+                var idCards = crmCustomer.Result.Records.Select(x => x.Cf1050);
+                IEnumerable<Customer> customers = _customerServices.GetByIdCards(idCards);
+
+                foreach (var record in crmCustomer.Result.Records)
+                {
+                    var customer = customers?.FirstOrDefault(x => string.Equals(x.Personal.IdCard, record.Cf1050, StringComparison.OrdinalIgnoreCase));
+                    if(customer == null)
+                    {
+                        var product = new Product
+                        {
+                            ProductName = record.Cf1032
+                        };
+                        var productCreated = _productServices.CreateProduct(product);
+
+                        var customerCreation = new Customer
+                        {
+                            Personal = new Personal
+                            {
+                                Name = record.Potentialname,
+                                Gender = record.Cf1026,
+                                Phone = record.Cf854,
+                                IdCard = record.Cf1050,
+                                Email = record.Cf1028,
+                                CurrentAddress = new Address
+                                {
+                                    FullAddress = record.Cf892
+                                },
+                                DateOfBirth = record.Cf948,
+                                MaritalStatus = record.Cf1030,
+                                PermanentAddress = new Address { FullAddress = record.Cf1002 },
+                                PotentialNo = record.PotentialNo
+                            },
+                            Working = new Working
+                            {
+                                Job = record.Cf1246,
+                                Income = record.Cf884,
+                                CompanyName = record.Cf962,
+                                CompanyAddress = new Address { FullAddress = record.Cf1020 },
+                                CompanyPhone = record.Cf976,
+                                Position = record.Cf982,
+                                WorkPeriod = record.Cf984,
+                                TypeOfContract = record.Cf986,
+                                HealthCardInssurance = record.Cf988,
+
+                            },
+                            TemporaryAddress = new Address
+                            {
+                                Province = record.Cf1020
+                            },
+                            Loan = new Loan
+                            {
+                                Amount = record.Cf968,
+                                ProductId = productCreated.Id,
+                                RequestDocuments = record.Cf1036,
+                                Term = record.Cf990,
+                                GenarateToLead = record.Createdtime,
+                                FollowedDate = record.Modifiedtime,
+                            },
+                            Result = new Models.Result
+                            {
+                                Note = record.Description,
+                                Status = record.SalesStage
+                            },
+                            UserName = record.Modifiedby.Label.Split("-")[0],
+                            Status = customerStatus,
+                            Counsel = new Counsel
+                            {
+                                LastCounselling = record.Cf1266,
+                                ApptSchedule = record.Cf1052,
+                                TeleSalesCode = record.AssignedUserId?.Value,
+                                Name = record.AssignedUserId?.Label,
+                                Campain = record.AssignedUserId?.Value,
+                                Remark = record.Cf1196,
+                                Occupation = record.Cf1246
+                            }
+                        };
+                        customer = _customerServices.CreateCustomer(customerCreation);
+                    }
+
+                    var dataProcessing = new DataProcessing
+                    {
+                        CustomerId = customer.Id,
+                        DataProcessingType = dataProcessingType
+                    };
+                    _dataProcessingService.ReplaceOne(dataProcessing);
+                }
+
+                return crmCustomer.Result.Records.Count();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return -1;
+            }
+        }
+
         public long GetCustomerFromCRM()
         {
             try
@@ -137,6 +252,26 @@ namespace _24hplusdotnetcore.Services.CRM
             catch (Exception ex)
             {
                  _logger.LogError(ex, ex.Message);
+                return -1;
+            }
+        }
+
+        public long GetCustomerFromCRM(string query)
+        {
+            try
+            {
+                string session = CRMLogin();
+                if (string.IsNullOrEmpty(session))
+                {
+                    return 0;
+                }
+
+                CrmCustomerData dataFromCRM = QueryLead(session, query);
+                return AddNewCustomerFromCRM(dataFromCRM, CustomerStatus.PUSH_MA, DataProcessingType.PUSH_CUSTOMER_CRM_TO_MA);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
                 return -1;
             }
         }
@@ -222,5 +357,6 @@ namespace _24hplusdotnetcore.Services.CRM
 
             }
         }
+
     }
 }

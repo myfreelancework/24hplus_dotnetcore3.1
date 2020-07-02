@@ -9,5 +9,6 @@
         public static string REJECT = "REJECT";
         public static string APPROVE = "APPROVE";
         public static string POTENTIAL = "POTENTIAL";
+        public const string PUSH_MA = "PUSH_MA";
     }
 }
