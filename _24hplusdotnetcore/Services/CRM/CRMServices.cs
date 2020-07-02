@@ -154,36 +154,36 @@ namespace _24hplusdotnetcore.Services.CRM
                         foreach (var item in lstCustomer)
                         {
                             var customer = _customerServices.GetCustomer(item.CustomerId);
-                            var dataCRM = new Record
-                            {
-                                Cf1178 = "MC",
-                                Potentialname = customer.Personal.Name,
-                                Cf1026 = customer.Personal.Gender,
-                                Leadsource = "MC",
-                                Cf854 = customer.Personal.Phone,
-                                Cf1050 = customer.Personal.IdCard,
-                                Cf1028 = customer.Working.Job,
-                                Cf884 = customer.Working.Income,
-                                Cf1020 = customer.ResidentAddress.Province,
-                                Cf1032 = customer.Loan.Product,
-                                Cf1040 = customer.Loan.Name,
-                                Cf968 = customer.Loan.Amount,
-                                Cf990 = customer.Loan.Term,
-                                Cf1052 = "-",
-                                Cf1054 = customer.Loan.SignAddress,
-                                Cf1036 = "CHỨNG MINH NHÂN DÂN |##| HỘ KHẨU",
-                                SalesStage = "1.KH mới",
-                                Cf1184 = "-",
-                                Cf1188 = "-",
-                                AssignedUserId = new AssignedUserId 
-                                { 
-                                   Value = "19x2335" 
-                                },
-                                Cf1244 = "AS",
-                                Cf1256 = "-",
-                                Cf1264 = "????",
-                                Cf1230 = ""
-                            };
+                            var dataCRM = new Record();
+
+                            dataCRM.Cf1178 = "MC";
+                            dataCRM.Potentialname = customer.Personal.Name;
+                            dataCRM.Cf1026 = customer.Personal.Gender;
+                            dataCRM.Leadsource = "MC";
+                            dataCRM.Cf854 = customer.Personal.Phone;
+                            dataCRM.Cf1050 = customer.Personal.IdCard;
+                            dataCRM.Cf1028 = customer.Working.Job;
+                            dataCRM.Cf884 = customer.Working.Income;
+                            dataCRM.Cf1020 = customer.ResidentAddress.Province;
+                            dataCRM.Cf1032 = customer.Loan.Product;
+                            dataCRM.Cf1040 = customer.Loan.Product;//customer.Loan.Name;
+                            dataCRM.Cf968 = customer.Loan.Amount;
+                            dataCRM.Cf990 = customer.Loan.Term;
+                            dataCRM.Cf1052 = "-";
+                            dataCRM.Cf1054 = customer.Loan.SignAddress;
+                            dataCRM.Cf1036 = "CHỨNG MINH NHÂN DÂN |##| HỘ KHẨU";
+                            dataCRM.SalesStage = "1.KH mới";
+                            dataCRM.Cf1184 = "-";
+                            dataCRM.Cf1188 = "-";
+                            var AssignedUserId = new AssignedUserId();
+
+                            AssignedUserId.Value = "19x2335";
+                            dataCRM.AssignedUserId = AssignedUserId;
+                            dataCRM.Cf1244 = "AS";
+                            dataCRM.Cf1256 = "-";
+                            dataCRM.Cf1264 = "????";
+                            dataCRM.Cf1230 = "";
+                            
                             PushDataToCRM(dataCRM, session, item);
                         }
                     }
@@ -209,7 +209,7 @@ namespace _24hplusdotnetcore.Services.CRM
                 request.AddParameter("values", ""+ JsonConvert.SerializeObject(dataCRM) +"");
                 request.AddParameter("_session", ""+ session +"");
                 request.AddParameter("module", "Potentials");
-                request.AddParameter("record", "13x55730");
+               //request.AddParameter("record", "13x55730");
                 IRestResponse response = client.Execute(request);
                 Console.WriteLine(response.Content);
                 dataCRMProcessing.Status = Common.DataCRMProcessingStatus.Done;
