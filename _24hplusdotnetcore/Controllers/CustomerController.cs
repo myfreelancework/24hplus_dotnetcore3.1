@@ -69,7 +69,7 @@ namespace _24hplusdotnetcore.Controllers
                     Personal.Phone = lstCustomers[i].Personal.Phone;
                     item.Personal = Personal;
                     dynamic Loan = new ExpandoObject();
-                    Loan.Name = lstCustomers[i].Loan != null ? lstCustomers[i].Loan.Name : null;
+                    Loan.Product = lstCustomers[i].Loan != null ? lstCustomers[i].Loan.Product : null;
                     item.Loan = Loan;
                     dynamic Return = new ExpandoObject();
                     Return.Status = lstCustomers[i].Result != null ? lstCustomers[i].Result.Status : null;

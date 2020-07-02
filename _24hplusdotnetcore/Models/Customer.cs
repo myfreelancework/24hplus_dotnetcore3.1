@@ -78,9 +78,10 @@ namespace _24hplusdotnetcore.Models
     {
         public string Purpose { get; set; }
         public string Term { get; set; }
+        public string Category { get; set; }
+        public string CategoryId { get; set; }
         public string Product { get; set; }
         public string ProductId { get; set; }
-        public string Name { get; set; }
         public string Amount { get; set; }
         public string BuyInsurance { get; set; }
         public string SignAddress { get; set; }
@@ -101,7 +102,7 @@ namespace _24hplusdotnetcore.Models
         public bool Mandatory { get; set; }
         public bool HasAlternate { get; set; }
         public IEnumerable<DocumentUpload> Documents { get; set; }
-        public IEnumerable<int> AlternateGroups { get; set; }
+        // public IEnumerable<int> AlternateGroups { get; set; }
     }
 
     public class DocumentUpload

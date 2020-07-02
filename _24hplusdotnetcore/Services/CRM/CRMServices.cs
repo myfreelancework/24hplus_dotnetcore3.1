@@ -155,7 +155,6 @@ namespace _24hplusdotnetcore.Services.CRM
                         {
                             var customer = _customerServices.GetCustomer(item.CustomerId);
                             var dataCRM = new Record();
-
                             dataCRM.Cf1178 = "MC";
                             dataCRM.Potentialname = customer.Personal.Name;
                             dataCRM.Cf1026 = customer.Personal.Gender;
@@ -183,7 +182,7 @@ namespace _24hplusdotnetcore.Services.CRM
                             dataCRM.Cf1256 = "-";
                             dataCRM.Cf1264 = "????";
                             dataCRM.Cf1230 = "";
-                            
+
                             PushDataToCRM(dataCRM, session, item);
                         }
                     }
