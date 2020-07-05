@@ -17,19 +17,16 @@ namespace _24hplusdotnetcore.Services.CRM
         private readonly ILogger<CRMServices> _logger;
         private readonly CustomerServices _customerServices;
         private readonly DataCRMProcessingServices _dataCRMProcessingServices;
-        private readonly ProductServices _productServices;
         private readonly DataProcessingService _dataProcessingService;
 
-        public CRMServices(ILogger<CRMServices> logger, 
-            CustomerServices customerServices, 
-            DataCRMProcessingServices dataCRMProcessingServices, 
-            ProductServices productServices,
+        public CRMServices(ILogger<CRMServices> logger,
+            CustomerServices customerServices,
+            DataCRMProcessingServices dataCRMProcessingServices,
             DataProcessingService dataProcessingService)
         {
             _logger = logger;
             _customerServices = customerServices;
             _dataCRMProcessingServices = dataCRMProcessingServices;
-            _productServices = productServices;
             _dataProcessingService = dataProcessingService;
         }
 
@@ -43,7 +40,7 @@ namespace _24hplusdotnetcore.Services.CRM
                 var request = new RestRequest(Method.POST);
                 request.AddHeader("Content-Type", "application/x-www-form-urlencoded");
                 request.AddParameter("_operation", "login");
-                request.AddParameter("username", ""+Common.Constants.ConfigRequest.CRM_UserName+"");
+                request.AddParameter("username", "" + Common.Constants.ConfigRequest.CRM_UserName + "");
                 request.AddParameter("password", "" + Common.Constants.ConfigRequest.CRM_Password + "");
                 IRestResponse response = client.Execute(request);
                 dynamic context = JsonConvert.DeserializeObject<dynamic>(response.Content);
@@ -65,8 +62,8 @@ namespace _24hplusdotnetcore.Services.CRM
                 var request = new RestRequest(Method.POST);
                 request.AddHeader("Content-Type", "application/x-www-form-urlencoded");
                 request.AddParameter("_operation", "query");
-                request.AddParameter("_session", ""+ session + "");
-                request.AddParameter("query", ""+ queryString + "");
+                request.AddParameter("_session", "" + session + "");
+                request.AddParameter("query", "" + queryString + "");
                 IRestResponse response = client.Execute(request);
                 return JsonConvert.DeserializeObject<CrmCustomerData>(response.Content);
             }
@@ -82,9 +79,9 @@ namespace _24hplusdotnetcore.Services.CRM
             long insertCount = 0;
             try
             {
-                
+
                 var arrCustomer = crmCustomer.Result.Records;
-                
+
                 if (arrCustomer.Length > 0)
                 {
                     foreach (var item in arrCustomer)
@@ -116,7 +113,7 @@ namespace _24hplusdotnetcore.Services.CRM
                                 insertCount++;
                             }
                         }
-                        
+
                     }
                 }
                 _logger.LogInformation("Number of customer from CRM: " + insertCount);
@@ -141,17 +138,14 @@ namespace _24hplusdotnetcore.Services.CRM
                 var idCards = crmCustomer.Result.Records.Select(x => x.Cf1050);
                 IEnumerable<Customer> customers = _customerServices.GetByIdCards(idCards);
 
+                var customerCreations = new List<Customer>();
+                var dataProcessingCreations = new List<DataProcessing>();
+
                 foreach (var record in crmCustomer.Result.Records)
                 {
                     var customer = customers?.FirstOrDefault(x => string.Equals(x.Personal.IdCard, record.Cf1050, StringComparison.OrdinalIgnoreCase));
-                    if(customer == null)
+                    if (customer == null)
                     {
-                        var product = new Product
-                        {
-                            ProductName = record.Cf1032
-                        };
-                        var productCreated = _productServices.CreateProduct(product);
-
                         var customerCreation = new Customer
                         {
                             Personal = new Personal
@@ -190,7 +184,7 @@ namespace _24hplusdotnetcore.Services.CRM
                             Loan = new Loan
                             {
                                 Amount = record.Cf968,
-                                ProductId = productCreated.Id,
+                                Product = record.Cf1032,
                                 RequestDocuments = record.Cf1036,
                                 Term = record.Cf990,
                                 GenarateToLead = record.Createdtime,
@@ -212,20 +206,39 @@ namespace _24hplusdotnetcore.Services.CRM
                                 Campain = record.AssignedUserId?.Value,
                                 Remark = record.Cf1196,
                                 Occupation = record.Cf1246
-                            }
+                            },
+                            CRMId = record.Id
                         };
-                        customer = _customerServices.CreateCustomer(customerCreation);
+                        customerCreations.Add(customerCreation);
                     }
+                    else
+                    {
+                        dataProcessingCreations.Add(new DataProcessing
+                        {
+                            CustomerId = customer.Id,
+                            DataProcessingType = dataProcessingType
+                        });
+                    }
+                }
 
-                    var dataProcessing = new DataProcessing
+                if (customerCreations.Any())
+                {
+                    _customerServices.InsertMany(customerCreations);
+
+                    dataProcessingCreations.AddRange(customerCreations.Select(customer => new DataProcessing
                     {
                         CustomerId = customer.Id,
                         DataProcessingType = dataProcessingType
-                    };
-                    _dataProcessingService.ReplaceOne(dataProcessing);
+                    }));
                 }
 
-                return crmCustomer.Result.Records.Count();
+                if (dataProcessingCreations.Any())
+                {
+                    _dataProcessingService.InsertMany(dataProcessingCreations);
+                }
+
+
+                return dataProcessingCreations.Count;
             }
             catch (Exception ex)
             {
@@ -251,7 +264,7 @@ namespace _24hplusdotnetcore.Services.CRM
             }
             catch (Exception ex)
             {
-                 _logger.LogError(ex, ex.Message);
+                _logger.LogError(ex, ex.Message);
                 return -1;
             }
         }
@@ -310,9 +323,9 @@ namespace _24hplusdotnetcore.Services.CRM
                                 SalesStage = "1.KH mới",
                                 Cf1184 = "-",
                                 Cf1188 = "-",
-                                AssignedUserId = new AssignedUserId 
-                                { 
-                                   Value = "19x2335" 
+                                AssignedUserId = new AssignedUserId
+                                {
+                                    Value = "19x2335"
                                 },
                                 Cf1244 = "AS",
                                 Cf1256 = "-",
@@ -341,8 +354,8 @@ namespace _24hplusdotnetcore.Services.CRM
                 var request = new RestRequest(Method.POST);
                 request.AddHeader("Content-Type", "application/x-www-form-urlencoded");
                 request.AddParameter("_operation", "saveRecord");
-                request.AddParameter("values", ""+ JsonConvert.SerializeObject(dataCRM) +"");
-                request.AddParameter("_session", ""+ session +"");
+                request.AddParameter("values", "" + JsonConvert.SerializeObject(dataCRM) + "");
+                request.AddParameter("_session", "" + session + "");
                 request.AddParameter("module", "Potentials");
                 request.AddParameter("record", "13x55730");
                 IRestResponse response = client.Execute(request);

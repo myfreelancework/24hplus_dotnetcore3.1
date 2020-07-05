@@ -67,5 +67,11 @@ namespace _24hplusdotnetcore.Services
                 throw;
             }
         }
+
+        public List<DataProcessing> InsertMany(List<DataProcessing> dataProcessings)
+        {
+            _dataProcessing.InsertMany(dataProcessings);
+            return dataProcessings;
+        }
     }
 }

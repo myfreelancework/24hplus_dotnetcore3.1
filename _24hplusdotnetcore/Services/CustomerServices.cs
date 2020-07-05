@@ -314,7 +314,7 @@ namespace _24hplusdotnetcore.Services
             return customer;
         }
 
-        public IEnumerable<Customer> GetByIdCards( IEnumerable<string> idCards)
+        public IEnumerable<Customer> GetByIdCards(IEnumerable<string> idCards)
         {
             try
             {
@@ -375,6 +375,12 @@ namespace _24hplusdotnetcore.Services
                 _logger.LogError(ex, ex.Message);
                 throw;
             }
+        }
+
+        public List<Customer> InsertMany(List<Customer> customers)
+        {
+            _customer.InsertMany(customers);
+            return customers;
         }
     }
 }

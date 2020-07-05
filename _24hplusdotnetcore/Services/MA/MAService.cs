@@ -16,7 +16,6 @@ namespace _24hplusdotnetcore.Services.MA
         private readonly ILogger<MAService> _logger;
         private readonly DataProcessingService _dataProcessingService;
         private readonly CustomerServices _customerServices;
-        private readonly ProductServices _productServices;
         private readonly MAConfig _mAConfig;
         private readonly IRestMAService _restMAService;
 
@@ -24,14 +23,12 @@ namespace _24hplusdotnetcore.Services.MA
             ILogger<MAService> logger,
             DataProcessingService dataProcessingService,
             CustomerServices customerServices,
-            ProductServices productServices,
             IOptions<MAConfig> mAConfig,
             IRestMAService restMAService)
         {
             _logger = logger;
             _dataProcessingService = dataProcessingService;
             _customerServices = customerServices;
-            _productServices = productServices;
             _mAConfig = mAConfig.Value;
             _restMAService = restMAService;
         }
@@ -53,15 +50,11 @@ namespace _24hplusdotnetcore.Services.MA
                     return;
                 }
 
-                var productIds = customers.Where(x => !string.IsNullOrEmpty(x.Loan?.ProductId)).Select(x => x.Loan.ProductId);
-                IEnumerable<Product> products = _productServices.GetByIds(productIds);
-
                 var dataProcessingIds = new List<string>();
 
                 foreach (var customer in customers)
                 {
-                    var product = products.FirstOrDefault(x => x.Id == customer.Loan?.ProductId);
-                    MARequestModel request = MappingCustomerToMA(customer, product);
+                    MARequestModel request = MappingCustomerToMA(customer);
 
                     var result = await _restMAService.PushCustomerAsync(request);
 
@@ -85,7 +78,7 @@ namespace _24hplusdotnetcore.Services.MA
             }
         }
 
-        private MARequestModel MappingCustomerToMA(Customer customer, Product product)
+        private MARequestModel MappingCustomerToMA(Customer customer)
         {
             return new MARequestModel
             {
@@ -98,7 +91,7 @@ namespace _24hplusdotnetcore.Services.MA
                     CONTACT_NAME = customer.Personal?.Name,
                     PHONE = customer.Personal?.Phone,
                     CURRENT_ADDRESS = customer.Personal?.CurrentAddress?.FullAddress,
-                    PRODUCT = product?.ProductName,
+                    PRODUCT = customer.Loan.Product,
                     T_STATUS_DATE = customer.Counsel?.LastCounselling,
                     APPOINTMENT_DATE = customer.Counsel?.ApptSchedule,
                     APPOINTMENT_ADDRESS = customer.Personal?.CurrentAddress?.FullAddress,

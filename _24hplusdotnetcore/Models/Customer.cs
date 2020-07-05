@@ -7,6 +7,12 @@ namespace _24hplusdotnetcore.Models
 {
     public class Customer
     {
+        public Customer()
+        {
+            CreatedDate = Convert.ToDateTime(DateTime.Now);
+            ModifiedDate = Convert.ToDateTime(DateTime.Now);
+        }
+
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; }
@@ -28,6 +34,7 @@ namespace _24hplusdotnetcore.Models
         public Result Result { get; set; }
         public IEnumerable<GroupDocument> Documents  { get; set; }
         public Counsel Counsel { get; set; }
+        public string CRMId { get; set; }
     }
 
     public class Personal
