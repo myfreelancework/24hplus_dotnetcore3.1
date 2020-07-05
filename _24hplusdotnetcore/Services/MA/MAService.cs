@@ -38,7 +38,7 @@ namespace _24hplusdotnetcore.Services.MA
             try
             {
                 IEnumerable<DataProcessing> dataProcessings = _dataProcessingService.GetList(DataProcessingType.PUSH_CUSTOMER_CRM_TO_MA, DataProcessingStatus.IN_PROGRESS);
-                if(dataProcessings?.Any() != true)
+                if (dataProcessings?.Any() != true)
                 {
                     return;
                 }
@@ -58,14 +58,14 @@ namespace _24hplusdotnetcore.Services.MA
 
                     var result = await _restMAService.PushCustomerAsync(request);
 
-                    if(result.Result == true)
+                    if (result.Result == true)
                     {
                         var dataProcessing = dataProcessings.First(x => x.CustomerId == customer.Id);
                         dataProcessingIds.Add(dataProcessing.Id);
                     }
                 }
 
-                if(dataProcessingIds.Any())
+                if (dataProcessingIds.Any())
                 {
                     _dataProcessingService.DeleteByIds(dataProcessingIds);
                 }
@@ -96,6 +96,7 @@ namespace _24hplusdotnetcore.Services.MA
                     APPOINTMENT_DATE = customer.Counsel?.ApptSchedule,
                     APPOINTMENT_ADDRESS = customer.Personal?.CurrentAddress?.FullAddress,
                     TSA_IN_CHARGE = customer.Counsel?.TeleSalesCode,
+                    TST_TEAM = customer.Counsel?.TeamCode,
                     REQUEST_DOCUMENT = customer.Loan?.RequestDocuments,
                     DOB = customer.Personal?.DateOfBirth,
                     GENDER = customer.Personal?.Gender,
@@ -104,6 +105,7 @@ namespace _24hplusdotnetcore.Services.MA
                     TEL_COMPANY = customer.Working?.CompanyPhone,
                     AREA = customer.TemporaryAddress?.FullAddress,
                     MARITAL_STATUS = customer.Personal?.MaritalStatus,
+                    OWNER = customer.Loan?.Owner,
                     INCOME = customer.Working?.Income,
                     POSITION = customer.Working?.Position,
                     WORK_PERIOD = customer.Working?.WorkPeriod,
@@ -111,13 +113,17 @@ namespace _24hplusdotnetcore.Services.MA
                     HEALTH_CARD = customer.Working?.HealthCardInssurance,
                     LOAN_AMOUNT = customer.Loan?.Amount,
                     TENURE = customer.Loan?.Term,
+                    APP_DATE = customer.Loan?.AppDate,
+                    DISBURSAL_DATE = customer.Loan?.DisbursalDate,
                     GENERATE_TO_LEAD = customer.Loan?.GenarateToLead,
                     FOLLOWED_DATE = customer.Loan?.FollowedDate,
                     PERMANENT_ADDR = customer.Personal?.PermanentAddress?.FullAddress,
                     TSA_NAME = customer.Counsel?.Name,
                     TSA_CAMPAIN = customer.Counsel?.Campain,
+                    TSA_GROUP = customer.Counsel?.GroupCode,
                     TSA_LAST_NOTES = customer.Counsel?.Remark,
                     OCCUPATION = customer.Counsel?.Occupation,
+                    ROUTE = customer.Route
                 }
             };
         }

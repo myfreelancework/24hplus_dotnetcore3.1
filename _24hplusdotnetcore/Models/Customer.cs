@@ -35,6 +35,7 @@ namespace _24hplusdotnetcore.Models
         public IEnumerable<GroupDocument> Documents  { get; set; }
         public Counsel Counsel { get; set; }
         public string CRMId { get; set; }
+        public string Route { get; set; }
     }
 
     public class Personal
@@ -103,9 +104,11 @@ namespace _24hplusdotnetcore.Models
         public string BuyInsurance { get; set; }
         public string SignAddress { get; set; }
         public string RequestDocuments { get; set; }
+        public DateTime? AppDate { get; set; }
+        public DateTime? DisbursalDate { get; set; }
         public DateTime? GenarateToLead { get; set; }
         public DateTime? FollowedDate { get; set; }
-
+        public string Owner { get; set; }
     }
 
     public class Result
@@ -152,5 +155,7 @@ namespace _24hplusdotnetcore.Models
         public string Campain { get; set; }
         public string Remark { get; set; }
         public string Occupation { get; set; }
+        public string TeamCode { get; set; }
+        public string GroupCode { get; set; }
     }
 }

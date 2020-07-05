@@ -175,7 +175,6 @@ namespace _24hplusdotnetcore.Services.CRM
                                 WorkPeriod = record.Cf984,
                                 TypeOfContract = record.Cf986,
                                 HealthCardInssurance = record.Cf988,
-
                             },
                             TemporaryAddress = new Address
                             {
@@ -189,6 +188,9 @@ namespace _24hplusdotnetcore.Services.CRM
                                 Term = record.Cf990,
                                 GenarateToLead = record.Createdtime,
                                 FollowedDate = record.Modifiedtime,
+                                Owner = record.Cf978,
+                                AppDate = record.Cf992,
+                                DisbursalDate = record.Cf994
                             },
                             Result = new Models.Result
                             {
@@ -205,9 +207,12 @@ namespace _24hplusdotnetcore.Services.CRM
                                 Name = record.AssignedUserId?.Label,
                                 Campain = record.AssignedUserId?.Value,
                                 Remark = record.Cf1196,
-                                Occupation = record.Cf1246
+                                Occupation = record.Cf1246,
+                                TeamCode = record.Cf972,
+                                GroupCode = record.Cf1008
                             },
-                            CRMId = record.Id
+                            CRMId = record.Id,
+                            Route = record.Cf1014
                         };
                         customerCreations.Add(customerCreation);
                     }

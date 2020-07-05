@@ -144,10 +144,10 @@ namespace _24hplusdotnetcore.Models.CRM
         public string Cf990 { get; set; }
 
         [JsonProperty("cf_992")]
-        public string Cf992 { get; set; }
+        public DateTime? Cf992 { get; set; }
 
         [JsonProperty("cf_994")]
-        public string Cf994 { get; set; }
+        public DateTime? Cf994 { get; set; }
 
         [JsonProperty("cf_996")]
         public string Cf996 { get; set; }
