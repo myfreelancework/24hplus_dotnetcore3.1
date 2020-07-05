@@ -314,6 +314,32 @@ namespace _24hplusdotnetcore.Services
             return customer;
         }
 
+        public IEnumerable<Customer> GetByIdCards(IEnumerable<string> idCards)
+        {
+            try
+            {
+                return _customer.Find(c => idCards.Contains(c.Personal.IdCard)).ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                throw;
+            }
+        }
+
+        public IEnumerable<Customer> GetByIds(IEnumerable<string> ids)
+        {
+            try
+            {
+                return _customer.Find(c => ids.Contains(c.Id)).ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                throw;
+            }
+        }
+
         public async Task<CustomerCheckListRequestModel> GetCustomerCheckListAsync(string id)
         {
             try
@@ -349,6 +375,12 @@ namespace _24hplusdotnetcore.Services
                 _logger.LogError(ex, ex.Message);
                 throw;
             }
+        }
+
+        public List<Customer> InsertMany(List<Customer> customers)
+        {
+            _customer.InsertMany(customers);
+            return customers;
         }
     }
 }
