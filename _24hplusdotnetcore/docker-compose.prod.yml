@@ -7,12 +7,12 @@ services:
           MONGO_INITDB_ROOT_USERNAME: root
           MONGO_INITDB_ROOT_PASSWORD: 24plus
         ports:
-          - 27017:27017
+          - 27014:27017
     mongo-express:
         image: mongo-express
         restart: always
         ports:
-          - 8081:8081
+          - 8085:8085
         environment:
           ME_CONFIG_MONGODB_ADMINUSERNAME: root
           ME_CONFIG_MONGODB_ADMINPASSWORD: 24plus
@@ -22,7 +22,7 @@ services:
         build: .
         restart: always
         ports:
-          - 5000:80
+          - 80:80
         environment:
           MongoDB__Host: mongo
         depends_on:
@@ -30,3 +30,4 @@ services:
         volumes:
           - ./mobileapp:/app/mobileapp
           - ./logs:/app/logs
+          - ./FileUpload:/app/FileUpload

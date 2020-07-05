@@ -362,7 +362,7 @@ namespace _24hplusdotnetcore.Services.CRM
                 request.AddParameter("values", "" + JsonConvert.SerializeObject(dataCRM) + "");
                 request.AddParameter("_session", "" + session + "");
                 request.AddParameter("module", "Potentials");
-                request.AddParameter("record", "13x55730");
+               //request.AddParameter("record", "13x55730");
                 IRestResponse response = client.Execute(request);
                 Console.WriteLine(response.Content);
                 dataCRMProcessing.Status = Common.DataCRMProcessingStatus.Done;
