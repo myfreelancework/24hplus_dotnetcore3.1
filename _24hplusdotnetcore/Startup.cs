@@ -158,6 +158,12 @@ namespace _24hplusdotnetcore
             Path.Combine(Directory.GetCurrentDirectory(), "mobileapp")),
                 RequestPath = "/mobileapp"
             });
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(
+            Path.Combine(Directory.GetCurrentDirectory(), "FileUpload")),
+                RequestPath = "/FileUpload"
+            });
             app.UseHttpsRedirection();
 
             app.UseRouting();
