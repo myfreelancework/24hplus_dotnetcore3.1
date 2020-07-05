@@ -91,7 +91,7 @@ namespace _24hplusdotnetcore.Services.MA
                     CONTACT_NAME = customer.Personal?.Name,
                     PHONE = customer.Personal?.Phone,
                     CURRENT_ADDRESS = customer.Personal?.CurrentAddress?.FullAddress,
-                    PRODUCT = customer.Loan.Product,
+                    PRODUCT = customer.Loan?.Product,
                     T_STATUS_DATE = customer.Counsel?.LastCounselling,
                     APPOINTMENT_DATE = customer.Counsel?.ApptSchedule,
                     APPOINTMENT_ADDRESS = customer.Personal?.CurrentAddress?.FullAddress,
