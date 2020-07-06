@@ -306,7 +306,7 @@ namespace _24hplusdotnetcore.Services.MC
             try
             {
                 CustomerCheckListRequestModel customerCheckList = await _customerServices.GetCustomerCheckListAsync(customerId);
-                customerCheckList.HasCourier = 1;
+                customerCheckList.HasCourier = 0;
                 CustomerCheckListResponseModel result = await _restMCService.CheckListAsync(customerCheckList);
                 return result;
             }

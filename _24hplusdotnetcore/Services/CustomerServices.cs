@@ -349,7 +349,7 @@ namespace _24hplusdotnetcore.Services
                 var projectMapping = new BsonDocument()
                 {
                    {"_id", 0 },
-                   {"MobileSchemaProductCode", "$Loan.Product.ProductCodeMC" },
+                   {"MobileSchemaProductCode", "$Loan.ProductObj.ProductCodeMC" },
                    {"MobileTemResidence", new BsonDocument("$toInt", "$IsTheSameResidentAddress") },
                    {"LoanAmountAfterInsurrance", "$Loan.Amount" },
                    {"ShopCode", "$Loan.SignAddress" },
@@ -362,8 +362,8 @@ namespace _24hplusdotnetcore.Services
                 BsonDocument document = await _customer
                     .Aggregate()
                     .Match(filter)
-                    .Lookup("Product", "Loan.ProductId", "ProductId", "Loan.Product")
-                    .Unwind("Loan.Product", unwindOption)
+                    .Lookup("Product", "Loan.ProductId", "ProductId", "Loan.ProductObj")
+                    .Unwind("Loan.ProductObj", unwindOption)
                     .Project(projectMapping)
                     .FirstOrDefaultAsync();
 
