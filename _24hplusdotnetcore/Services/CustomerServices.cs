@@ -383,7 +383,7 @@ namespace _24hplusdotnetcore.Services
             return customers;
         }
 
-        public long UpdateStatus(string customerId, string status)
+        public long UpdateStatus(string customerId, string status, string reason)
         {
             long updateCount = 0;
             try
@@ -392,6 +392,15 @@ namespace _24hplusdotnetcore.Services
                 if (customer != null)
                 {
                     customer.Status = status;
+                    if (customer.Result == null)
+                    {
+                        customer.Result = new Models.Result();
+                        customer.Result.Reason = reason;
+                    }
+                    else
+                    {
+                        customer.Result.Reason = reason;
+                    }
                     customer.ModifiedDate = Convert.ToDateTime(DateTime.Now);
                     updateCount = _customer.ReplaceOne(c => c.Id == customer.Id, customer).ModifiedCount;
                 }

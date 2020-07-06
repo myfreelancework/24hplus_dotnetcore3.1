@@ -282,7 +282,7 @@ namespace _24hplusdotnetcore.Controllers
 
         [HttpGet]
         [Route("api/customer/updateStatus")]
-        public ActionResult<ResponseContext> UpdateStatus([FromQuery] string customerId, [FromQuery] string status)
+        public ActionResult<ResponseContext> UpdateStatus([FromQuery] string customerId, [FromQuery] string status, [FromQuery] string reason)
         {
             try
             {
@@ -293,7 +293,7 @@ namespace _24hplusdotnetcore.Controllers
                         message = Common.Message.IS_LOGGED_IN_ORTHER_DEVICE,
                         data = null
                     });
-                var statusCount = _customerServices.UpdateStatus(customerId, status);
+                var statusCount = _customerServices.UpdateStatus(customerId, status, reason);
                 if (statusCount == 1)
                 {
                     return Ok(new ResponseContext
