@@ -366,7 +366,7 @@ namespace _24hplusdotnetcore.Services.CRM
                 IRestResponse response = client.Execute(request);
                 Console.WriteLine(response.Content);
                 dataCRMProcessing.Status = Common.DataCRMProcessingStatus.Done;
-                _dataCRMProcessingServices.UpdateByCustomerId(dataCRMProcessing.CustomerId, Common.DataCRMProcessingStatus.Done);
+                _dataCRMProcessingServices.UpdateByCustomerId(dataCRMProcessing, Common.DataCRMProcessingStatus.Done);
                 _logger.LogInformation("User was pushed to CRM: {0} - Status: {1}", dataCRMProcessing.CustomerId, Common.DataCRMProcessingStatus.Done);
             }
             catch (Exception ex)
