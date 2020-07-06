@@ -27,6 +27,7 @@
         internal static string GCCKindMoto = "GCCKindMoto";
         public static string DataCRMProcessing = "DataCRMProcessing";
         public static string DataMCProcessing = "DataMCProcessing";
+        internal static string MCNotification = "MCNotification";
         public const string DATA_PROCESSING = "DataProcessing";
     }
 }

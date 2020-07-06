@@ -47,6 +47,7 @@ namespace _24hplusdotnetcore.Middleware
                  && !context.Request.Path.Value.Contains("api/checkversion")
                  && !context.Request.Path.Value.Contains("api/config/banner")
                  && !context.Request.Path.Value.Contains("api/fileupload/upload")
+                 && !context.Request.Path.Value.Contains("api/mc/notification")
                  && !context.Request.Path.Value.Contains("api/gcc/personal")
                  && !context.Request.Path.Value.Contains("api/gcc/moto")
                  && !context.Request.Path.Value.Contains("api/gcc/postbackPersonal")

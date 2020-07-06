@@ -12,6 +12,7 @@ namespace _24hplusdotnetcore.Models
         [BsonRequired]
         public string ProductCategoryName { get; set; }
         public string GreenType { get; set; }
+        public string ProductCategoryType { get; set; }
         public string Note { get; set; }
     }
 }

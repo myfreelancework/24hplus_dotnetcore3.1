@@ -22,5 +22,7 @@ namespace _24hplusdotnetcore.ModelDtos
         public string HasInsurance { get; set; }
         [AliasAs("companyTaxNumber")]
         public string CompanyTaxNumber { get; set; }
+        [AliasAs("hasCourier")]
+        public int HasCourier { get; set; }
     }
 }

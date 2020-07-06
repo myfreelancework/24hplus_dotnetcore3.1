@@ -31,5 +31,7 @@ namespace _24hplusdotnetcore.Models
         public string GreenType { get; set; }
         [JsonProperty("productCodeMC")]
         public string ProductCodeMC { get; set; }
+        [JsonProperty("productType")]
+        public string ProductType { get; set; }
     }
 }
