@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using _24hplusdotnetcore.BatchJob;
+using _24hplusdotnetcore.Mappings;
 using _24hplusdotnetcore.Middleware;
 using _24hplusdotnetcore.ModelDtos;
 using _24hplusdotnetcore.Models;
@@ -17,6 +18,7 @@ using _24hplusdotnetcore.Services.GCC;
 using _24hplusdotnetcore.Services.MA;
 using _24hplusdotnetcore.Services.MC;
 using _24hplusdotnetcore.Settings;
+using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -49,6 +51,7 @@ namespace _24hplusdotnetcore
         {
             services.Configure<MongoDbConnection>(Configuration.GetSection(nameof(MongoDbConnection)));
             services.Configure<MAConfig>(Configuration.GetSection("MAConfig"));
+            services.Configure<AuthenConfig>(Configuration.GetSection("AuthenConfig"));
 
             services.AddCors(options =>
             {
@@ -146,6 +149,14 @@ namespace _24hplusdotnetcore
             services.AddMvcCore().AddNewtonsoftJson();
             ConfigureMCRestClient(services);
             ConfigureMARestClient(services);
+            // Auto Mapper Configurations
+            var mappingConfig = new MapperConfiguration(mc =>
+            {
+                mc.AddProfile(new MappingProfile());
+            });
+
+            IMapper mapper = mappingConfig.CreateMapper();
+            services.AddSingleton(mapper);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

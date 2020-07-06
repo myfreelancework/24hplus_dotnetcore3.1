@@ -7,6 +7,9 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System;
 using _24hplusdotnetcore.Models;
 using System.Runtime.Serialization;
+using _24hplusdotnetcore.Settings;
+using Microsoft.Extensions.Options;
+using System.Linq;
 
 namespace _24hplusdotnetcore.Middleware
 {
@@ -14,16 +17,24 @@ namespace _24hplusdotnetcore.Middleware
     {
         private readonly RequestDelegate _next;
         private readonly UserLoginServices _userLoginSerivces;
+        private readonly AuthenConfig _authenConfig;
 
-        public RequestMiddleware(RequestDelegate next, UserLoginServices userLoginSerivces)
+        public RequestMiddleware(RequestDelegate next, UserLoginServices userLoginSerivces, IOptions<AuthenConfig> options)
         {
             _next = next;
             _userLoginSerivces = userLoginSerivces;
+            _authenConfig = options.Value;
         }
 
         public async Task InvokeAsync(HttpContext context)
         {
-            if (context.Request.Headers["Authorization"].Count > 0)
+            if (context.Request.Path.Value.Contains("api/ma/postback") &&
+                _authenConfig.APIKey == context.Request.Headers["APIKey"].FirstOrDefault() &&
+                _authenConfig.SecretKey == context.Request.Headers["SecretKey"].FirstOrDefault())
+            {
+                await _next(context);
+            }
+            else if (context.Request.Headers["Authorization"].Count > 0)
             {
                 var auth = context.Request.Headers["Authorization"][0];
                 var authArray = auth.Split(" ");

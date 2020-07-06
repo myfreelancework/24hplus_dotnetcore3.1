@@ -1,4 +1,5 @@
 ﻿using _24hplusdotnetcore.Common;
+using _24hplusdotnetcore.Common.Enums;
 using _24hplusdotnetcore.ModelDtos;
 using _24hplusdotnetcore.Models;
 using _24hplusdotnetcore.Models.CRM;
@@ -125,7 +126,8 @@ namespace _24hplusdotnetcore.Services
                     var dataCRMProcessing = new DataCRMProcessing
                     {
                         CustomerId = customer.Id,
-                        Status = DataCRMProcessingStatus.InProgress
+                        Status = DataCRMProcessingStatus.InProgress,
+                        LeadSource = LeadSourceType.MC.ToString()
                     };
                     _dataCRMProcessingServices.CreateOne(dataCRMProcessing);
                     if (customer.GreenType == GeenType.GreenC)
@@ -172,7 +174,8 @@ namespace _24hplusdotnetcore.Services
                     var dataCRMProcessing = new DataCRMProcessing
                     {
                         CustomerId = customer.Id,
-                        Status = DataCRMProcessingStatus.InProgress
+                        Status = DataCRMProcessingStatus.InProgress,
+                        LeadSource = LeadSourceType.MC.ToString()
                     };
                     _dataCRMProcessingServices.CreateOne(dataCRMProcessing);
                     // Notification
@@ -381,6 +384,32 @@ namespace _24hplusdotnetcore.Services
         {
             _customer.InsertMany(customers);
             return customers;
+        }
+
+        public async Task<Customer> GetByCrmIdAsync(string crmId)
+        {
+            return await _customer.Find(c => string.Equals(c.CRMId, crmId)).FirstOrDefaultAsync();
+        }
+
+        public async Task UpdateAsync(MAPostBackRequestModel mAPostBack)
+        {
+            try
+            {
+                var filter = Builders<Customer>.Filter.Where(c => string.Equals(c.CRMId, mAPostBack.Lead_id));
+                var update = Builders<Customer>.Update
+                    .Set(c => c.ModifiedDate, DateTime.UtcNow)
+                    .Set(c => c.Result.Status, mAPostBack.Status.ToString())
+                    .Set(c => c.Result.DetailStatus, mAPostBack.Detail_status.ToString());
+
+                // TODO: update StatusValue, DetailStatusValue
+
+                await _customer.UpdateOneAsync(filter, update);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                throw;
+            }
         }
     }
 }
