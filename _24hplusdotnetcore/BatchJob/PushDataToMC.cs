@@ -22,7 +22,7 @@ namespace _24hplusdotnetcore.BatchJob
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
             _mcService.PushDataToMC();
-            await Task.Delay(TimeSpan.FromHours(1), cancellationToken);
+            await Task.Delay(TimeSpan.FromMinutes(30), cancellationToken);
         }
     }
 }

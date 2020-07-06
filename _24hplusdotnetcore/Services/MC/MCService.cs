@@ -147,13 +147,13 @@ namespace _24hplusdotnetcore.Services.MC
                 var token = GetMCToken();//"ca5d2357-90be-4bd9-b9d9-732c690dd9c3";//GetMCToken();
                 int uploadCount = 0;
                 if (lstMCProcessing.Count > 0 && !string.IsNullOrEmpty(token))
-                {                    
+                {
                     foreach (var item in lstMCProcessing)
                     {
                         var objCustomer = _customerServices.GetCustomer(item.CustomerId);
-                        var lstFileUpload = _fileUploadServices.GetListFileUploadByCustomerId(item.CustomerId);
-                        lstFileUpload = lstFileUpload.Where(l => !string.IsNullOrEmpty(l.DocumentCode)).ToList();
-                        var fileZipInfo = ZipFiles(lstFileUpload, objCustomer.Id);
+                        // var lstFileUpload = _fileUploadServices.GetListFileUploadByCustomerId(item.CustomerId);
+                        // lstFileUpload = lstFileUpload.Where(l => !string.IsNullOrEmpty(l.DocumentCode)).ToList();
+                        var fileZipInfo = ZipFiles(objCustomer.Id);
                         var filePath = fileZipInfo[0];
                         var hash = fileZipInfo[1];
                         var dataMC = new DataMC();
@@ -170,36 +170,49 @@ namespace _24hplusdotnetcore.Services.MC
                         dataMC.Request.HasInsurance = objCustomer.Loan.BuyInsurance;
                         dataMC.Md5 = hash;
                         dataMC.Info = new List<Info>();
-                        
-                        foreach (var f in lstFileUpload)
+
+                        foreach (var group in objCustomer.Documents)
                         {
-                            var dataMCFileInfo = new Info();
-                            dataMCFileInfo.DocumentCode = f.DocumentCode;
-                            dataMCFileInfo.FileName = f.FileUploadName;
-                            dataMCFileInfo.MimeType = "jpg";
-                            dataMCFileInfo.GroupId = f.GroupId;
-                            dataMC.Info.Add(dataMCFileInfo);
+                            var groupId = group.GroupId;
+                            foreach (var doc in group.Documents)
+                            {
+                                foreach (var media in doc.UploadedMedias)
+                                {
+                                    var dataMCFileInfo = new Info();
+                                    dataMCFileInfo.GroupId = group.GroupId.ToString();
+                                    dataMCFileInfo.DocumentCode = doc.DocumentCode;
+                                    dataMCFileInfo.FileName = media.Name;
+                                    dataMCFileInfo.MimeType = media.Type;
+                                    dataMC.Info.Add(dataMCFileInfo);
+                                }
+                            }
+                            // var dataMCFileInfo = new Info();
+                            // dataMCFileInfo.DocumentCode = f.DocumentCode;
+                            // dataMCFileInfo.FileName = f.FileUploadName;
+                            // dataMCFileInfo.MimeType = "jpg";
+                            // dataMCFileInfo.GroupId = f.GroupId;
+                            // dataMC.Info.Add(dataMCFileInfo);
                         }
                         var client = new RestClient(Url.MC_BASE_URL + Url.MC_UPLOAD_DOCUMENT);
                         client.Timeout = -1;
                         var request = new RestRequest(Method.POST);
-                        request.AddHeader("Authorization", "Bearer "+token+"");
+                        request.AddHeader("Authorization", "Bearer " + token + "");
                         request.AddHeader("x-security", "MEKONG-CREDIT-57d733a9-bcb5-4bff-aca1-f58163122fae");
                         request.AddHeader("Content-Type", "multipart/form-data");
-                        request.AddFile("file", ""+ filePath +"");
+                        request.AddFile("file", "" + filePath + "");
                         request.AddParameter("object", JsonConvert.SerializeObject(dataMC));
                         IRestResponse response = client.Execute(request);
                         _logger.LogInformation(response.Content);
                         if (!string.IsNullOrEmpty(response.Content))
                         {
-                            uploadCount ++;
+                            uploadCount++;
                         }
                         File.Delete(filePath);
                         _dataMCProcessingServices.UpdateByCustomerId(item.CustomerId, Common.DataCRMProcessingStatus.Done);
                     }
-                }             
+                }
                 return uploadCount;
-             
+
             }
             catch (Exception ex)
             {
@@ -207,38 +220,31 @@ namespace _24hplusdotnetcore.Services.MC
                 return -1;
             }
         }
-        
-        public string[] ZipFiles(List<FileUpload> listFile, string customerId)
+
+        public string[] ZipFiles(string customerId)
         {
             try
             {
                 //var listFile = _fileUploadServices.GetListFileUploadByCustomerId(customerId);
                 string serverPath = Path.Combine(_hostingEnvironment.ContentRootPath, "FileUpload");
-                if (listFile.Count > 0)
+                //Directory.CreateDirectory(Path.Combine(serverPath, customerId));
+                string d = Path.Combine(serverPath, customerId);
+                //for (int i = 0; i < listFile.Count; i++)
+                //{
+                //    string s = Path.Combine(serverPath, listFile[i].FileUploadName);
+                //    File.Copy(s, Path.Combine(d, listFile[i].FileUploadName), true);
+                //}
+                ZipFile.CreateFromDirectory(d, Path.Combine(serverPath, customerId + ".zip"));
+                string fileZip = Path.Combine(serverPath, customerId + ".zip");
+                var md5 = MD5.Create();
+                var stream = File.OpenRead(fileZip);
+                var hash = md5.ComputeHash(stream);
+                var hashString = BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+                return new string[]
                 {
-                    //Directory.CreateDirectory(Path.Combine(serverPath, customerId));
-                    string d = Path.Combine(serverPath, customerId);
-                    //for (int i = 0; i < listFile.Count; i++)
-                    //{
-                    //    string s = Path.Combine(serverPath, listFile[i].FileUploadName);
-                    //    File.Copy(s, Path.Combine(d, listFile[i].FileUploadName), true);
-                    //}
-                    ZipFile.CreateFromDirectory(d, Path.Combine(serverPath, customerId + ".zip"));
-                    string fileZip = Path.Combine(serverPath, customerId + ".zip");
-                    var md5 = MD5.Create();
-                    var stream = File.OpenRead(fileZip);
-                    var hash = md5.ComputeHash(stream);
-                    var hashString = BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
-                    return new string[] 
-                    {
                         fileZip,
                         hashString
-                    };
-                }
-                else
-                {
-                    return null;
-                }
+                };
             }
             catch (Exception ex)
             {
@@ -282,7 +288,7 @@ namespace _24hplusdotnetcore.Services.MC
                     client.Timeout = -1;
                     var request = new RestRequest(Method.GET);
                     request.AddHeader("Content-type", "application/json");
-                    request.AddHeader("Authorization", "Bearer "+token+"");
+                    request.AddHeader("Authorization", "Bearer " + token + "");
                     request.AddHeader("x-security", "MEKONG-CREDIT-57d733a9-bcb5-4bff-aca1-f58163122fae");
                     IRestResponse response = client.Execute(request);
                     Console.WriteLine(response.Content);
