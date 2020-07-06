@@ -103,7 +103,7 @@ namespace _24hplusdotnetcore
             //Add batchjob
             services.AddSingleton<IHostedService, AddNewCustomerFromCRM>();
             services.AddSingleton<IHostedService, PushCustomerToCRM>();
-            //services.AddSingleton<IHostedService, PushDataToMC>();
+            services.AddSingleton<IHostedService, PushDataToMC>();
             services.AddSingleton<IHostedService, PushCustomerCRMToMA>();
             #endregion
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
