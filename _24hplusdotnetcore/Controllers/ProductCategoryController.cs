@@ -37,7 +37,12 @@ namespace _24hplusdotnetcore.Controllers
                         data = null
                     });
                 lstProductCategory = _productCategoryServices.GetProductCategories();
-                return Ok(lstProductCategory);
+                return Ok(new ResponseContext
+                {
+                    code = (int)Common.ResponseCode.SUCCESS,
+                    message = Common.Message.SUCCESS,
+                    data = lstProductCategory
+                });
             }
             catch (Exception ex)
             {
