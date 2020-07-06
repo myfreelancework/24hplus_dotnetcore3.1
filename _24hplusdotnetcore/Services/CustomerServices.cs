@@ -386,6 +386,36 @@ namespace _24hplusdotnetcore.Services
             return customers;
         }
 
+        public long UpdateStatus(string customerId, string status, string reason)
+        {
+            long updateCount = 0;
+            try
+            {
+                var customer = _customer.Find(x => x.Id == customerId).FirstOrDefault();
+                if (customer != null)
+                {
+                    customer.Status = status;
+                    if (customer.Result == null)
+                    {
+                        customer.Result = new Models.Result();
+                        customer.Result.Reason = reason;
+                    }
+                    else
+                    {
+                        customer.Result.Reason = reason;
+                    }
+                    customer.ModifiedDate = Convert.ToDateTime(DateTime.Now);
+                    updateCount = _customer.ReplaceOne(c => c.Id == customer.Id, customer).ModifiedCount;
+                }
+            }
+            catch (Exception ex)
+            {
+                updateCount = -1;
+                _logger.LogError(ex, ex.Message);
+            }
+            return updateCount;
+        }
+
         public async Task<Customer> GetByCrmIdAsync(string crmId)
         {
             return await _customer.Find(c => string.Equals(c.CRMId, crmId)).FirstOrDefaultAsync();
