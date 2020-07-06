@@ -36,7 +36,7 @@ namespace _24hplusdotnetcore.Services
             var objProduct = new Product();
             try
             {
-                objProduct = _product.Find(p => p.ProductId == ProductId && (p.ProductType == "" || p.ProductType == "TLS")).FirstOrDefault();
+                objProduct = _product.Find(p => p.ProductId == ProductId).FirstOrDefault();
             }
             catch (Exception ex)
             {
@@ -75,7 +75,7 @@ namespace _24hplusdotnetcore.Services
             var lstProduct = new List<Product>();
             try
             {
-                lstProduct = _product.Find(p => p.ProductCategoryId == ProductCategoryId).ToList();
+                lstProduct = _product.Find(p => p.ProductCategoryId == ProductCategoryId && (p.ProductType == "" || p.ProductType == "TLS")).ToList();
             }
             catch (Exception ex)
             {
