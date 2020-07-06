@@ -81,11 +81,12 @@ namespace _24hplusdotnetcore
             services.AddSingleton<PaymentServices>();
             services.AddSingleton<CheckInfoServices>();
             services.AddSingleton<NotificationServices>();
-            services.AddSingleton<Services.MC.MCService>();
+            // services.AddSingleton<Services.MC.MCService>();
             services.AddSingleton<ConfigServices>();
             services.AddSingleton<CRMServices>();
             services.AddSingleton<DataCRMProcessingServices>();
             services.AddSingleton<MCService>();
+            services.AddSingleton<MCNotificationService>();
             services.AddSingleton<DataMCProcessingServices>();
 
             // GCC Service

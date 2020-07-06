@@ -17,10 +17,14 @@ namespace _24hplusdotnetcore.Controllers
     {
         private readonly ILogger<MCController> _logger;
         private readonly MCService _mcService;
-        public MCController(ILogger<MCController> logger, MCService mcService)
+        private readonly MCNotificationService _mcNotificationService;
+        public MCController(ILogger<MCController> logger, 
+        MCService mcService,
+        MCNotificationService mcNotificationService)
         {
             _logger = logger;
             _mcService = mcService;
+            _mcNotificationService = mcNotificationService;
         }
 
         [HttpGet]
@@ -52,8 +56,8 @@ namespace _24hplusdotnetcore.Controllers
             try
             {
                 CustomerCheckListResponseModel result = await _mcService.CheckListAsync(customerId);
-                
-                if(result?.CheckList?.Any() != true)
+
+                if (result?.CheckList?.Any() != true)
                 {
                     return Ok(new ResponseContext
                     {
@@ -104,6 +108,32 @@ namespace _24hplusdotnetcore.Controllers
                     code = (int)Common.ResponseCode.SUCCESS,
                     message = Common.Message.SUCCESS,
                     data = kios
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return Ok(new ResponseContext
+                {
+                    code = (int)Common.ResponseCode.ERROR,
+                    message = ex.Message,
+                });
+            }
+        }
+
+
+        [HttpPost]
+        [Route("api/mc/notification")]
+        public ActionResult<ResponseContext> PushNotification(MCNotificationDto noti)
+        {
+            try
+            {
+                _mcNotificationService.CreateOne(noti);
+                return Ok(new ResponseContext
+                {
+                    code = (int)Common.ResponseCode.SUCCESS,
+                    message = Common.Message.SUCCESS,
+                    data = null
                 });
             }
             catch (Exception ex)

@@ -27,7 +27,7 @@ namespace _24hplusdotnetcore.Services
             var lstProductCategories = new List<ProductCategory>();
             try
             {
-                lstProductCategories = _productCategory.Find(p => true).ToList();
+                lstProductCategories = _productCategory.Find(p => p.ProductCategoryType== "" || p.ProductCategoryType== "TLS").ToList();
             }
             catch (Exception ex)
             {

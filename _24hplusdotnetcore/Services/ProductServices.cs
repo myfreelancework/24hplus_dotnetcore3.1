@@ -36,7 +36,7 @@ namespace _24hplusdotnetcore.Services
             var objProduct = new Product();
             try
             {
-                objProduct = _product.Find(p => p.ProductId == ProductId).FirstOrDefault();
+                objProduct = _product.Find(p => p.ProductId == ProductId && (p.ProductType == "" || p.ProductType == "TLS")).FirstOrDefault();
             }
             catch (Exception ex)
             {
