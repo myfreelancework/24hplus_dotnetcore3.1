@@ -83,5 +83,17 @@ namespace _24hplusdotnetcore.Services
             }
             return lstProduct;
         }
+        public IEnumerable<Product> GetByIds(IEnumerable<string> ids)
+        {
+            try
+            {
+                return _product.Find(c => ids.Contains(c.Id)).ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                throw;
+            }
+        }
     }
 }

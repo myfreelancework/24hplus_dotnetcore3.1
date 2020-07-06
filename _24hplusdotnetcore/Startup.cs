@@ -14,7 +14,9 @@ using _24hplusdotnetcore.Models;
 using _24hplusdotnetcore.Services;
 using _24hplusdotnetcore.Services.CRM;
 using _24hplusdotnetcore.Services.GCC;
+using _24hplusdotnetcore.Services.MA;
 using _24hplusdotnetcore.Services.MC;
+using _24hplusdotnetcore.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -46,6 +48,7 @@ namespace _24hplusdotnetcore
         public void ConfigureServices(IServiceCollection services)
         {
             services.Configure<MongoDbConnection>(Configuration.GetSection(nameof(MongoDbConnection)));
+            services.Configure<MAConfig>(Configuration.GetSection("MAConfig"));
 
             services.AddCors(options =>
             {
@@ -88,6 +91,8 @@ namespace _24hplusdotnetcore
             services.AddSingleton<MCService>();
             services.AddSingleton<MCNotificationService>();
             services.AddSingleton<DataMCProcessingServices>();
+            services.AddSingleton<DataProcessingService>();
+            services.AddSingleton<MAService>();
 
             // GCC Service
             services.AddSingleton<GCCService>();
@@ -99,6 +104,7 @@ namespace _24hplusdotnetcore
             services.AddSingleton<IHostedService, AddNewCustomerFromCRM>();
             services.AddSingleton<IHostedService, PushCustomerToCRM>();
             //services.AddSingleton<IHostedService, PushDataToMC>();
+            services.AddSingleton<IHostedService, PushCustomerCRMToMA>();
             #endregion
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
@@ -139,6 +145,7 @@ namespace _24hplusdotnetcore
             });
             services.AddMvcCore().AddNewtonsoftJson();
             ConfigureMCRestClient(services);
+            ConfigureMARestClient(services);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -222,11 +229,30 @@ namespace _24hplusdotnetcore
                     return new RestHttpClientHandler(getToken);
                 });
         }
+
+        private void ConfigureMARestClient(IServiceCollection services)
+        {
+            services.AddRefitClient<IRestMAService>()
+               .ConfigureHttpClient((serviceProvider, conf) =>
+               {
+                   MAConfig maConfig = serviceProvider.GetRequiredService<IOptions<MAConfig>>().Value;
+                   conf.BaseAddress = new Uri(maConfig.Host);
+               }).ConfigurePrimaryHttpMessageHandler((serviceProvider) =>
+               {
+                   return new RestHttpClientHandler();
+               });
+        }
     }
 
     class RestHttpClientHandler : HttpClientHandler
     {
         private readonly Func<Task<string>> _getToken;
+        
+        public RestHttpClientHandler()
+        {
+
+        }
+
         public RestHttpClientHandler(Func<Task<string>> getToken)
         {
             if (getToken == null) throw new ArgumentNullException("getToken");

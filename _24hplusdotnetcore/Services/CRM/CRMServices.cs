@@ -8,6 +8,7 @@ using _24hplusdotnetcore.Models.CRM;
 using System.Linq;
 using _24hplusdotnetcore.Models;
 using MongoDB.Bson;
+using _24hplusdotnetcore.Common;
 
 namespace _24hplusdotnetcore.Services.CRM
 {
@@ -16,11 +17,17 @@ namespace _24hplusdotnetcore.Services.CRM
         private readonly ILogger<CRMServices> _logger;
         private readonly CustomerServices _customerServices;
         private readonly DataCRMProcessingServices _dataCRMProcessingServices;
-        public CRMServices(ILogger<CRMServices> logger, CustomerServices customerServices, DataCRMProcessingServices dataCRMProcessingServices)
+        private readonly DataProcessingService _dataProcessingService;
+
+        public CRMServices(ILogger<CRMServices> logger,
+            CustomerServices customerServices,
+            DataCRMProcessingServices dataCRMProcessingServices,
+            DataProcessingService dataProcessingService)
         {
             _logger = logger;
             _customerServices = customerServices;
             _dataCRMProcessingServices = dataCRMProcessingServices;
+            _dataProcessingService = dataProcessingService;
         }
 
         private string CRMLogin()
@@ -33,7 +40,7 @@ namespace _24hplusdotnetcore.Services.CRM
                 var request = new RestRequest(Method.POST);
                 request.AddHeader("Content-Type", "application/x-www-form-urlencoded");
                 request.AddParameter("_operation", "login");
-                request.AddParameter("username", ""+Common.Constants.ConfigRequest.CRM_UserName+"");
+                request.AddParameter("username", "" + Common.Constants.ConfigRequest.CRM_UserName + "");
                 request.AddParameter("password", "" + Common.Constants.ConfigRequest.CRM_Password + "");
                 IRestResponse response = client.Execute(request);
                 dynamic context = JsonConvert.DeserializeObject<dynamic>(response.Content);
@@ -55,8 +62,8 @@ namespace _24hplusdotnetcore.Services.CRM
                 var request = new RestRequest(Method.POST);
                 request.AddHeader("Content-Type", "application/x-www-form-urlencoded");
                 request.AddParameter("_operation", "query");
-                request.AddParameter("_session", ""+ session + "");
-                request.AddParameter("query", ""+ queryString + "");
+                request.AddParameter("_session", "" + session + "");
+                request.AddParameter("query", "" + queryString + "");
                 IRestResponse response = client.Execute(request);
                 return JsonConvert.DeserializeObject<CrmCustomerData>(response.Content);
             }
@@ -72,9 +79,9 @@ namespace _24hplusdotnetcore.Services.CRM
             long insertCount = 0;
             try
             {
-                
+
                 var arrCustomer = crmCustomer.Result.Records;
-                
+
                 if (arrCustomer.Length > 0)
                 {
                     foreach (var item in arrCustomer)
@@ -106,11 +113,137 @@ namespace _24hplusdotnetcore.Services.CRM
                                 insertCount++;
                             }
                         }
-                        
+
                     }
                 }
                 _logger.LogInformation("Number of customer from CRM: " + insertCount);
                 return insertCount;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return -1;
+            }
+        }
+
+        private long AddNewCustomerFromCRM(CrmCustomerData crmCustomer, string customerStatus, string dataProcessingType)
+        {
+            try
+            {
+                if (crmCustomer?.Result?.Records?.Any() != true)
+                {
+                    return 0;
+                }
+
+                var idCards = crmCustomer.Result.Records.Select(x => x.Cf1050);
+                IEnumerable<Customer> customers = _customerServices.GetByIdCards(idCards);
+
+                var customerCreations = new List<Customer>();
+                var dataProcessingCreations = new List<DataProcessing>();
+
+                foreach (var record in crmCustomer.Result.Records)
+                {
+                    var customer = customers?.FirstOrDefault(x => string.Equals(x.Personal.IdCard, record.Cf1050, StringComparison.OrdinalIgnoreCase));
+                    if (customer == null)
+                    {
+                        var customerCreation = new Customer
+                        {
+                            Personal = new Personal
+                            {
+                                Name = record.Potentialname,
+                                Gender = record.Cf1026,
+                                Phone = record.Cf854,
+                                IdCard = record.Cf1050,
+                                Email = record.Cf1028,
+                                CurrentAddress = new Address
+                                {
+                                    FullAddress = record.Cf892
+                                },
+                                DateOfBirth = record.Cf948,
+                                MaritalStatus = record.Cf1030,
+                                PermanentAddress = new Address { FullAddress = record.Cf1002 },
+                                PotentialNo = record.PotentialNo
+                            },
+                            Working = new Working
+                            {
+                                Job = record.Cf1246,
+                                Income = record.Cf884,
+                                CompanyName = record.Cf962,
+                                CompanyAddress = new Address { FullAddress = record.Cf1020 },
+                                CompanyPhone = record.Cf976,
+                                Position = record.Cf982,
+                                WorkPeriod = record.Cf984,
+                                TypeOfContract = record.Cf986,
+                                HealthCardInssurance = record.Cf988,
+                            },
+                            TemporaryAddress = new Address
+                            {
+                                Province = record.Cf1020
+                            },
+                            Loan = new Loan
+                            {
+                                Amount = record.Cf968,
+                                Product = record.Cf1032,
+                                RequestDocuments = record.Cf1036,
+                                Term = record.Cf990,
+                                GenarateToLead = record.Createdtime,
+                                FollowedDate = record.Modifiedtime,
+                                Owner = record.Cf978,
+                                AppDate = record.Cf992,
+                                DisbursalDate = record.Cf994
+                            },
+                            Result = new Models.Result
+                            {
+                                Note = record.Description,
+                                Status = record.SalesStage
+                            },
+                            UserName = record.Modifiedby.Label.Split("-")[0],
+                            Status = customerStatus,
+                            Counsel = new Counsel
+                            {
+                                LastCounselling = record.Cf1266,
+                                ApptSchedule = record.Cf1052,
+                                TeleSalesCode = record.AssignedUserId?.Value,
+                                Name = record.AssignedUserId?.Label,
+                                Campain = record.AssignedUserId?.Value,
+                                Remark = record.Cf1196,
+                                Occupation = record.Cf1246,
+                                TeamCode = record.Cf972,
+                                GroupCode = record.Cf1008
+                            },
+                            CRMId = record.Id,
+                            Route = record.Cf1014
+                        };
+                        customerCreations.Add(customerCreation);
+                    }
+                    else
+                    {
+                        dataProcessingCreations.Add(new DataProcessing
+                        {
+                            CustomerId = customer.Id,
+                            DataProcessingType = dataProcessingType
+                        });
+                    }
+                }
+
+                if (customerCreations.Any())
+                {
+                    _customerServices.InsertMany(customerCreations);
+
+                    dataProcessingCreations.AddRange(customerCreations.Select(customer => new DataProcessing
+                    {
+                        CustomerId = customer.Id,
+                        DataProcessingType = dataProcessingType
+                    }));
+                }
+
+                if (dataProcessingCreations.Any())
+                {
+                    _dataProcessingService.InsertMany(dataProcessingCreations);
+                }
+
+
+                return dataProcessingCreations.Count;
             }
             catch (Exception ex)
             {
@@ -136,7 +269,27 @@ namespace _24hplusdotnetcore.Services.CRM
             }
             catch (Exception ex)
             {
-                 _logger.LogError(ex, ex.Message);
+                _logger.LogError(ex, ex.Message);
+                return -1;
+            }
+        }
+
+        public long GetCustomerFromCRM(string query)
+        {
+            try
+            {
+                string session = CRMLogin();
+                if (string.IsNullOrEmpty(session))
+                {
+                    return 0;
+                }
+
+                CrmCustomerData dataFromCRM = QueryLead(session, query);
+                return AddNewCustomerFromCRM(dataFromCRM, CustomerStatus.PUSH_MA, DataProcessingType.PUSH_CUSTOMER_CRM_TO_MA);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
                 return -1;
             }
         }
@@ -154,35 +307,36 @@ namespace _24hplusdotnetcore.Services.CRM
                         foreach (var item in lstCustomer)
                         {
                             var customer = _customerServices.GetCustomer(item.CustomerId);
-                            var dataCRM = new Record();
-                            dataCRM.Cf1178 = "MC";
-                            dataCRM.Potentialname = customer.Personal.Name;
-                            dataCRM.Cf1026 = customer.Personal.Gender;
-                            dataCRM.Leadsource = "MC";
-                            dataCRM.Cf854 = customer.Personal.Phone;
-                            dataCRM.Cf1050 = customer.Personal.IdCard;
-                            dataCRM.Cf1028 = customer.Working.Job;
-                            dataCRM.Cf884 = customer.Working.Income;
-                            dataCRM.Cf1020 = customer.ResidentAddress.Province;
-                            dataCRM.Cf1032 = customer.Loan.Product;
-                            dataCRM.Cf1040 = customer.Loan.Product;//customer.Loan.Name;
-                            dataCRM.Cf968 = customer.Loan.Amount;
-                            dataCRM.Cf990 = customer.Loan.Term;
-                            dataCRM.Cf1052 = "-";
-                            dataCRM.Cf1054 = customer.Loan.SignAddress;
-                            dataCRM.Cf1036 = "CHỨNG MINH NHÂN DÂN |##| HỘ KHẨU";
-                            dataCRM.SalesStage = "1.KH mới";
-                            dataCRM.Cf1184 = "-";
-                            dataCRM.Cf1188 = "-";
-                            var AssignedUserId = new AssignedUserId();
-
-                            AssignedUserId.Value = "19x2335";
-                            dataCRM.AssignedUserId = AssignedUserId;
-                            dataCRM.Cf1244 = "AS";
-                            dataCRM.Cf1256 = "-";
-                            dataCRM.Cf1264 = "????";
-                            dataCRM.Cf1230 = "";
-
+                            var dataCRM = new Record
+                            {
+                                Cf1178 = "MC",
+                                Potentialname = customer.Personal.Name,
+                                Cf1026 = customer.Personal.Gender,
+                                Leadsource = "MC",
+                                Cf854 = customer.Personal.Phone,
+                                Cf1050 = customer.Personal.IdCard,
+                                Cf1028 = customer.Working.Job,
+                                Cf884 = customer.Working.Income,
+                                Cf1020 = customer.ResidentAddress.Province,
+                                Cf1032 = customer.Loan.Category,
+                                Cf1040 = customer.Loan.Product,
+                                Cf968 = customer.Loan.Amount,
+                                Cf990 = customer.Loan.Term,
+                                Cf1052 = "-",
+                                Cf1054 = customer.Loan.SignAddress,
+                                Cf1036 = "CHỨNG MINH NHÂN DÂN |##| HỘ KHẨU",
+                                SalesStage = "1.KH mới",
+                                Cf1184 = "-",
+                                Cf1188 = "-",
+                                AssignedUserId = new AssignedUserId
+                                {
+                                    Value = "19x2335"
+                                },
+                                Cf1244 = "AS",
+                                Cf1256 = "-",
+                                Cf1264 = "????",
+                                Cf1230 = ""
+                            };
                             PushDataToCRM(dataCRM, session, item);
                         }
                     }
@@ -205,8 +359,8 @@ namespace _24hplusdotnetcore.Services.CRM
                 var request = new RestRequest(Method.POST);
                 request.AddHeader("Content-Type", "application/x-www-form-urlencoded");
                 request.AddParameter("_operation", "saveRecord");
-                request.AddParameter("values", ""+ JsonConvert.SerializeObject(dataCRM) +"");
-                request.AddParameter("_session", ""+ session +"");
+                request.AddParameter("values", "" + JsonConvert.SerializeObject(dataCRM) + "");
+                request.AddParameter("_session", "" + session + "");
                 request.AddParameter("module", "Potentials");
                //request.AddParameter("record", "13x55730");
                 IRestResponse response = client.Execute(request);
@@ -221,5 +375,6 @@ namespace _24hplusdotnetcore.Services.CRM
 
             }
         }
+
     }
 }
