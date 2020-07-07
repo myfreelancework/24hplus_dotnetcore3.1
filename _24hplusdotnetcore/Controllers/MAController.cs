@@ -4,6 +4,7 @@ using _24hplusdotnetcore.ModelDtos;
 using _24hplusdotnetcore.Models;
 using _24hplusdotnetcore.Services;
 using _24hplusdotnetcore.Services.CRM;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
@@ -29,12 +30,13 @@ namespace _24hplusdotnetcore.Controllers
             _dataCRMProcessingServices = dataCRMProcessingServices;
         }
 
+        [AllowAnonymous]
         [HttpPost("postback")]
         public async Task<ActionResult<ResponseContext>> PostBackAsync(MAPostBackRequestModel mAPostBack)
         {
             try
             {
-                var customer = await _customerServices.GetByCrmIdAsync(mAPostBack.Lead_id);
+                var customer = await _customerServices.GetByCrmIdAsync(mAPostBack.LeadId);
                 if (customer == null)
                 {
                     return Ok(new ResponseMAContext

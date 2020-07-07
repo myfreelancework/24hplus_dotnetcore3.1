@@ -493,11 +493,23 @@ namespace _24hplusdotnetcore.Services
         {
             try
             {
-                var filter = Builders<Customer>.Filter.Where(c => string.Equals(c.CRMId, mAPostBack.Lead_id));
+                var filter = Builders<Customer>.Filter.Where(c => string.Equals(c.CRMId, mAPostBack.LeadId));
                 var update = Builders<Customer>.Update
                     .Set(c => c.ModifiedDate, DateTime.UtcNow)
                     .Set(c => c.Result.Status, mAPostBack.Status.ToString())
-                    .Set(c => c.Result.DetailStatus, mAPostBack.Detail_status.ToString());
+                    .Set(c => c.Result.DetailStatus, mAPostBack.DetailStatus.ToString())
+                    .Set(c => c.PostbackMA.TransactionId, mAPostBack.TransactionId)
+                    .Set(c => c.PostbackMA.DateOfLead, mAPostBack.DateOfLead)
+                    .Set(c => c.PostbackMA.DcCode, mAPostBack.DcCode)
+                    .Set(c => c.PostbackMA.DcName, mAPostBack.DcName)
+                    .Set(c => c.PostbackMA.PlaceOfUpload, mAPostBack.PlaceOfUpload)
+                    .Set(c => c.PostbackMA.DocumentCollected, mAPostBack.DocumentCollected)
+                    .Set(c => c.PostbackMA.LastCastStatus, mAPostBack.LastCastStatus)
+                    .Set(c => c.PostbackMA.DcLastNote, mAPostBack.DcLastNote)
+                    .Set(c => c.PostbackMA.AppSchedule, mAPostBack.AppSchedule)
+                    .Set(c => c.PostbackMA.LastCall, mAPostBack.LastCall)
+                    .Set(c => c.PostbackMA.Status, mAPostBack.Status)
+                    .Set(c => c.PostbackMA.DetailStatus, mAPostBack.DetailStatus);
 
                 // TODO: update StatusValue, DetailStatusValue
 
