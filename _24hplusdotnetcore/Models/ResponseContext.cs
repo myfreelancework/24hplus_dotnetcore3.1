@@ -1,4 +1,5 @@
 using System;
+using Newtonsoft.Json;
 
 namespace _24hplusdotnetcore.Models
 {
@@ -12,7 +13,9 @@ namespace _24hplusdotnetcore.Models
 
     public class ResponseMAContext
     {
+        [JsonProperty("Result")]
         public bool Result { get; set; }
+        [JsonProperty("Message")]
         public string Message { get; set; }
     }
 }
