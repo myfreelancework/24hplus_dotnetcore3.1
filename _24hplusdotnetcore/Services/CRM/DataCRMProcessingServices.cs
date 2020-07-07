@@ -62,5 +62,11 @@ namespace _24hplusdotnetcore.Services.CRM
             }
             return listDataCRMProcessing;
         }
+
+        public IEnumerable<DataCRMProcessing> InsertMany(IEnumerable<DataCRMProcessing> dataProcessings)
+        {
+            _dataCRMProcessing.InsertMany(dataProcessings);
+            return dataProcessings;
+        }
     }
 }

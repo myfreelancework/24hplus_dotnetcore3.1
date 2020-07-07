@@ -9,6 +9,8 @@ using System.Linq;
 using _24hplusdotnetcore.Models;
 using MongoDB.Bson;
 using _24hplusdotnetcore.Common;
+using AutoMapper;
+using _24hplusdotnetcore.Common.Enums;
 
 namespace _24hplusdotnetcore.Services.CRM
 {
@@ -18,16 +20,19 @@ namespace _24hplusdotnetcore.Services.CRM
         private readonly CustomerServices _customerServices;
         private readonly DataCRMProcessingServices _dataCRMProcessingServices;
         private readonly DataProcessingService _dataProcessingService;
+        private readonly IMapper _mapper;
 
         public CRMServices(ILogger<CRMServices> logger,
             CustomerServices customerServices,
             DataCRMProcessingServices dataCRMProcessingServices,
-            DataProcessingService dataProcessingService)
+            DataProcessingService dataProcessingService,
+            IMapper mapper)
         {
             _logger = logger;
             _customerServices = customerServices;
             _dataCRMProcessingServices = dataCRMProcessingServices;
             _dataProcessingService = dataProcessingService;
+            _mapper = mapper;
         }
 
         private string CRMLogin()
@@ -146,74 +151,8 @@ namespace _24hplusdotnetcore.Services.CRM
                     var customer = customers?.FirstOrDefault(x => string.Equals(x.Personal.IdCard, record.Cf1050, StringComparison.OrdinalIgnoreCase));
                     if (customer == null)
                     {
-                        var customerCreation = new Customer
-                        {
-                            Personal = new Personal
-                            {
-                                Name = record.Potentialname,
-                                Gender = record.Cf1026,
-                                Phone = record.Cf854,
-                                IdCard = record.Cf1050,
-                                Email = record.Cf1028,
-                                CurrentAddress = new Address
-                                {
-                                    FullAddress = record.Cf892
-                                },
-                                DateOfBirth = record.Cf948,
-                                MaritalStatus = record.Cf1030,
-                                PermanentAddress = new Address { FullAddress = record.Cf1002 },
-                                PotentialNo = record.PotentialNo
-                            },
-                            Working = new Working
-                            {
-                                Job = record.Cf1246,
-                                Income = record.Cf884,
-                                CompanyName = record.Cf962,
-                                CompanyAddress = new Address { FullAddress = record.Cf1020 },
-                                CompanyPhone = record.Cf976,
-                                Position = record.Cf982,
-                                WorkPeriod = record.Cf984,
-                                TypeOfContract = record.Cf986,
-                                HealthCardInssurance = record.Cf988,
-                            },
-                            TemporaryAddress = new Address
-                            {
-                                Province = record.Cf1020
-                            },
-                            Loan = new Loan
-                            {
-                                Amount = record.Cf968,
-                                Product = record.Cf1032,
-                                RequestDocuments = record.Cf1036,
-                                Term = record.Cf990,
-                                GenarateToLead = record.Createdtime,
-                                FollowedDate = record.Modifiedtime,
-                                Owner = record.Cf978,
-                                AppDate = record.Cf992,
-                                DisbursalDate = record.Cf994
-                            },
-                            Result = new Models.Result
-                            {
-                                Note = record.Description,
-                                Status = record.SalesStage
-                            },
-                            UserName = record.Modifiedby.Label.Split("-")[0],
-                            Status = customerStatus,
-                            Counsel = new Counsel
-                            {
-                                LastCounselling = record.Cf1266,
-                                ApptSchedule = record.Cf1052,
-                                TeleSalesCode = record.AssignedUserId?.Value,
-                                Name = record.AssignedUserId?.Label,
-                                Campain = record.AssignedUserId?.Value,
-                                Remark = record.Cf1196,
-                                Occupation = record.Cf1246,
-                                TeamCode = record.Cf972,
-                                GroupCode = record.Cf1008
-                            },
-                            CRMId = record.Id,
-                            Route = record.Cf1014
-                        };
+                        var customerCreation = _mapper.Map<Customer>(record);
+                        customerCreation.Status = customerStatus;
                         customerCreations.Add(customerCreation);
                     }
                     else
@@ -234,6 +173,12 @@ namespace _24hplusdotnetcore.Services.CRM
                     {
                         CustomerId = customer.Id,
                         DataProcessingType = dataProcessingType
+                    }));
+
+                    _dataCRMProcessingServices.InsertMany(customerCreations.Select(customer => new DataCRMProcessing { 
+                        CustomerId = customer.Id,
+                        Status = DataCRMProcessingStatus.InProgress, 
+                        LeadSource = LeadSourceType.MA.ToString() 
                     }));
                 }
 
@@ -302,41 +247,53 @@ namespace _24hplusdotnetcore.Services.CRM
                 if (!string.IsNullOrEmpty(session))
                 {
                     var lstCustomer = _dataCRMProcessingServices.GetDataCRMProcessings(Common.DataCRMProcessingStatus.InProgress);
-                    if (lstCustomer.Count > 0)
+                    if (lstCustomer.Any())
                     {
                         foreach (var item in lstCustomer)
                         {
                             var customer = _customerServices.GetCustomer(item.CustomerId);
-                            var dataCRM = new Record
+                            Record dataCRM;
+
+                            if(string.Equals(item.LeadSource, LeadSourceType.MA.ToString()))
                             {
-                                Cf1178 = "MC",
-                                Potentialname = customer.Personal.Name,
-                                Cf1026 = customer.Personal.Gender,
-                                Leadsource = "MC",
-                                Cf854 = customer.Personal.Phone,
-                                Cf1050 = customer.Personal.IdCard,
-                                Cf1028 = customer.Working.Job,
-                                Cf884 = customer.Working.Income,
-                                Cf1020 = customer.ResidentAddress.Province,
-                                Cf1032 = customer.Loan.Category,
-                                Cf1040 = customer.Loan.Product,
-                                Cf968 = customer.Loan.Amount,
-                                Cf990 = customer.Loan.Term,
-                                Cf1052 = "-",
-                                Cf1054 = customer.Loan.SignAddress,
-                                Cf1036 = "CHỨNG MINH NHÂN DÂN |##| HỘ KHẨU",
-                                SalesStage = "1.KH mới",
-                                Cf1184 = "-",
-                                Cf1188 = "-",
-                                AssignedUserId = new AssignedUserId
+                                dataCRM = _mapper.Map<Record>(customer);
+                                dataCRM.Cf1178 = LeadSourceType.MA.ToString();
+                                dataCRM.Leadsource = LeadSourceType.MA.ToString();
+                            }
+                            else
+                            {
+                                dataCRM = new Record
                                 {
-                                    Value = "19x2335"
-                                },
-                                Cf1244 = "AS",
-                                Cf1256 = "-",
-                                Cf1264 = "????",
-                                Cf1230 = ""
-                            };
+                                    Cf1178 = "MC",
+                                    Potentialname = customer.Personal.Name,
+                                    Cf1026 = customer.Personal.Gender,
+                                    Leadsource = "MC",
+                                    Cf854 = customer.Personal.Phone,
+                                    Cf1050 = customer.Personal.IdCard,
+                                    Cf1028 = customer.Working.Job,
+                                    Cf884 = customer.Working.Income,
+                                    Cf1020 = customer.ResidentAddress.Province,
+                                    Cf1032 = customer.Loan.Category,
+                                    Cf1040 = customer.Loan.Product,
+                                    Cf968 = customer.Loan.Amount,
+                                    Cf990 = customer.Loan.Term,
+                                    Cf1052 = "-",
+                                    Cf1054 = customer.Loan.SignAddress,
+                                    Cf1036 = "CHỨNG MINH NHÂN DÂN |##| HỘ KHẨU",
+                                    SalesStage = "1.KH mới",
+                                    Cf1184 = "-",
+                                    Cf1188 = "-",
+                                    AssignedUserId = new AssignedUserId
+                                    {
+                                        Value = "19x2335"
+                                    },
+                                    Cf1244 = "AS",
+                                    Cf1256 = "-",
+                                    Cf1264 = "????",
+                                    Cf1230 = ""
+                                };
+                            }
+
                             PushDataToCRM(dataCRM, session, item);
                         }
                     }
@@ -348,7 +305,6 @@ namespace _24hplusdotnetcore.Services.CRM
                 _logger.LogError(ex, ex.Message);
             }
         }
-
 
         private void PushDataToCRM(Record dataCRM, string session, DataCRMProcessing dataCRMProcessing)
         {
