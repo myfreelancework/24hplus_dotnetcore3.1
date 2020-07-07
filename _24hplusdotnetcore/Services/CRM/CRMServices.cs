@@ -257,8 +257,8 @@ namespace _24hplusdotnetcore.Services.CRM
                             if(string.Equals(item.LeadSource, LeadSourceType.MA.ToString()))
                             {
                                 dataCRM = _mapper.Map<Record>(customer);
-                                dataCRM.Cf1178 = LeadSourceType.MA.ToString();
-                                dataCRM.Leadsource = LeadSourceType.MA.ToString();
+                                dataCRM.Cf1178 = "MIRAE ASSET";
+                                dataCRM.Leadsource = "Telesales 24hPlus -2020";
                             }
                             else
                             {
@@ -267,7 +267,7 @@ namespace _24hplusdotnetcore.Services.CRM
                                     Cf1178 = "MC",
                                     Potentialname = customer.Personal.Name,
                                     Cf1026 = customer.Personal.Gender,
-                                    Leadsource = "MC",
+                                    Leadsource = "MobileGreenC",
                                     Cf854 = customer.Personal.Phone,
                                     Cf1050 = customer.Personal.IdCard,
                                     Cf1028 = customer.Working.Job,
