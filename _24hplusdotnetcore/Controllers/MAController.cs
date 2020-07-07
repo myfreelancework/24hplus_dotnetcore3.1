@@ -34,7 +34,7 @@ namespace _24hplusdotnetcore.Controllers
         {
             try
             {
-                var customer = await _customerServices.GetByCrmIdAsync(mAPostBack.Lead_id);
+                var customer = await _customerServices.GetByCrmIdAsync(mAPostBack.LeadId);
                 if (customer == null)
                 {
                     return Ok(new ResponseMAContext

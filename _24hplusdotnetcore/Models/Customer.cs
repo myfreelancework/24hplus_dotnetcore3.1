@@ -36,6 +36,7 @@ namespace _24hplusdotnetcore.Models
         public Counsel Counsel { get; set; }
         public string CRMId { get; set; }
         public string Route { get; set; }
+        public PostbackMA PostbackMA { get; set; }
     }
 
     public class Personal
@@ -160,5 +161,21 @@ namespace _24hplusdotnetcore.Models
         public string Occupation { get; set; }
         public string TeamCode { get; set; }
         public string GroupCode { get; set; }
+    }
+
+    public class PostbackMA
+    {
+        public string TransactionId { get; set; }
+        public string DateOfLead { get; set; }
+        public string DcCode { get; set; }
+        public string DcName { get; set; }
+        public string PlaceOfUpload { get; set; }
+        public string DocumentCollected { get; set; }
+        public string LastCastStatus { get; set; }
+        public string DcLastNote { get; set; }
+        public string AppSchedule { get; set; }
+        public string LastCall { get; set; }
+        public short Status { get; set; }
+        public short DetailStatus { get; set; }
     }
 }
