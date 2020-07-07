@@ -148,6 +148,25 @@ namespace _24hplusdotnetcore.Services
                 return null;
             }
         }
+
+        public long UpdateCustomerPostback(Customer customer)
+        {
+            long updateCount = 0;
+            try
+            {
+                dynamic prvCustomer = _customer.Find(c => c.Id == customer.Id).FirstOrDefault();
+                customer.ModifiedDate = Convert.ToDateTime(DateTime.Now);
+                customer.CreatedDate = prvCustomer.CreatedDate;
+                updateCount = _customer.ReplaceOne(c => c.Id == customer.Id, customer).ModifiedCount;
+
+            }
+            catch (Exception ex)
+            {
+                updateCount = -1;
+                _logger.LogError(ex, ex.Message);
+            }
+            return updateCount;
+        }
         public long UpdateCustomer(Customer customer)
         {
             long updateCount = 0;
@@ -440,7 +459,7 @@ namespace _24hplusdotnetcore.Services
                         message = string.Format(Message.TeamLeadApprove, teamLead, customer.Personal.Name);
                     }
 
-                    
+
                     if (message != "")
                     {
                         var objNoti = new Notification

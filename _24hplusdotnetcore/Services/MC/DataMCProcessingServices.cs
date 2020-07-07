@@ -34,11 +34,11 @@ namespace _24hplusdotnetcore.Services.MC
             }
             return newData;
         }
-        public long UpdateByCustomerId(string CustomerId, string Status)
+        public long UpdateById(string id, string Status)
         {
             try
             {
-                var dataMC = _dataMCProcessing.Find(d => d.CustomerId == CustomerId).FirstOrDefault();
+                var dataMC = _dataMCProcessing.Find(d => d.Id == id).FirstOrDefault();
                 dataMC.Status = Status;
                 var modifiedCount = _dataMCProcessing.ReplaceOne(d => d.Id == dataMC.Id, dataMC).ModifiedCount;
                 return modifiedCount;

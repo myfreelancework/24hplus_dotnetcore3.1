@@ -15,7 +15,7 @@ namespace _24hplusdotnetcore.Models.MC
         public string MobileIssueDateCitizen { get; set; }
 
         [JsonProperty("appStatus")]
-        public string AppStatus { get; set; }
+        public int AppStatus { get; set; }
 
         [JsonProperty("md5")]
         public string Md5 { get; set; }
@@ -42,31 +42,31 @@ namespace _24hplusdotnetcore.Models.MC
     public partial class Request
     {
         [JsonProperty("id")]
-        public string Id { get; set; }
+        public int Id { get; set; }
 
-        [JsonProperty("SaleCode")]
+        [JsonProperty("saleCode")]
         public string SaleCode { get; set; }
 
         [JsonProperty("customerName")]
         public string CustomerName { get; set; }
 
         [JsonProperty("productId")]
-        public string ProductId { get; set; }
+        public int ProductId { get; set; }
 
         [JsonProperty("citizenId")]
         public string CitizenId { get; set; }
 
         [JsonProperty("tempResidence")]
-        public string TempResidence { get; set; }
+        public int TempResidence { get; set; }
 
         [JsonProperty("loanAmount")]
-        public string LoanAmount { get; set; }
+        public double LoanAmount { get; set; }
 
         [JsonProperty("loanTenor")]
-        public string LoanTenor { get; set; }
+        public int LoanTenor { get; set; }
 
         [JsonProperty("hasInsurance")]
-        public string HasInsurance { get; set; }
+        public int HasInsurance { get; set; }
 
         [JsonProperty("issuePlace")]
         public string IssuePlace { get; set; }
