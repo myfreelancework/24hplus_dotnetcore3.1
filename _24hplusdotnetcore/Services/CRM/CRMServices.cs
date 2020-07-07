@@ -246,56 +246,65 @@ namespace _24hplusdotnetcore.Services.CRM
                 string session = CRMLogin();
                 if (!string.IsNullOrEmpty(session))
                 {
-                    var lstCustomer = _dataCRMProcessingServices.GetDataCRMProcessings(Common.DataCRMProcessingStatus.InProgress);
-                    if (lstCustomer.Any())
+                    var dataCRMProcessings = _dataCRMProcessingServices.GetDataCRMProcessings(Common.DataCRMProcessingStatus.InProgress);
+                    if(!dataCRMProcessings.Any())
                     {
-                        foreach (var item in lstCustomer)
+                        return;
+                    }
+
+                    var custoemrIds = dataCRMProcessings.Select(x => x.CustomerId);
+                    var customers = _customerServices.GetByIds(custoemrIds);
+                    if (!customers.Any())
+                    {
+                        return;
+                    }
+
+                    foreach (var customer in customers)
+                    {
+                        Record dataCRM;
+                        var dataCRMProcessing = dataCRMProcessings.First(x => x.CustomerId == customer.Id);
+                        
+                        if (string.Equals(dataCRMProcessing.LeadSource, LeadSourceType.MA.ToString()))
                         {
-                            var customer = _customerServices.GetCustomer(item.CustomerId);
-                            Record dataCRM;
-
-                            if(string.Equals(item.LeadSource, LeadSourceType.MA.ToString()))
-                            {
-                                dataCRM = _mapper.Map<Record>(customer);
-                                dataCRM.Cf1178 = "MIRAE ASSET";
-                                dataCRM.Leadsource = "Telesales 24hPlus -2020";
-                            }
-                            else
-                            {
-                                dataCRM = new Record
-                                {
-                                    Cf1178 = "MC",
-                                    Potentialname = customer.Personal.Name,
-                                    Cf1026 = customer.Personal.Gender,
-                                    Leadsource = "MobileGreenC",
-                                    Cf854 = customer.Personal.Phone,
-                                    Cf1050 = customer.Personal.IdCard,
-                                    Cf1028 = customer.Working.Job,
-                                    Cf884 = customer.Working.Income,
-                                    Cf1020 = customer.ResidentAddress.Province,
-                                    Cf1032 = customer.Loan.Category,
-                                    Cf1040 = customer.Loan.Product,
-                                    Cf968 = customer.Loan.Amount,
-                                    Cf990 = customer.Loan.Term,
-                                    Cf1052 = "-",
-                                    Cf1054 = customer.Loan.SignAddress,
-                                    Cf1036 = "CHỨNG MINH NHÂN DÂN |##| HỘ KHẨU",
-                                    SalesStage = "1.KH mới",
-                                    Cf1184 = "-",
-                                    Cf1188 = "-",
-                                    AssignedUserId = new AssignedUserId
-                                    {
-                                        Value = "19x2335"
-                                    },
-                                    Cf1244 = "AS",
-                                    Cf1256 = "-",
-                                    Cf1264 = "????",
-                                    Cf1230 = ""
-                                };
-                            }
-
-                            PushDataToCRM(dataCRM, session, item);
+                            dataCRM = _mapper.Map<Record>(customer);
+                            dataCRM.Cf1178 = "MIRAE ASSET";
+                            dataCRM.Leadsource = "Telesales 24hPlus -2020";
                         }
+                        else
+                        {
+                            dataCRM = new Record
+                            {
+                                Cf1178 = "MC",
+                                Potentialname = customer.Personal.Name,
+                                Cf1026 = customer.Personal.Gender,
+                                Leadsource = "MobileGreenC",
+                                Cf854 = customer.Personal.Phone,
+                                Cf1050 = customer.Personal.IdCard,
+                                Cf1028 = customer.Working.Job,
+                                Cf884 = customer.Working.Income,
+                                Cf1020 = customer.ResidentAddress.Province,
+                                Cf1032 = customer.Loan.Category,
+                                Cf1040 = customer.Loan.Product,
+                                Cf968 = customer.Loan.Amount,
+                                Cf990 = customer.Loan.Term,
+                                Cf1052 = "-",
+                                Cf1054 = customer.Loan.SignAddress,
+                                Cf1036 = "CHỨNG MINH NHÂN DÂN |##| HỘ KHẨU",
+                                SalesStage = "1.KH mới",
+                                Cf1184 = "-",
+                                Cf1188 = "-",
+                                AssignedUserId = new AssignedUserId
+                                {
+                                    Value = "19x2335"
+                                },
+                                Cf1244 = "AS",
+                                Cf1256 = "-",
+                                Cf1264 = "????",
+                                Cf1230 = ""
+                            };
+                        }
+
+                        PushDataToCRM(dataCRM, session, dataCRMProcessing);
                     }
                 }
             }
