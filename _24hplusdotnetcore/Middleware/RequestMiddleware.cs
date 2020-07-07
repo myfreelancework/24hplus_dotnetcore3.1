@@ -28,13 +28,7 @@ namespace _24hplusdotnetcore.Middleware
 
         public async Task InvokeAsync(HttpContext context)
         {
-            if (context.Request.Path.Value.Contains("api/ma/postback") &&
-                _authenConfig.APIKey == context.Request.Headers["APIKey"].FirstOrDefault() &&
-                _authenConfig.SecretKey == context.Request.Headers["SecretKey"].FirstOrDefault())
-            {
-                await _next(context);
-            }
-            else if (context.Request.Headers["Authorization"].Count > 0)
+            if (context.Request.Headers["Authorization"].Count > 0)
             {
                 var auth = context.Request.Headers["Authorization"][0];
                 var authArray = auth.Split(" ");
@@ -49,7 +43,6 @@ namespace _24hplusdotnetcore.Middleware
                     context.Items["isLoggedInOtherDevice"] = false;
                 }
                 await _next(context);
-
             }
             else
             {
@@ -62,7 +55,9 @@ namespace _24hplusdotnetcore.Middleware
                  && !context.Request.Path.Value.Contains("api/gcc/personal")
                  && !context.Request.Path.Value.Contains("api/gcc/moto")
                  && !context.Request.Path.Value.Contains("api/gcc/postbackPersonal")
-                 && !context.Request.Path.Value.Contains("api/crm/pullnewcustomers"))
+                 && !context.Request.Path.Value.Contains("api/crm/pullnewcustomers")
+                 && !context.Request.Path.Value.Contains("api/ma/postback")
+                 )
                 {
                     context.Response.StatusCode = StatusCodes.Status401Unauthorized;
                     context.Response.Headers.Clear();
