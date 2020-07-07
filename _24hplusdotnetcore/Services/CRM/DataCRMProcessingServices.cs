@@ -34,13 +34,12 @@ namespace _24hplusdotnetcore.Services.CRM
             return newData;
         }
 
-        public long UpdateByCustomerId(string CustomerId, string Status)
+        public long UpdateByCustomerId(DataCRMProcessing dataCRMProcessing, string Status)
         {
             try
             {
-                var dataCrm = _dataCRMProcessing.Find(d => d.CustomerId == CustomerId).FirstOrDefault();
-                dataCrm.Status = Status;
-                var modifiedCount = _dataCRMProcessing.ReplaceOne(d => d.Id == dataCrm.Id, dataCrm).ModifiedCount;
+                dataCRMProcessing.Status = Status;
+                var modifiedCount = _dataCRMProcessing.ReplaceOne(d => d.Id == dataCRMProcessing.Id, dataCRMProcessing).ModifiedCount;
                 return modifiedCount;
             }
             catch (Exception ex)
@@ -62,6 +61,12 @@ namespace _24hplusdotnetcore.Services.CRM
                 _logger.LogError(ex, ex.Message);
             }
             return listDataCRMProcessing;
+        }
+
+        public IEnumerable<DataCRMProcessing> InsertMany(IEnumerable<DataCRMProcessing> dataProcessings)
+        {
+            _dataCRMProcessing.InsertMany(dataProcessings);
+            return dataProcessings;
         }
     }
 }

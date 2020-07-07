@@ -2,6 +2,7 @@
 using _24hplusdotnetcore.ModelDtos;
 using _24hplusdotnetcore.Models;
 using _24hplusdotnetcore.Settings;
+using AutoMapper;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
@@ -18,19 +19,22 @@ namespace _24hplusdotnetcore.Services.MA
         private readonly CustomerServices _customerServices;
         private readonly MAConfig _mAConfig;
         private readonly IRestMAService _restMAService;
+        private readonly IMapper _mapper;
 
         public MAService(
             ILogger<MAService> logger,
             DataProcessingService dataProcessingService,
             CustomerServices customerServices,
             IOptions<MAConfig> mAConfig,
-            IRestMAService restMAService)
+            IRestMAService restMAService,
+            IMapper mapper)
         {
             _logger = logger;
             _dataProcessingService = dataProcessingService;
             _customerServices = customerServices;
             _mAConfig = mAConfig.Value;
             _restMAService = restMAService;
+            _mapper = mapper;
         }
 
         public async Task PublishAsync()
@@ -54,7 +58,14 @@ namespace _24hplusdotnetcore.Services.MA
 
                 foreach (var customer in customers)
                 {
-                    MARequestModel request = MappingCustomerToMA(customer);
+                    var requestData = _mapper.Map<MARequestDataModel>(customer);
+                    requestData.REQUEST_ID = _mAConfig.RequestId;
+
+                    var request = new MARequestModel
+                    {
+                        PublicKey = _mAConfig.PublishKey,
+                        Data = requestData
+                    };
 
                     var result = await _restMAService.PushCustomerAsync(request);
 
@@ -76,56 +87,6 @@ namespace _24hplusdotnetcore.Services.MA
                 _logger.LogError(ex, ex.Message);
                 throw;
             }
-        }
-
-        private MARequestModel MappingCustomerToMA(Customer customer)
-        {
-            return new MARequestModel
-            {
-                PublicKey = _mAConfig.PublishKey,
-                Data = new MARequestDataModel
-                {
-                    REQUEST_ID = _mAConfig.RequestId,
-                    LEAD_ID = customer.Personal?.PotentialNo,
-                    ID_NO = customer.Personal?.IdCard,
-                    CONTACT_NAME = customer.Personal?.Name,
-                    PHONE = customer.Personal?.Phone,
-                    CURRENT_ADDRESS = customer.Personal?.CurrentAddress?.FullAddress,
-                    PRODUCT = customer.Loan?.Product,
-                    T_STATUS_DATE = customer.Counsel?.LastCounselling,
-                    APPOINTMENT_DATE = customer.Counsel?.ApptSchedule,
-                    APPOINTMENT_ADDRESS = customer.Personal?.CurrentAddress?.FullAddress,
-                    TSA_IN_CHARGE = customer.Counsel?.TeleSalesCode,
-                    TST_TEAM = customer.Counsel?.TeamCode,
-                    REQUEST_DOCUMENT = customer.Loan?.RequestDocuments,
-                    DOB = customer.Personal?.DateOfBirth,
-                    GENDER = customer.Personal?.Gender,
-                    COMPANY_NAME = customer.Working?.CompanyName,
-                    COMPANY_ADDR = customer.Working?.CompanyAddress?.FullAddress,
-                    TEL_COMPANY = customer.Working?.CompanyPhone,
-                    AREA = customer.TemporaryAddress?.FullAddress,
-                    MARITAL_STATUS = customer.Personal?.MaritalStatus,
-                    OWNER = customer.Loan?.Owner,
-                    INCOME = customer.Working?.Income,
-                    POSITION = customer.Working?.Position,
-                    WORK_PERIOD = customer.Working?.WorkPeriod,
-                    TYPE_OF_CONTRACT = customer.Working?.TypeOfContract,
-                    HEALTH_CARD = customer.Working?.HealthCardInssurance,
-                    LOAN_AMOUNT = customer.Loan?.Amount,
-                    TENURE = customer.Loan?.Term,
-                    APP_DATE = customer.Loan?.AppDate,
-                    DISBURSAL_DATE = customer.Loan?.DisbursalDate,
-                    GENERATE_TO_LEAD = customer.Loan?.GenarateToLead,
-                    FOLLOWED_DATE = customer.Loan?.FollowedDate,
-                    PERMANENT_ADDR = customer.Personal?.PermanentAddress?.FullAddress,
-                    TSA_NAME = customer.Counsel?.Name,
-                    TSA_CAMPAIN = customer.Counsel?.Campain,
-                    TSA_GROUP = customer.Counsel?.GroupCode,
-                    TSA_LAST_NOTES = customer.Counsel?.Remark,
-                    OCCUPATION = customer.Counsel?.Occupation,
-                    ROUTE = customer.Route
-                }
-            };
         }
     }
 }

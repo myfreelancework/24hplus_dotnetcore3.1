@@ -115,6 +115,9 @@ namespace _24hplusdotnetcore.Models
     {
         public string Department { get; set; }
         public string Status { get; set; }
+        public string StatusValue { get; set; }
+        public string DetailStatus { get; set; }
+        public string DetailStatusValue { get; set; }
         public string Reason { get; set; }
         public string Note { get; set; }
     }

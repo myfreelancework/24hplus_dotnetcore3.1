@@ -68,7 +68,7 @@ namespace _24hplusdotnetcore.Services
             }
         }
 
-        public List<DataProcessing> InsertMany(List<DataProcessing> dataProcessings)
+        public IEnumerable<DataProcessing> InsertMany(IEnumerable<DataProcessing> dataProcessings)
         {
             _dataProcessing.InsertMany(dataProcessings);
             return dataProcessings;
