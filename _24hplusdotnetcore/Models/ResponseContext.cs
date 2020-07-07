@@ -9,4 +9,10 @@ namespace _24hplusdotnetcore.Models
         public string message { get; set; }
         public dynamic data { get; set; }
     }
+
+    public class ResponseMAContext
+    {
+        public bool Result { get; set; }
+        public string Message { get; set; }
+    }
 }

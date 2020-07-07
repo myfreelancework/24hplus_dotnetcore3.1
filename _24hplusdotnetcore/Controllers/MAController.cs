@@ -13,7 +13,7 @@ namespace _24hplusdotnetcore.Controllers
 {
     [ApiController]
     [Route("api/ma")]
-    public class MAController: ControllerBase
+    public class MAController : ControllerBase
     {
         private readonly ILogger<MAController> _logger;
         private readonly CustomerServices _customerServices;
@@ -35,9 +35,13 @@ namespace _24hplusdotnetcore.Controllers
             try
             {
                 var customer = await _customerServices.GetByCrmIdAsync(mAPostBack.Lead_id);
-                if(customer == null)
+                if (customer == null)
                 {
-                    return BadRequest("Customer does not exist");
+                    return Ok(new ResponseMAContext
+                    {
+                        Result = false,
+                        Message = "Customer does not exist",
+                    });
                 }
 
                 await _customerServices.UpdateAsync(mAPostBack);
@@ -49,7 +53,11 @@ namespace _24hplusdotnetcore.Controllers
                     LeadSource = LeadSourceType.MA.ToString()
                 });
 
-                return Ok();
+                return Ok(new ResponseMAContext
+                {
+                    Result = true,
+                    Message = "",
+                });
             }
             catch (Exception ex)
             {
