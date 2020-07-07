@@ -146,5 +146,30 @@ namespace _24hplusdotnetcore.Controllers
                 });
             }
         }
+        
+        [HttpGet]
+        [Route("api/mc/push-mc")]
+        public ActionResult<ResponseContext> CheckListAsync()
+        {
+            try
+            {
+                _mcService.PushDataToMC();
+                return Ok(new ResponseContext
+                {
+                    code = (int)Common.ResponseCode.SUCCESS,
+                    message = Common.Message.SUCCESS,
+                    data = null
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return Ok(new ResponseContext
+                {
+                    code = (int)Common.ResponseCode.ERROR,
+                    message = ex.Message,
+                });
+            }
+        }
     }
 }
