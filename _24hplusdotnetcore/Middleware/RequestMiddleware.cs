@@ -10,6 +10,7 @@ using System.Runtime.Serialization;
 using _24hplusdotnetcore.Settings;
 using Microsoft.Extensions.Options;
 using System.Linq;
+using Microsoft.AspNetCore.Authorization;
 
 namespace _24hplusdotnetcore.Middleware
 {
@@ -28,6 +29,14 @@ namespace _24hplusdotnetcore.Middleware
 
         public async Task InvokeAsync(HttpContext context)
         {
+            var endpoint = context.GetEndpoint();
+            if (endpoint?.Metadata?.GetMetadata<IAllowAnonymous>() is object)
+            {
+                await _next(context);
+                return;
+            }
+
+
             if (context.Request.Headers["Authorization"].Count > 0)
             {
                 var auth = context.Request.Headers["Authorization"][0];
@@ -56,7 +65,6 @@ namespace _24hplusdotnetcore.Middleware
                  && !context.Request.Path.Value.Contains("api/gcc/moto")
                  && !context.Request.Path.Value.Contains("api/gcc/postbackPersonal")
                  && !context.Request.Path.Value.Contains("api/crm/pullnewcustomers")
-                 && !context.Request.Path.Value.Contains("api/ma/postback")
                  )
                 {
                     context.Response.StatusCode = StatusCodes.Status401Unauthorized;
