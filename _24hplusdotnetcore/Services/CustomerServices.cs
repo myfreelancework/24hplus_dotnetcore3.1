@@ -386,23 +386,23 @@ namespace _24hplusdotnetcore.Services
             return customers;
         }
 
-        public long UpdateStatus(string customerId, string status, string reason)
+        public long UpdateStatus(CustomerUpdateStatusDto dto)
         {
             long updateCount = 0;
             try
             {
-                var customer = _customer.Find(x => x.Id == customerId).FirstOrDefault();
+                var customer = _customer.Find(x => x.Id == dto.CustomerId).FirstOrDefault();
                 if (customer != null)
                 {
-                    customer.Status = status;
+                    customer.Status = dto.Status;
                     if (customer.Result == null)
                     {
                         customer.Result = new Models.Result();
-                        customer.Result.Reason = reason;
+                        customer.Result.Reason = dto.Reason;
                     }
                     else
                     {
-                        customer.Result.Reason = reason;
+                        customer.Result.Reason = dto.Reason;
                     }
                     customer.ModifiedDate = Convert.ToDateTime(DateTime.Now);
                     updateCount = _customer.ReplaceOne(c => c.Id == customer.Id, customer).ModifiedCount;

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Dynamic;
+using _24hplusdotnetcore.ModelDtos;
 using _24hplusdotnetcore.Models;
 using _24hplusdotnetcore.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -280,9 +281,9 @@ namespace _24hplusdotnetcore.Controllers
             }
         }
 
-        [HttpGet]
+        [HttpPost]
         [Route("api/customer/updateStatus")]
-        public ActionResult<ResponseContext> UpdateStatus([FromQuery] string customerId, [FromQuery] string status, [FromQuery] string reason)
+        public ActionResult<ResponseContext> UpdateStatus([FromBody] CustomerUpdateStatusDto dto)
         {
             try
             {
@@ -293,7 +294,7 @@ namespace _24hplusdotnetcore.Controllers
                         message = Common.Message.IS_LOGGED_IN_ORTHER_DEVICE,
                         data = null
                     });
-                var statusCount = _customerServices.UpdateStatus(customerId, status, reason);
+                var statusCount = _customerServices.UpdateStatus(dto);
                 if (statusCount == 1)
                 {
                     return Ok(new ResponseContext
