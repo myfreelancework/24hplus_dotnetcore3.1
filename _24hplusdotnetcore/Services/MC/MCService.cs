@@ -196,7 +196,7 @@ namespace _24hplusdotnetcore.Services.MC
                                 foreach (var media in doc.UploadedMedias)
                                 {
                                     string mimeType = "";
-                                    if (media.Type.IndexOf("/") > -1)
+                                    if (media.Type != null && media.Type.IndexOf("/") > -1)
                                     {
                                         mimeType = media.Type.Split("/")[1];
                                     }
@@ -241,11 +241,11 @@ namespace _24hplusdotnetcore.Services.MC
                             CustomerUpdateStatusDto error = new CustomerUpdateStatusDto();
                             error.CustomerId = objCustomer.Id;
                             error.Status = CustomerStatus.REJECT;
-                            error.Reason = content.returnMes ? content.returnMes.Value : "Lỗi gửi data qua MC";
+                            error.Reason = content.returnMes != null ? content.returnMes.Value : "Lỗi gửi data qua MC";
                             _customerServices.UpdateStatus(error);
                         }
-                        File.Delete(filePath);
                         _dataMCProcessingServices.UpdateById(item.Id, Common.DataCRMProcessingStatus.Done);
+                        File.Delete(filePath);
                     }
                 }
                 return uploadCount;

@@ -69,6 +69,7 @@ namespace _24hplusdotnetcore.Mappings
                 .AfterMap((src, dest) => dest.UserName = src.Modifiedby.Label.Split("-")[0])
                 .ForMember(dest => dest.CRMId, src => src.MapFrom(x => x.Id))
                 .ForMember(dest => dest.Route, src => src.MapFrom(x => x.Cf1014))
+                .ForMember(dest => dest.Counsel, src => src.MapFrom(x => x))
                 .ForMember(dest => dest.Id, src => src.Ignore());
 
             #endregion
