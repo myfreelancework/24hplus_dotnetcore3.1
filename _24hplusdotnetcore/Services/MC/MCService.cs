@@ -24,8 +24,15 @@ namespace _24hplusdotnetcore.Services.MC
         private readonly IWebHostEnvironment _hostingEnvironment;
         private readonly DataMCProcessingServices _dataMCProcessingServices;
         private readonly CustomerServices _customerServices;
+        private readonly ProductServices _productServices;
         private readonly IRestMCService _restMCService;
-        public MCService(ILogger<MCService> logger, FileUploadServices fileUploadServices, IWebHostEnvironment webHostEnvironment, DataMCProcessingServices dataMCProcessingServices, CustomerServices customerServices, IRestMCService restMCService)
+        public MCService(ILogger<MCService> logger,
+        FileUploadServices fileUploadServices,
+        IWebHostEnvironment webHostEnvironment,
+        DataMCProcessingServices dataMCProcessingServices,
+        CustomerServices customerServices,
+        ProductServices productServices,
+        IRestMCService restMCService)
         {
             _logger = logger;
             _fileUploadServices = fileUploadServices;
@@ -33,6 +40,7 @@ namespace _24hplusdotnetcore.Services.MC
             _dataMCProcessingServices = dataMCProcessingServices;
             _restMCService = restMCService;
             _customerServices = customerServices;
+            _productServices = productServices;
         }
         public dynamic CheckDuplicate(string citizenID)
         {
@@ -151,23 +159,31 @@ namespace _24hplusdotnetcore.Services.MC
                     foreach (var item in lstMCProcessing)
                     {
                         var objCustomer = _customerServices.GetCustomer(item.CustomerId);
+                        var product = _productServices.GetProductByProductId(objCustomer.Loan.ProductId);
                         // var lstFileUpload = _fileUploadServices.GetListFileUploadByCustomerId(item.CustomerId);
                         // lstFileUpload = lstFileUpload.Where(l => !string.IsNullOrEmpty(l.DocumentCode)).ToList();
                         var fileZipInfo = ZipFiles(objCustomer.Id);
                         var filePath = fileZipInfo[0];
                         var hash = fileZipInfo[1];
+                        var loanAmount = objCustomer.Loan.Amount.Replace(",", string.Empty);
                         var dataMC = new DataMC();
-                        dataMC.AppStatus = "1";
                         dataMC.Request = new Models.MC.Request();
+                        dataMC.Request.Id = 0;
                         dataMC.Request.CitizenId = objCustomer.Personal.IdCard;
                         dataMC.Request.CustomerName = objCustomer.Personal.Name;
-                        dataMC.Request.ProductId = objCustomer.Loan.ProductId;
-                        dataMC.Request.SaleCode = objCustomer.UserName;
+                        dataMC.Request.ProductId = product.ProductIdMC;
+                        dataMC.Request.TempResidence = objCustomer.IsTheSameResidentAddress == true ? 1 : 2;
+                        dataMC.Request.SaleCode = "RD006011111";
                         dataMC.Request.CompanyTaxNumber = objCustomer.Working.TaxId;
-                        dataMC.Request.ShopCode = objCustomer.SaleInfo.Code;
-                        dataMC.Request.LoanAmount = objCustomer.Loan.Amount;
-                        dataMC.Request.LoanTenor = objCustomer.Loan.Term;
-                        dataMC.Request.HasInsurance = objCustomer.Loan.BuyInsurance;
+                        dataMC.Request.ShopCode = objCustomer.Loan.SignAddress.Split('-')[0];
+                        dataMC.Request.IssuePlace = objCustomer.Loan.SignAddress.Split('-')[1];
+                        dataMC.Request.LoanAmount = Int64.Parse(loanAmount);
+                        dataMC.Request.LoanTenor = Int16.Parse(objCustomer.Loan.Term);
+                        dataMC.Request.HasInsurance = objCustomer.Loan.BuyInsurance.Equals("true") ? 1 : 0;
+
+                        dataMC.AppStatus = 1;
+                        dataMC.MobileIssueDateCitizen = objCustomer.Personal.IdCardDate;
+                        dataMC.MobileProductType = "CashLoan";
                         dataMC.Md5 = hash;
                         dataMC.Info = new List<Info>();
 
@@ -203,12 +219,15 @@ namespace _24hplusdotnetcore.Services.MC
                         request.AddParameter("object", JsonConvert.SerializeObject(dataMC));
                         IRestResponse response = client.Execute(request);
                         _logger.LogInformation(response.Content);
-                        if (!string.IsNullOrEmpty(response.Content))
+                        dynamic content = JsonConvert.DeserializeObject<dynamic>(response.Content);
+                        if (content.id != null)
                         {
+                            objCustomer.MCId = content.id;
+                            _customerServices.UpdateCustomerPostback(objCustomer);
                             uploadCount++;
                         }
                         File.Delete(filePath);
-                        _dataMCProcessingServices.UpdateByCustomerId(item.CustomerId, Common.DataCRMProcessingStatus.Done);
+                        _dataMCProcessingServices.UpdateById(item.Id, Common.DataCRMProcessingStatus.Done);
                     }
                 }
                 return uploadCount;

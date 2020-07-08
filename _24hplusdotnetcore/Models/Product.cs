@@ -29,6 +29,8 @@ namespace _24hplusdotnetcore.Models
         public string[] OtherDocument { get; set; }
         [JsonProperty("greenType")]
         public string GreenType { get; set; }
+        [JsonProperty("productIdMC")]
+        public int ProductIdMC { get; set; }
         [JsonProperty("productCodeMC")]
         public string ProductCodeMC { get; set; }
         [JsonProperty("productType")]

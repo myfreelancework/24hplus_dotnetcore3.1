@@ -16,6 +16,11 @@ namespace _24hplusdotnetcore.Models
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; }
+        public string CRMId { get; set; }
+        public string MCId { get; set; }
+        public string MCAppnumber  { get; set; }
+        public string MCAppId { get; set; }
+        public string Route { get; set; }
         public string ContractCode { get; set; } // @todo
         [BsonRequired]
         public string UserName { get; set; }
@@ -34,8 +39,6 @@ namespace _24hplusdotnetcore.Models
         public Result Result { get; set; }
         public IEnumerable<GroupDocument> Documents  { get; set; }
         public Counsel Counsel { get; set; }
-        public string CRMId { get; set; }
-        public string Route { get; set; }
         public PostbackMA PostbackMA { get; set; }
     }
 
