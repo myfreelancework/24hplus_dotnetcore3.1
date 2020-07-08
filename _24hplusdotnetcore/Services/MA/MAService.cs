@@ -54,7 +54,7 @@ namespace _24hplusdotnetcore.Services.MA
                     return;
                 }
 
-                var dataProcessingIds = new List<string>();
+                // var dataProcessingIds = new List<string>();
 
                 foreach (var customer in customers)
                 {
@@ -72,14 +72,17 @@ namespace _24hplusdotnetcore.Services.MA
                     if (result.Result == true)
                     {
                         var dataProcessing = dataProcessings.First(x => x.CustomerId == customer.Id);
-                        dataProcessingIds.Add(dataProcessing.Id);
+                        // dataProcessingIds.Add(dataProcessing.Id);
+                        dataProcessing.Status = DataProcessingStatus.DONE;
+                        _dataProcessingService.ReplaceOne(dataProcessing);
                     }
                 }
 
-                if (dataProcessingIds.Any())
-                {
-                    _dataProcessingService.DeleteByIds(dataProcessingIds);
-                }
+                // if (dataProcessingIds.Any())
+                // {
+
+                    // _dataProcessingService.DeleteByIds(dataProcessingIds);
+                // }
 
             }
             catch (Exception ex)
