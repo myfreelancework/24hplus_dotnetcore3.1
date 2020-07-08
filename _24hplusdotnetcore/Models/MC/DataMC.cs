@@ -60,7 +60,7 @@ namespace _24hplusdotnetcore.Models.MC
         public int TempResidence { get; set; }
 
         [JsonProperty("loanAmount")]
-        public double LoanAmount { get; set; }
+        public int LoanAmount { get; set; }
 
         [JsonProperty("loanTenor")]
         public int LoanTenor { get; set; }

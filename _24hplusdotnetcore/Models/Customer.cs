@@ -17,8 +17,8 @@ namespace _24hplusdotnetcore.Models
         [BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; }
         public string CRMId { get; set; }
-        public string MCId { get; set; }
-        public string MCAppnumber  { get; set; }
+        public int MCId { get; set; }
+        public int MCAppnumber  { get; set; }
         public string MCAppId { get; set; }
         public string Route { get; set; }
         public string ContractCode { get; set; } // @todo
