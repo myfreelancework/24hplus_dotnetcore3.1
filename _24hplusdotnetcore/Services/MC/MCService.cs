@@ -165,7 +165,7 @@ namespace _24hplusdotnetcore.Services.MC
                         var fileZipInfo = ZipFiles(objCustomer.Id);
                         var filePath = fileZipInfo[0];
                         var hash = fileZipInfo[1];
-                        var loanAmount = String.Replace(objCustomer.Loan.Amount, ',', string.Empty);
+                        var loanAmount = objCustomer.Loan.Amount.Replace(",", string.Empty);
                         var dataMC = new DataMC();
                         dataMC.Request = new Models.MC.Request();
                         dataMC.Request.Id = 0;
