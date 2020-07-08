@@ -486,14 +486,14 @@ namespace _24hplusdotnetcore.Services
 
         public async Task<Customer> GetByCrmIdAsync(string crmId)
         {
-            return await _customer.Find(c => string.Equals(c.CRMId, crmId)).FirstOrDefaultAsync();
+            return await _customer.Find(c => string.Equals(c.Personal.PotentialNo, crmId)).FirstOrDefaultAsync();
         }
 
         public async Task UpdateAsync(MAPostBackRequestModel mAPostBack)
         {
             try
             {
-                var filter = Builders<Customer>.Filter.Where(c => string.Equals(c.CRMId, mAPostBack.LeadId));
+                var filter = Builders<Customer>.Filter.Where(c => string.Equals(c.Personal.PotentialNo, mAPostBack.LeadId));
                 var update = Builders<Customer>.Update
                     .Set(c => c.ModifiedDate, DateTime.UtcNow)
                     .Set(c => c.Result.Status, mAPostBack.Status.ToString())

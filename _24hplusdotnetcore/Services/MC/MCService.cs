@@ -1,4 +1,5 @@
 
+using _24hplusdotnetcore.Common;
 using _24hplusdotnetcore.Common.Constants;
 using _24hplusdotnetcore.ModelDtos;
 using _24hplusdotnetcore.Models;
@@ -194,11 +195,20 @@ namespace _24hplusdotnetcore.Services.MC
                             {
                                 foreach (var media in doc.UploadedMedias)
                                 {
+                                    string mimeType = "";
+                                    if (media.Type.IndexOf("/") > -1)
+                                    {
+                                        mimeType = media.Type.Split("/")[1];
+                                    }
+                                    else
+                                    {
+                                        mimeType = media.Type;
+                                    }
                                     var dataMCFileInfo = new Info();
                                     dataMCFileInfo.GroupId = group.GroupId.ToString();
                                     dataMCFileInfo.DocumentCode = doc.DocumentCode;
                                     dataMCFileInfo.FileName = media.Name;
-                                    dataMCFileInfo.MimeType = media.Type;
+                                    dataMCFileInfo.MimeType = mimeType;
                                     dataMC.Info.Add(dataMCFileInfo);
                                 }
                             }
@@ -222,9 +232,17 @@ namespace _24hplusdotnetcore.Services.MC
                         dynamic content = JsonConvert.DeserializeObject<dynamic>(response.Content);
                         if (content.id != null)
                         {
-                            objCustomer.MCId = content.id;
+                            objCustomer.MCId = content.id.Value;
                             _customerServices.UpdateCustomerPostback(objCustomer);
                             uploadCount++;
+                        }
+                        else
+                        {
+                            CustomerUpdateStatusDto error = new CustomerUpdateStatusDto();
+                            error.CustomerId = objCustomer.Id;
+                            error.Status = CustomerStatus.REJECT;
+                            error.Reason = content.returnMes ? content.returnMes.Value : "Lỗi gửi data qua MC";
+                            _customerServices.UpdateStatus(error);
                         }
                         File.Delete(filePath);
                         _dataMCProcessingServices.UpdateById(item.Id, Common.DataCRMProcessingStatus.Done);

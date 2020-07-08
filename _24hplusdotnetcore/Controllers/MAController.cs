@@ -45,8 +45,23 @@ namespace _24hplusdotnetcore.Controllers
                         Message = "Customer does not exist",
                     });
                 }
-
-                await _customerServices.UpdateAsync(mAPostBack);
+                customer.PostbackMA = new PostbackMA();
+                customer.ModifiedDate = Convert.ToDateTime(DateTime.Now);
+                customer.Result.Status = mAPostBack.Status.ToString();
+                customer.Result.DetailStatus = mAPostBack.DetailStatus.ToString();
+                customer.PostbackMA.TransactionId = mAPostBack.TransactionId;
+                customer.PostbackMA.DateOfLead = mAPostBack.DateOfLead;
+                customer.PostbackMA.DcCode = mAPostBack.DcCode;
+                customer.PostbackMA.DcName = mAPostBack.DcName;
+                customer.PostbackMA.PlaceOfUpload = mAPostBack.PlaceOfUpload;
+                customer.PostbackMA.DocumentCollected = mAPostBack.DocumentCollected;
+                customer.PostbackMA.LastCastStatus = mAPostBack.LastCastStatus;
+                customer.PostbackMA.DcLastNote = mAPostBack.DcLastNote;
+                customer.PostbackMA.AppSchedule = mAPostBack.AppSchedule;
+                customer.PostbackMA.LastCall = mAPostBack.LastCall;
+                customer.PostbackMA.Status = mAPostBack.Status;
+                customer.PostbackMA.DetailStatus = mAPostBack.DetailStatus;
+                _customerServices.UpdateCustomerPostback(customer);
 
                 _dataCRMProcessingServices.CreateOne(new Models.CRM.DataCRMProcessing
                 {
