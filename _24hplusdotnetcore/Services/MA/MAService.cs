@@ -16,49 +16,52 @@ namespace _24hplusdotnetcore.Services.MA
     {
         private readonly ILogger<MAService> _logger;
         private readonly DataProcessingService _dataProcessingService;
-        private readonly CustomerServices _customerServices;
         private readonly MAConfig _mAConfig;
         private readonly IRestMAService _restMAService;
         private readonly IMapper _mapper;
+        private readonly LeadCrmService _leadCrmService;
 
         public MAService(
             ILogger<MAService> logger,
             DataProcessingService dataProcessingService,
-            CustomerServices customerServices,
             IOptions<MAConfig> mAConfig,
             IRestMAService restMAService,
-            IMapper mapper)
+            IMapper mapper,
+            LeadCrmService leadCrmService)
         {
             _logger = logger;
             _dataProcessingService = dataProcessingService;
-            _customerServices = customerServices;
             _mAConfig = mAConfig.Value;
             _restMAService = restMAService;
             _mapper = mapper;
+            _leadCrmService = leadCrmService;
         }
 
         public async Task PublishAsync()
         {
             try
             {
-                IEnumerable<DataProcessing> dataProcessings = _dataProcessingService.GetList(DataProcessingType.PUSH_CUSTOMER_CRM_TO_MA, DataProcessingStatus.IN_PROGRESS);
+                IEnumerable<DataProcessing> dataProcessings = await _dataProcessingService.GetListAsync(
+                    DataProcessingType.PUSH_LEAD_CRM_TO_MA, DataProcessingStatus.IN_PROGRESS);
+
                 if (dataProcessings?.Any() != true)
                 {
                     return;
                 }
 
-                var customerIds = dataProcessings.Select(x => x.CustomerId);
-                IEnumerable<Customer> customers = _customerServices.GetByIds(customerIds);
-                if (customers?.Any() != true)
+                var leadCrmIds = dataProcessings.Select(x => x.LeadCrmId);
+                var leadCrms = _leadCrmService.GetByIds(leadCrmIds);
+
+                if (leadCrms.Any() != true)
                 {
                     return;
                 }
 
-                // var dataProcessingIds = new List<string>();
+                var dataProcessingUpdations = new List<DataProcessing>();
 
-                foreach (var customer in customers)
+                foreach (var leadCrm in leadCrms)
                 {
-                    var requestData = _mapper.Map<MARequestDataModel>(customer);
+                    var requestData = _mapper.Map<MARequestDataModel>(leadCrm);
                     requestData.REQUEST_ID = _mAConfig.RequestId;
 
                     var request = new MARequestModel
@@ -71,18 +74,17 @@ namespace _24hplusdotnetcore.Services.MA
 
                     if (result.Result == true)
                     {
-                        var dataProcessing = dataProcessings.First(x => x.CustomerId == customer.Id);
-                        // dataProcessingIds.Add(dataProcessing.Id);
-                        dataProcessing.Status = DataProcessingStatus.DONE;
-                        _dataProcessingService.ReplaceOne(dataProcessing);
+                        dataProcessingUpdations.AddRange(dataProcessings.Where(x => x.LeadCrmId == leadCrm.Id));
+
                     }
                 }
 
-                // if (dataProcessingIds.Any())
-                // {
-
-                    // _dataProcessingService.DeleteByIds(dataProcessingIds);
-                // }
+                foreach (var dataProcessing in dataProcessingUpdations)
+                {
+                    dataProcessing.Status = DataProcessingStatus.DONE;
+                    dataProcessing.FinishDate = DateTime.UtcNow;
+                    await _dataProcessingService.ReplaceOneAsync(dataProcessing);
+                }
 
             }
             catch (Exception ex)

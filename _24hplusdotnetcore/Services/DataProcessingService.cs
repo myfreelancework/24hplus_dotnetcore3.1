@@ -5,6 +5,7 @@ using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace _24hplusdotnetcore.Services
 {
@@ -24,15 +25,11 @@ namespace _24hplusdotnetcore.Services
             _dataProcessing = database.GetCollection<DataProcessing>(MongoCollection.DATA_PROCESSING);
         }
 
-        public DataProcessing ReplaceOne(DataProcessing dataProcessing)
+        public async Task ReplaceOneAsync(DataProcessing dataProcessing)
         {
             try
             {
-                var filter = Builders<DataProcessing>.Filter.Where(c =>
-                string.Equals(c.CustomerId, dataProcessing.CustomerId) && string.Equals(c.Status, dataProcessing.Status));
-
-                _dataProcessing.ReplaceOne(filter, dataProcessing, new ReplaceOptions { IsUpsert = true });
-                return dataProcessing;
+                await _dataProcessing.ReplaceOneAsync(c => c.Id == dataProcessing.Id, dataProcessing);
             }
             catch (Exception ex)
             {
@@ -54,12 +51,12 @@ namespace _24hplusdotnetcore.Services
             }
         }
 
-        public IEnumerable<DataProcessing> GetList(string dataProcessingType, string status)
+        public async Task<IEnumerable<DataProcessing>> GetListAsync(string dataProcessingType, string status)
         {
             try
             {
-                return _dataProcessing.Find(x => string.Equals(dataProcessingType, x.DataProcessingType) && 
-                string.Equals(x.Status, status)).ToList();
+                return await _dataProcessing.Find(x => string.Equals(dataProcessingType, x.DataProcessingType) && 
+                string.Equals(x.Status, status)).ToListAsync();
             }
             catch (Exception ex)
             {

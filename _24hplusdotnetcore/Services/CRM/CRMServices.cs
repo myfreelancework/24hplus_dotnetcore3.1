@@ -11,6 +11,7 @@ using MongoDB.Bson;
 using _24hplusdotnetcore.Common;
 using AutoMapper;
 using _24hplusdotnetcore.Common.Enums;
+using System.Threading.Tasks;
 
 namespace _24hplusdotnetcore.Services.CRM
 {
@@ -21,18 +22,21 @@ namespace _24hplusdotnetcore.Services.CRM
         private readonly DataCRMProcessingServices _dataCRMProcessingServices;
         private readonly DataProcessingService _dataProcessingService;
         private readonly IMapper _mapper;
+        private readonly LeadCrmService _leadCrmService;
 
         public CRMServices(ILogger<CRMServices> logger,
             CustomerServices customerServices,
             DataCRMProcessingServices dataCRMProcessingServices,
             DataProcessingService dataProcessingService,
-            IMapper mapper)
+            IMapper mapper,
+            LeadCrmService leadCrmService)
         {
             _logger = logger;
             _customerServices = customerServices;
             _dataCRMProcessingServices = dataCRMProcessingServices;
             _dataProcessingService = dataProcessingService;
             _mapper = mapper;
+            _leadCrmService = leadCrmService;
         }
 
         private string CRMLogin()
@@ -131,72 +135,6 @@ namespace _24hplusdotnetcore.Services.CRM
             }
         }
 
-        private long AddNewCustomerFromCRM(CrmCustomerData crmCustomer, string customerStatus, string dataProcessingType)
-        {
-            try
-            {
-                if (crmCustomer?.Result?.Records?.Any() != true)
-                {
-                    return 0;
-                }
-
-                var idCards = crmCustomer.Result.Records.Select(x => x.Cf1050);
-                IEnumerable<Customer> customers = _customerServices.GetByIdCards(idCards);
-
-                var customerCreations = new List<Customer>();
-                var dataProcessingCreations = new List<DataProcessing>();
-
-                foreach (var record in crmCustomer.Result.Records)
-                {
-                    var customer = customers?.FirstOrDefault(x => string.Equals(x.Personal.IdCard, record.Cf1050, StringComparison.OrdinalIgnoreCase));
-                    if (customer == null)
-                    {
-                        var customerCreation = _mapper.Map<Customer>(record);
-                        customerCreation.Status = customerStatus;
-                        customerCreations.Add(customerCreation);
-                    }
-                    else
-                    {
-                        dataProcessingCreations.Add(new DataProcessing
-                        {
-                            CustomerId = customer.Id,
-                            DataProcessingType = dataProcessingType
-                        });
-                    }
-                }
-
-                if (customerCreations.Any())
-                {
-                    _customerServices.InsertMany(customerCreations);
-
-                    dataProcessingCreations.AddRange(customerCreations.Select(customer => new DataProcessing
-                    {
-                        CustomerId = customer.Id,
-                        DataProcessingType = dataProcessingType
-                    }));
-
-                    _dataCRMProcessingServices.InsertMany(customerCreations.Select(customer => new DataCRMProcessing { 
-                        CustomerId = customer.Id,
-                        Status = DataCRMProcessingStatus.InProgress, 
-                        LeadSource = LeadSourceType.MA.ToString() 
-                    }));
-                }
-
-                if (dataProcessingCreations.Any())
-                {
-                    _dataProcessingService.InsertMany(dataProcessingCreations);
-                }
-
-
-                return dataProcessingCreations.Count;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, ex.Message);
-                return -1;
-            }
-        }
-
         public long GetCustomerFromCRM()
         {
             try
@@ -219,23 +157,73 @@ namespace _24hplusdotnetcore.Services.CRM
             }
         }
 
-        public long GetCustomerFromCRM(string query)
+        public async Task UpsertLeadCrmAsync(CrmCustomerData crmCustomer, string dataProcessingType)
+        {
+            try
+            {
+                if (crmCustomer?.Result?.Records?.Any() != true)
+                {
+                    return;
+                }
+
+                IEnumerable<string> leadCrmIds = crmCustomer.Result.Records.Select(x => x.Id);
+                IEnumerable<LeadCrm> leadCrms = await _leadCrmService.GetByLeadCrmIdsAsync(leadCrmIds);
+
+                var dataProcessingCreations = new List<DataProcessing>();
+                var dataCRMProcessingCreations = new List<DataCRMProcessing>();
+
+                foreach (Record record in crmCustomer.Result.Records)
+                {
+                    LeadCrm leadCrm = leadCrms.FirstOrDefault(x => x.LeadCrmId == record.Id);
+                    if (leadCrm == null)
+                    {
+                        leadCrm = _mapper.Map<LeadCrm>(record);
+                        await _leadCrmService.InsertAsync(leadCrm);
+                    }
+                    else
+                    {
+                        _mapper.Map(record, leadCrm);
+                        await _leadCrmService.ReplaceOneAsync(leadCrm);
+                    }
+
+                    dataProcessingCreations.Add(new DataProcessing
+                    {
+                        LeadCrmId = leadCrm.Id,
+                        DataProcessingType = dataProcessingType
+                    });
+                    dataCRMProcessingCreations.Add(new DataCRMProcessing
+                    {
+
+                        LeadCrmId = leadCrm.Id,
+                        LeadSource = LeadSourceType.MA.ToString()
+                    });
+                }
+
+                _dataProcessingService.InsertMany(dataProcessingCreations);
+                _dataCRMProcessingServices.InsertMany(dataCRMProcessingCreations);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                throw;
+            }
+        }
+
+        public async Task GetCustomerFromCrmAsync(string query)
         {
             try
             {
                 string session = CRMLogin();
                 if (string.IsNullOrEmpty(session))
                 {
-                    return 0;
+                    throw new Exception("Token is null or empty");
                 }
-
                 CrmCustomerData dataFromCRM = QueryLead(session, query);
-                return AddNewCustomerFromCRM(dataFromCRM, CustomerStatus.PUSH_MA, DataProcessingType.PUSH_CUSTOMER_CRM_TO_MA);
+                await UpsertLeadCrmAsync(dataFromCRM, DataProcessingType.PUSH_LEAD_CRM_TO_MA);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, ex.Message);
-                return -1;
             }
         }
 
@@ -247,64 +235,73 @@ namespace _24hplusdotnetcore.Services.CRM
                 if (!string.IsNullOrEmpty(session))
                 {
                     var dataCRMProcessings = _dataCRMProcessingServices.GetDataCRMProcessings(Common.DataCRMProcessingStatus.InProgress);
-                    if(!dataCRMProcessings.Any())
+                    if (!dataCRMProcessings.Any())
                     {
                         return;
                     }
 
-                    var custoemrIds = dataCRMProcessings.Select(x => x.CustomerId);
-                    var customers = _customerServices.GetByIds(custoemrIds);
-                    if (!customers.Any())
-                    {
-                        return;
-                    }
+                    IEnumerable<string> customerIds = dataCRMProcessings
+                        .Where(x => !string.IsNullOrEmpty(x.CustomerId))
+                        .Select(x => x.CustomerId);
+                    IEnumerable<Customer> customers = _customerServices.GetByIds(customerIds);
 
-                    foreach (var customer in customers)
+                    IEnumerable<string> leadCrmIds = dataCRMProcessings
+                        .Where(x => !string.IsNullOrEmpty(x.LeadCrmId))
+                        .Select(x => x.LeadCrmId);
+                    IEnumerable<LeadCrm> leadCrms = _leadCrmService.GetByIds(leadCrmIds);
+
+                    foreach (var dataCRMProcessing in dataCRMProcessings)
                     {
-                        Record dataCRM;
-                        var dataCRMProcessing = dataCRMProcessings.First(x => x.CustomerId == customer.Id);
-                        
+
                         if (string.Equals(dataCRMProcessing.LeadSource, LeadSourceType.MA.ToString()))
                         {
-                            dataCRM = _mapper.Map<Record>(customer);
-                            dataCRM.Cf1178 = "MIRAE ASSET";
-                            dataCRM.Leadsource = "Telesales 24hPlus -2020";
+                            LeadCrm leadCrm = leadCrms.FirstOrDefault(x => x.Id == dataCRMProcessing.LeadCrmId);
+                            if (leadCrm != null)
+                            {
+                                Record dataCRM = _mapper.Map<Record>(leadCrm);
+                                dataCRM.Cf1178 = "MIRAE ASSET";
+                                dataCRM.Leadsource = "Telesales 24hPlus -2020";
+                                PushDataToCRM(dataCRM, session, dataCRMProcessing);
+                            }
                         }
                         else
                         {
-                            dataCRM = new Record
+                            Customer customer = customers.FirstOrDefault(x => x.Id == dataCRMProcessing.CustomerId);
+                            if (customer != null)
                             {
-                                Cf1178 = "MC",
-                                Potentialname = customer.Personal.Name,
-                                Cf1026 = customer.Personal.Gender,
-                                Leadsource = "MobileGreenC",
-                                Cf854 = customer.Personal.Phone,
-                                Cf1050 = customer.Personal.IdCard,
-                                Cf1028 = customer.Working.Job,
-                                Cf884 = customer.Working.Income,
-                                Cf1020 = customer.ResidentAddress.Province,
-                                Cf1032 = customer.Loan.Category,
-                                Cf1040 = customer.Loan.Product,
-                                Cf968 = customer.Loan.Amount,
-                                Cf990 = customer.Loan.Term,
-                                Cf1052 = "-",
-                                Cf1054 = customer.Loan.SignAddress,
-                                Cf1036 = "CHỨNG MINH NHÂN DÂN |##| HỘ KHẨU",
-                                SalesStage = "1.KH mới",
-                                Cf1184 = "-",
-                                Cf1188 = "-",
-                                AssignedUserId = new AssignedUserId
+                                Record dataCRM = new Record
                                 {
-                                    Value = "19x2335"
-                                },
-                                Cf1244 = "AS",
-                                Cf1256 = "-",
-                                Cf1264 = "????",
-                                Cf1230 = ""
-                            };
+                                    Cf1178 = "MC",
+                                    Potentialname = customer.Personal.Name,
+                                    Cf1026 = customer.Personal.Gender,
+                                    Leadsource = "MobileGreenC",
+                                    Cf854 = customer.Personal.Phone,
+                                    Cf1050 = customer.Personal.IdCard,
+                                    Cf1028 = customer.Working.Job,
+                                    Cf884 = customer.Working.Income,
+                                    Cf1020 = customer.ResidentAddress.Province,
+                                    Cf1032 = customer.Loan.Category,
+                                    Cf1040 = customer.Loan.Product,
+                                    Cf968 = customer.Loan.Amount,
+                                    Cf990 = customer.Loan.Term,
+                                    Cf1052 = "-",
+                                    Cf1054 = customer.Loan.SignAddress,
+                                    Cf1036 = "CHỨNG MINH NHÂN DÂN |##| HỘ KHẨU",
+                                    SalesStage = "1.KH mới",
+                                    Cf1184 = "-",
+                                    Cf1188 = "-",
+                                    AssignedUserId = new AssignedUserId
+                                    {
+                                        Value = "19x2335"
+                                    },
+                                    Cf1244 = "AS",
+                                    Cf1256 = "-",
+                                    Cf1264 = "????",
+                                    Cf1230 = ""
+                                };
+                                PushDataToCRM(dataCRM, session, dataCRMProcessing);
+                            }
                         }
-
-                        PushDataToCRM(dataCRM, session, dataCRMProcessing);
                     }
                 }
             }
@@ -327,10 +324,11 @@ namespace _24hplusdotnetcore.Services.CRM
                 request.AddParameter("values", "" + JsonConvert.SerializeObject(dataCRM) + "");
                 request.AddParameter("_session", "" + session + "");
                 request.AddParameter("module", "Potentials");
-               //request.AddParameter("record", "13x55730");
+                //request.AddParameter("record", "13x55730");
                 IRestResponse response = client.Execute(request);
                 Console.WriteLine(response.Content);
                 dataCRMProcessing.Status = Common.DataCRMProcessingStatus.Done;
+                dataCRMProcessing.FinishDate = DateTime.UtcNow;
                 _dataCRMProcessingServices.UpdateByCustomerId(dataCRMProcessing, Common.DataCRMProcessingStatus.Done);
                 _logger.LogInformation("User was pushed to CRM: {0} - Status: {1}", dataCRMProcessing.CustomerId, Common.DataCRMProcessingStatus.Done);
             }

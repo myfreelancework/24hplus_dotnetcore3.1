@@ -29,5 +29,6 @@
         public static string DataMCProcessing = "DataMCProcessing";
         internal static string MCNotification = "MCNotification";
         public const string DATA_PROCESSING = "DataProcessing";
+        public const string LEAD_CRM = "LeadCrm";
     }
 }
