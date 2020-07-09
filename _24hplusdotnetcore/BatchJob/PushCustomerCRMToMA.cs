@@ -28,7 +28,7 @@ namespace _24hplusdotnetcore.BatchJob
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                _cRMServices.GetCustomerFromCRM(query);
+                await _cRMServices.GetCustomerFromCrmAsync(query);
                 await _mAService.PublishAsync();
 
                 await Task.Delay(_mAConfig.MillisecondsDelay, cancellationToken);

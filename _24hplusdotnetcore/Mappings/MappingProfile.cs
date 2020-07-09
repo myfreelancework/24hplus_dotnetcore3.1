@@ -170,6 +170,79 @@ namespace _24hplusdotnetcore.Mappings
 
             #endregion
 
+            #region CRM to LeadCRM
+
+            CreateMap<AssignedUserId, LeadCrmUser>();
+
+            CreateMap<Record, LeadCrm>()
+                .ForMember(dest => dest.LeadCrmId, src => src.MapFrom(x => x.Id))
+                .ForMember(dest => dest.Id, src => src.Ignore());
+
+            #endregion
+
+            #region LeadCRM to CRM
+
+            CreateMap<LeadCrmUser, AssignedUserId>();
+
+            CreateMap<LeadCrm, Record>()
+                .ForMember(dest => dest.Id, src => src.MapFrom(x => x.LeadCrmId));
+
+            #endregion
+
+            #region LeadCRM to MA
+
+            CreateMap<LeadCrm, MARequestDataModel>()
+                .ForMember(dest => dest.LEAD_ID, src => src.MapFrom(x => x.PotentialNo))
+                .ForMember(dest => dest.ID_NO, src => src.MapFrom(x => x.Cf1050))
+                .ForMember(dest => dest.CONTACT_NAME, src => src.MapFrom(x => x.Potentialname))
+                .ForMember(dest => dest.PHONE, src => src.MapFrom(x => x.Cf854))
+                .ForMember(dest => dest.CURRENT_ADDRESS, src => src.MapFrom(x => x.Cf892))
+                .ForMember(dest => dest.PRODUCT, src => src.MapFrom(x => x.Cf1032))
+                .ForMember(dest => dest.T_STATUS_DATE, src => src.MapFrom(x => x.Cf1266))
+                .ForMember(dest => dest.APPOINTMENT_DATE, src => src.MapFrom(x => x.Cf1052))
+                .ForMember(dest => dest.APPOINTMENT_ADDRESS, src => src.MapFrom(x => x.Cf892))
+                .ForMember(dest => dest.TSA_IN_CHARGE, src => src.MapFrom(x => x.AssignedUserId.Value))
+                .ForMember(dest => dest.TST_TEAM, src => src.MapFrom(x => x.Cf972))
+                .ForMember(dest => dest.REQUEST_DOCUMENT, src => src.MapFrom(x => x.Cf1036))
+                .ForMember(dest => dest.DOB, src => src.MapFrom(x => x.Cf948))
+                .ForMember(dest => dest.GENDER, src => src.MapFrom(x => x.Cf1026))
+                .ForMember(dest => dest.COMPANY_NAME, src => src.MapFrom(x => x.Cf962))
+                .ForMember(dest => dest.COMPANY_ADDR, src => src.MapFrom(x => x.Cf1020))
+                .ForMember(dest => dest.TEL_COMPANY, src => src.MapFrom(x => x.Cf976))
+                .ForMember(dest => dest.AREA, src => src.MapFrom(x => x.Cf1020))
+                .ForMember(dest => dest.MARITAL_STATUS, src => src.MapFrom(x => x.Cf1030))
+                .ForMember(dest => dest.OWNER, src => src.MapFrom(x => x.Cf978))
+                .ForMember(dest => dest.INCOME, src => src.MapFrom(x => x.Cf884))
+                .ForMember(dest => dest.POSITION, src => src.MapFrom(x => x.Cf982))
+                .ForMember(dest => dest.WORK_PERIOD, src => src.MapFrom(x => x.Cf984))
+                .ForMember(dest => dest.TYPE_OF_CONTRACT, src => src.MapFrom(x => x.Cf986))
+                .ForMember(dest => dest.HEALTH_CARD, src => src.MapFrom(x => x.Cf988))
+                .ForMember(dest => dest.LOAN_AMOUNT, src => src.MapFrom(x => x.Cf968))
+                .ForMember(dest => dest.TENURE, src => src.MapFrom(x => x.Cf990))
+                .ForMember(dest => dest.APP_DATE, src => src.MapFrom(x => x.Cf992))
+                .ForMember(dest => dest.DISBURSAL_DATE, src => src.MapFrom(x => x.Cf994))
+                .ForMember(dest => dest.GENERATE_TO_LEAD, src => src.MapFrom(x => x.Createdtime))
+                .ForMember(dest => dest.FOLLOWED_DATE, src => src.MapFrom(x => x.Modifiedtime))
+                .ForMember(dest => dest.PERMANENT_ADDR, src => src.MapFrom(x => x.Cf1002))
+                .ForMember(dest => dest.TSA_NAME, src => src.MapFrom(x => x.AssignedUserId.Label))
+                .ForMember(dest => dest.TSA_CAMPAIN, src => src.MapFrom(x => x.AssignedUserId.Value))
+                .ForMember(dest => dest.TSA_GROUP, src => src.MapFrom(x => x.Cf1008))
+                .ForMember(dest => dest.TSA_LAST_NOTES, src => src.MapFrom(x => x.Cf1196))
+                .ForMember(dest => dest.OCCUPATION, src => src.MapFrom(x => x.Cf1246))
+                .ForMember(dest => dest.ROUTE, src => src.MapFrom(x => x.Cf1014));
+
+            #endregion
+
+            #region MA to LeadCRM
+
+            CreateMap<MAPostBackRequestModel, PostbackMA>();
+
+            CreateMap<MAPostBackRequestModel, LeadCrm>()
+                .ForMember(dest => dest.Cf1184, src => src.MapFrom(x => x.Status))
+                .ForMember(dest => dest.Description, src => src.MapFrom(x => x.DetailStatus))
+                .ForMember(dest => dest.PostbackMA, src => src.MapFrom(x => x));
+
+            #endregion
         }
     }
 }

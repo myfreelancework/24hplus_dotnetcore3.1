@@ -96,6 +96,7 @@ namespace _24hplusdotnetcore
             services.AddSingleton<DataMCProcessingServices>();
             services.AddSingleton<DataProcessingService>();
             services.AddSingleton<MAService>();
+            services.AddSingleton<LeadCrmService>();
 
             // GCC Service
             services.AddSingleton<GCCService>();
