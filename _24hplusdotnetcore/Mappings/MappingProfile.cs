@@ -1,4 +1,5 @@
-﻿using _24hplusdotnetcore.ModelDtos;
+﻿using _24hplusdotnetcore.Common.Constants;
+using _24hplusdotnetcore.ModelDtos;
 using _24hplusdotnetcore.Models;
 using _24hplusdotnetcore.Models.CRM;
 using AutoMapper;
@@ -185,7 +186,8 @@ namespace _24hplusdotnetcore.Mappings
             CreateMap<LeadCrmUser, AssignedUserId>();
 
             CreateMap<LeadCrm, Record>()
-                .ForMember(dest => dest.Id, src => src.MapFrom(x => x.LeadCrmId));
+                .ForMember(dest => dest.Id, src => src.MapFrom(x => x.LeadCrmId))
+                .ForMember(dest => dest.Cf1184, src => src.MapFrom(x => x.GetStatusMessage()));
 
             #endregion
 
@@ -238,8 +240,8 @@ namespace _24hplusdotnetcore.Mappings
             CreateMap<MAPostBackRequestModel, PostbackMA>();
 
             CreateMap<MAPostBackRequestModel, LeadCrm>()
-                .ForMember(dest => dest.Cf1184, src => src.MapFrom(x => x.Status))
-                .ForMember(dest => dest.Description, src => src.MapFrom(x => x.DetailStatus))
+                .ForMember(dest => dest.Cf1184, src => src.MapFrom(x => x.GetStatusMessage()))
+                .ForMember(dest => dest.Description, src => src.MapFrom(x => x.GetDetailStatusMessage()))
                 .ForMember(dest => dest.PostbackMA, src => src.MapFrom(x => x));
 
             #endregion

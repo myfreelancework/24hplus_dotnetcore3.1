@@ -1,4 +1,5 @@
-﻿using MongoDB.Bson;
+﻿using _24hplusdotnetcore.Common.Constants;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using System;
 
@@ -160,6 +161,21 @@ namespace _24hplusdotnetcore.Models
         public string Cf1350 { get; set; }
 
         public PostbackMA PostbackMA { get; set; }
+
+        public string GetStatusMessage()
+        {
+            if(PostbackMA == null)
+            {
+                return Cf1184;
+            }
+
+            string key = string.Format(StatusMapping.STATUS_PREFIX, PostbackMA.Status);
+            if (StatusMapping.CRM_STATUS_MESSAGE_MAPPING.TryGetValue(key, out string message))
+            {
+                return message;
+            }
+            return StatusMapping.CRM_STATUS_MESSAGE_MAPPING[StatusMapping.DEFAULT];
+        }
     }
 
     public class LeadCrmUser
