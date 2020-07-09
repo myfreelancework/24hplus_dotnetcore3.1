@@ -271,7 +271,7 @@ namespace _24hplusdotnetcore.Services.MC
                 //    string s = Path.Combine(serverPath, listFile[i].FileUploadName);
                 //    File.Copy(s, Path.Combine(d, listFile[i].FileUploadName), true);
                 //}
-                ZipFile.CreateFromDirectory(d, Path.Combine(serverPath, customerId + ".zip"));
+                ZipFile.CreateFromDirectory(d, Path.Combine(serverPath, customerId + ".zip"), CompressionLevel.Optimal, false);
                 string fileZip = Path.Combine(serverPath, customerId + ".zip");
                 var md5 = MD5.Create();
                 var stream = File.OpenRead(fileZip);
