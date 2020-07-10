@@ -89,20 +89,29 @@ namespace _24hplusdotnetcore
             services.AddSingleton<NotificationServices>();
             // services.AddSingleton<Services.MC.MCService>();
             services.AddSingleton<ConfigServices>();
-            services.AddSingleton<CRMServices>();
-            services.AddSingleton<DataCRMProcessingServices>();
-            services.AddSingleton<MCService>();
-            services.AddSingleton<MCNotificationService>();
-            services.AddSingleton<DataMCProcessingServices>();
-            services.AddSingleton<DataProcessingService>();
-            services.AddSingleton<MAService>();
-            services.AddSingleton<LeadCrmService>();
 
             // GCC Service
             services.AddSingleton<GCCService>();
             services.AddSingleton<GCCProductService>();
             services.AddSingleton<GCCMotoProgramService>();
             services.AddSingleton<GCCMotoService>();
+
+            // MA service
+            services.AddSingleton<MAService>();
+            services.AddSingleton<DataProcessingService>();
+
+            // MC Service
+            services.AddSingleton<MCService>();
+            services.AddSingleton<MCNotificationService>();
+            services.AddSingleton<MCCheckCICService>();
+            services.AddSingleton<DataMCProcessingServices>();
+
+            // CRM service
+            services.AddSingleton<CRMServices>();
+            services.AddSingleton<DataCRMProcessingServices>();
+            services.AddSingleton<LeadCrmService>();
+
+
 
             //Add batchjob
             services.AddSingleton<IHostedService, AddNewCustomerFromCRM>();

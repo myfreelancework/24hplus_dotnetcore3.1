@@ -18,4 +18,11 @@ namespace _24hplusdotnetcore.Models
         [JsonProperty("Message")]
         public string Message { get; set; }
     }
+    public class ResponseMCContext
+    {
+        [JsonProperty("returnCode")]
+        public string ReturnCode { get; set; }
+        [JsonProperty("returnMes")]
+        public string ReturnMes { get; set; }
+    }
 }

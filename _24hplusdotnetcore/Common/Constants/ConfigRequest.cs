@@ -18,6 +18,6 @@ namespace _24hplusdotnetcore.Common.Constants
         //CRM
         public static string CRM_UserName = "admin1";
         public static string CRM_Password = "Abc@123";
-        public static string CRM_Query = "SELECT * FROM Potentials WHERE cf_1050=365422585";
+        public static string CRM_Query = "SELECT * FROM Potentials WHERE cf_1050=365423434433432585";
     }
 }
