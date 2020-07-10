@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using _24hplusdotnetcore.Common.Constants;
+using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations;
 
 namespace _24hplusdotnetcore.ModelDtos
@@ -33,5 +34,24 @@ namespace _24hplusdotnetcore.ModelDtos
         [Required]
         [JsonProperty("detail_status")]
         public short DetailStatus { get; set; }
+
+        public string GetStatusMessage()
+        {
+            string key = string.Format(StatusMapping.STATUS_PREFIX, Status);
+            if (StatusMapping.MA_STATUS_MESSAGE_MAPPING.TryGetValue(key, out string message))
+            {
+                return message;
+            }
+            return StatusMapping.MA_STATUS_MESSAGE_MAPPING[StatusMapping.DEFAULT];
+        }
+        public string GetDetailStatusMessage()
+        {
+            string key = string.Format(StatusMapping.DETAIL_STATUS_PREFIX, Status, DetailStatus);
+            if(StatusMapping.MA_DETAIL_STATUS_MESSAGE_MAPPING.TryGetValue(key, out string message))
+            {
+                return message;
+            }
+            return StatusMapping.MA_DETAIL_STATUS_MESSAGE_MAPPING[StatusMapping.DEFAULT];
+        }
     }
 }
