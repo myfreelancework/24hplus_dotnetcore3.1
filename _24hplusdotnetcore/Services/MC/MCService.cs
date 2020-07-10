@@ -232,7 +232,7 @@ namespace _24hplusdotnetcore.Services.MC
                         dynamic content = JsonConvert.DeserializeObject<dynamic>(response.Content);
                         if (content.id != null)
                         {
-                            objCustomer.MCId = content.id.Value;
+                            objCustomer.MCId = Int32.Parse(content.id.Value.ToString());
                             _customerServices.UpdateCustomerPostback(objCustomer);
                             uploadCount++;
                         }
