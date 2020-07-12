@@ -18,5 +18,9 @@ namespace _24hplusdotnetcore.Services.MC
         [Post("/mcMobileService/service/v1.0/mobile-4sales/cancel-case")]
         [Headers("Authorization: Bearer")]
         Task<MCCancelCaseResponseDto> CancelCaseAsync(MCCancelCaseRequestDto cancelCaseRequestDto);
+
+        [Get("/mcMobileService/service/v1.0/mobile-4sales/list-case-note/{appNumber}")]
+        [Headers("Authorization: Bearer")]
+        Task<MCCaseNoteListDto> GetCaseNoteAsync(int appNumber);
     }
 }

@@ -406,5 +406,31 @@ namespace _24hplusdotnetcore.Services.MC
                 throw;
             }
         }
+
+        public async Task<MCCaseNoteListDto> GetCaseNoteAsync(string customerId)
+        {
+            try
+            {
+                Customer customer = _customerServices.GetCustomer(customerId);
+                if (customer == null)
+                {
+                    throw new ArgumentException(Message.CUSTOMER_NOT_FOUND);
+                }
+
+                MCCaseNoteListDto mCCaseNoteListDto = await _restMCService.GetCaseNoteAsync(customer.MCAppnumber);
+                return mCCaseNoteListDto;
+            }
+            catch (Refit.ApiException ex)
+            {
+                _logger.LogError(ex, ex.Content);
+                var error = await ex.GetContentAsAsync<MCErrorResponseDto>();
+                throw new ArgumentException(error.ReturnMes);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                throw;
+            }
+        }
     }
 }
