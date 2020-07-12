@@ -397,7 +397,7 @@ namespace _24hplusdotnetcore.Services.MC
             catch (Refit.ApiException ex)
             {
                 _logger.LogError(ex, ex.Content);
-                var error = await ex.GetContentAsAsync<MCCancelCaseResponseDto>();
+                var error = await ex.GetContentAsAsync<MCErrorResponseDto>();
                 throw new ArgumentException(error.ReturnMes);
             }
             catch (Exception ex)
