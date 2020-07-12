@@ -221,13 +221,13 @@ namespace _24hplusdotnetcore.Controllers
         {
             try
             {
-                MCCancelCaseResponseDto mCCancelCaseRequestDto = await _mcService.CancelCaseAsync(cancelCaseRequestDto);
+                MCSuccessResponseDto mCSuccessResponseDto = await _mcService.CancelCaseAsync(cancelCaseRequestDto);
 
                 return Ok(new ResponseContext
                 {
                     code = (int)Common.ResponseCode.SUCCESS,
                     message = Common.Message.SUCCESS,
-                    data = mCCancelCaseRequestDto
+                    data = mCSuccessResponseDto
                 });
             }
             catch (Exception ex)
@@ -271,5 +271,29 @@ namespace _24hplusdotnetcore.Controllers
             }
         }
 
+        [HttpPost("api/mc/send-case-note")]
+        public async Task<ActionResult<ResponseContext>> SendCaseNoteAsync(SendCaseNoteRequestDto sendCaseNoteRequestDto)
+        {
+            try
+            {
+                MCSuccessResponseDto mCSuccessResponseDto = await _mcService.SendCaseNoteAsync(sendCaseNoteRequestDto);
+
+                return Ok(new ResponseContext
+                {
+                    code = (int)Common.ResponseCode.SUCCESS,
+                    message = Common.Message.SUCCESS,
+                    data = mCSuccessResponseDto
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return Ok(new ResponseContext
+                {
+                    code = (int)Common.ResponseCode.ERROR,
+                    message = ex.Message,
+                });
+            }
+        }
     }
 }

@@ -374,7 +374,7 @@ namespace _24hplusdotnetcore.Services.MC
             }
         }
 
-        public async Task<MCCancelCaseResponseDto> CancelCaseAsync(CancelCaseRequestDto cancelCaseRequestDto)
+        public async Task<MCSuccessResponseDto> CancelCaseAsync(CancelCaseRequestDto cancelCaseRequestDto)
         {
             try
             {
@@ -391,8 +391,8 @@ namespace _24hplusdotnetcore.Services.MC
                     Reason = cancelCaseRequestDto.Reason
                 };
 
-                MCCancelCaseResponseDto mCCancelCaseResponseDto = await _restMCService.CancelCaseAsync(mCCancelCaseRequestDto);
-                return mCCancelCaseResponseDto;
+                MCSuccessResponseDto mCSuccessResponseDto = await _restMCService.CancelCaseAsync(mCCancelCaseRequestDto);
+                return mCSuccessResponseDto;
             }
             catch (Refit.ApiException ex)
             {
@@ -419,6 +419,38 @@ namespace _24hplusdotnetcore.Services.MC
 
                 MCCaseNoteListDto mCCaseNoteListDto = await _restMCService.GetCaseNoteAsync(customer.MCAppnumber);
                 return mCCaseNoteListDto;
+            }
+            catch (Refit.ApiException ex)
+            {
+                _logger.LogError(ex, ex.Content);
+                var error = await ex.GetContentAsAsync<MCErrorResponseDto>();
+                throw new ArgumentException(error.ReturnMes);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                throw;
+            }
+        }
+
+        public async Task<MCSuccessResponseDto> SendCaseNoteAsync(SendCaseNoteRequestDto sendCaseNoteRequestDto)
+        {
+            try
+            {
+                Customer customer = _customerServices.GetCustomer(sendCaseNoteRequestDto.CustomerId);
+                if (customer == null)
+                {
+                    throw new ArgumentException(Message.CUSTOMER_NOT_FOUND);
+                }
+
+                var mCSendCaseNoteRequestDto = new MCSendCaseNoteRequestDto
+                {
+                    AppNumber = customer.MCAppnumber,
+                    NoteContent = sendCaseNoteRequestDto.NoteContent
+                };
+
+                MCSuccessResponseDto mCSuccessResponseDto = await _restMCService.SendCaseNoteAsync(mCSendCaseNoteRequestDto);
+                return mCSuccessResponseDto;
             }
             catch (Refit.ApiException ex)
             {
