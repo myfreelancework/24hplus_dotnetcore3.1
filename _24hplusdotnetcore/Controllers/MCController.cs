@@ -193,7 +193,7 @@ namespace _24hplusdotnetcore.Controllers
         
         [HttpGet]
         [Route("api/mc/push-mc")]
-        public ActionResult<ResponseContext> CheckListAsync()
+        public ActionResult<ResponseContext> CheckList()
         {
             try
             {
@@ -215,5 +215,31 @@ namespace _24hplusdotnetcore.Controllers
                 });
             }
         }
+
+        [HttpPost("api/mc/cancel-case")]
+        public async Task<ActionResult<ResponseContext>> CancelCaseAsync(CancelCaseRequestDto cancelCaseRequestDto)
+        {
+            try
+            {
+                MCCancelCaseResponseDto mCCancelCaseRequestDto = await _mcService.CancelCaseAsync(cancelCaseRequestDto);
+
+                return Ok(new ResponseContext
+                {
+                    code = (int)Common.ResponseCode.SUCCESS,
+                    message = Common.Message.SUCCESS,
+                    data = mCCancelCaseRequestDto
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return Ok(new ResponseContext
+                {
+                    code = (int)Common.ResponseCode.ERROR,
+                    message = ex.Message,
+                });
+            }
+        }
+
     }
 }

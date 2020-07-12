@@ -373,5 +373,38 @@ namespace _24hplusdotnetcore.Services.MC
                 throw;
             }
         }
+
+        public async Task<MCCancelCaseResponseDto> CancelCaseAsync(CancelCaseRequestDto cancelCaseRequestDto)
+        {
+            try
+            {
+                Customer customer = _customerServices.GetCustomer(cancelCaseRequestDto.CustomerId);
+                if(customer == null)
+                {
+                    throw new ArgumentException(Message.CUSTOMER_NOT_FOUND);
+                }
+
+                MCCancelCaseRequestDto mCCancelCaseRequestDto = new MCCancelCaseRequestDto
+                {
+                    Id = customer.MCId,
+                    Comment = cancelCaseRequestDto.Comment,
+                    Reason = cancelCaseRequestDto.Reason
+                };
+
+                MCCancelCaseResponseDto mCCancelCaseResponseDto = await _restMCService.CancelCaseAsync(mCCancelCaseRequestDto);
+                return mCCancelCaseResponseDto;
+            }
+            catch (Refit.ApiException ex)
+            {
+                _logger.LogError(ex, ex.Content);
+                var error = await ex.GetContentAsAsync<MCErrorResponseDto>();
+                throw new ArgumentException(error.ReturnMes);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                throw;
+            }
+        }
     }
 }
