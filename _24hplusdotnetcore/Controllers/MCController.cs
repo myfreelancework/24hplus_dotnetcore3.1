@@ -241,8 +241,12 @@ namespace _24hplusdotnetcore.Controllers
             }
         }
 
-        [AllowAnonymous]
-        [HttpGet("api/mc/list-case-note/{customerId}")]
+        /// <summary>
+        /// Get list case note
+        /// </summary>
+        /// <param name="customerId"></param>
+        /// <returns></returns>
+        [HttpGet("api/mc/case-note/{customerId}")]
         public async Task<ActionResult<ResponseContext>> GetCaseNoteAsync(string customerId)
         {
             try
