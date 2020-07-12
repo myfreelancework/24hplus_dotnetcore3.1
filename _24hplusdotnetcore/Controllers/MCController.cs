@@ -241,5 +241,31 @@ namespace _24hplusdotnetcore.Controllers
             }
         }
 
+        [AllowAnonymous]
+        [HttpGet("api/mc/list-case-note/{customerId}")]
+        public async Task<ActionResult<ResponseContext>> GetCaseNoteAsync(string customerId)
+        {
+            try
+            {
+                MCCaseNoteListDto mCCaseNoteListDto = await _mcService.GetCaseNoteAsync(customerId);
+
+                return Ok(new ResponseContext
+                {
+                    code = (int)Common.ResponseCode.SUCCESS,
+                    message = Common.Message.SUCCESS,
+                    data = mCCaseNoteListDto
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return Ok(new ResponseContext
+                {
+                    code = (int)Common.ResponseCode.ERROR,
+                    message = ex.Message,
+                });
+            }
+        }
+
     }
 }
