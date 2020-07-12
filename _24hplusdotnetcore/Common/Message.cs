@@ -19,6 +19,7 @@ namespace _24hplusdotnetcore.Common
         public static string TeamLeadApprove = "{0} vừa duyệt thành công khách hàng {1}";
         public const string NOT_FOUND_KIOS = "Không tìm thấy kios";
         public static string CANT_UPDATE_CUSTOMER_ERROR = "Lỗi hệ thống, Vui lòng thử lại!";
+        public const string CUSTOMER_NOT_FOUND = "Không tìm thấy khách hàng!";
     }
     public enum ResponseCode : int
     {
