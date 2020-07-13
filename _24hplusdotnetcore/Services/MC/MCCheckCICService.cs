@@ -57,11 +57,11 @@ namespace _24hplusdotnetcore.Services.MC
             }
         }
         
-        public MCCheckCICModel FindOneByRequestId(string requestId)
+        public MCCheckCICModel FindOneByIdentity(string identity)
         {
             try
             {
-                return _collection.Find(x => x.RequestId == requestId).FirstOrDefault();
+                return _collection.Find(x => x.Identifier == identity).FirstOrDefault();
             }
             catch (Exception ex)
             {

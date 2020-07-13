@@ -157,9 +157,10 @@ namespace _24hplusdotnetcore.Controllers
         {
             try
             {
-                var oldCic = _mcCheckCICService.FindOneByRequestId(dto.RequestId);
+                var oldCic = _mcCheckCICService.FindOneByIdentity(dto.Identifier);
                 if (oldCic != null)
                 {
+                    oldCic.RequestId = dto.RequestId;
                     oldCic.CicResult = dto.CicResult;
                     oldCic.Description = dto.Description;
                     oldCic.CicImageLink = dto.CicImageLink;
