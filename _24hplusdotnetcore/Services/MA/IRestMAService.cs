@@ -6,7 +6,7 @@ namespace _24hplusdotnetcore.Services.MA
 {
     public interface IRestMAService
     {
-        [Post("/uat/api/ReceiveLeads")]
+        [Post("/production/api/ReceiveLeads")]
         Task<MAResponseModel> PushCustomerAsync([Body] MARequestModel body);
     }
 }
