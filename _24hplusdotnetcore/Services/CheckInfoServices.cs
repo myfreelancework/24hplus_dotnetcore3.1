@@ -123,7 +123,7 @@ namespace _24hplusdotnetcore.Services
                     }
                     else if (result.status == "CHECKING")
                     {
-                        var oldCic = _mcCheckCICService.FindOneByRequestId(result.requestId);
+                        var oldCic = _mcCheckCICService.FindOneByIdentity(result.identifier);
                         if (oldCic == null)
                         {
                             var cic = new MCCheckCICModel();
