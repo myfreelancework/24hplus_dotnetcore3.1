@@ -63,6 +63,7 @@ namespace _24hplusdotnetcore.Services.MA
                 {
                     var requestData = _mapper.Map<MARequestDataModel>(leadCrm);
                     requestData.REQUEST_ID = _mAConfig.RequestId;
+                    requestData.REQUEST_DOCUMENT = requestData.REQUEST_DOCUMENT.Replace(" |##| ", ",");
 
                     var request = new MARequestModel
                     {
