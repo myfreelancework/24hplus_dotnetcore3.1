@@ -1,6 +1,10 @@
-﻿using _24hplusdotnetcore.ModelDtos;
+﻿using _24hplusdotnetcore.Common;
+using _24hplusdotnetcore.Common.Constants;
+using _24hplusdotnetcore.Common.Enums;
+using _24hplusdotnetcore.ModelDtos;
 using _24hplusdotnetcore.Models;
 using _24hplusdotnetcore.Models.MC;
+using _24hplusdotnetcore.Services;
 using _24hplusdotnetcore.Services.MC;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -18,10 +22,12 @@ namespace _24hplusdotnetcore.Controllers
     {
         private readonly ILogger<MCController> _logger;
         private readonly MCService _mcService;
+        private readonly CustomerServices _customerService;
         private readonly MCNotificationService _mcNotificationService;
         private readonly MCCheckCICService _mcCheckCICService;
-        public MCController(ILogger<MCController> logger, 
+        public MCController(ILogger<MCController> logger,
         MCService mcService,
+        CustomerServices customerService,
         MCCheckCICService mcCheckCICService,
         MCNotificationService mcNotificationService)
         {
@@ -29,6 +35,7 @@ namespace _24hplusdotnetcore.Controllers
             _mcService = mcService;
             _mcCheckCICService = mcCheckCICService;
             _mcNotificationService = mcNotificationService;
+            _customerService = customerService;
         }
 
         [HttpGet]
@@ -133,6 +140,31 @@ namespace _24hplusdotnetcore.Controllers
             try
             {
                 _mcNotificationService.CreateOne(noti);
+                var customer = _customerService.GetByMCId(noti.Id);
+                if (customer != null)
+                {
+                    var dto = new CustomerUpdateStatusDto();
+                    dto.LeadSource = LeadSourceType.MC.ToString();
+                    dto.CustomerId = customer.Id;
+                    dto.Reason = noti.CurrentStatus;
+                    if (MCNotificationMessage.Return.Where(x => x == noti.CurrentStatus).Any())
+                    {
+                        dto.Status = CustomerStatus.RETURN;
+                    }
+                    else if (MCNotificationMessage.Cancel.Where(x => x == noti.CurrentStatus).Any())
+                    {
+                        dto.Status = CustomerStatus.CANCEL;
+                    }
+                    else if (MCNotificationMessage.Succes == noti.CurrentStatus)
+                    {
+                        dto.Status = CustomerStatus.SUCCESS;
+                    }
+                    else
+                    {
+                        dto.Status = CustomerStatus.PROCESSING;
+                    }
+                    _customerService.UpdateStatus(dto);
+                }
                 return Ok(new ResponseMCContext
                 {
                     ReturnCode = "200",
@@ -145,11 +177,11 @@ namespace _24hplusdotnetcore.Controllers
                 return Ok(new ResponseMCContext
                 {
                     ReturnCode = "400",
-                    ReturnMes = "Error"
+                    ReturnMes = ex.Message
                 });
             }
         }
-        
+
         [AllowAnonymous]
         [HttpPost]
         [Route("api/mc/update-cic")]
@@ -168,7 +200,8 @@ namespace _24hplusdotnetcore.Controllers
                     oldCic.Status = dto.Status;
                     await _mcCheckCICService.ReplaceOneAsync(oldCic);
                 }
-                else {
+                else
+                {
                     return Ok(new ResponseMCContext
                     {
                         ReturnCode = "400",
@@ -191,7 +224,7 @@ namespace _24hplusdotnetcore.Controllers
                 });
             }
         }
-        
+
         [HttpGet]
         [Route("api/mc/push-mc")]
         public ActionResult<ResponseContext> CheckList()

@@ -213,8 +213,8 @@ namespace _24hplusdotnetcore.Services
                 else if (customer.Status.ToUpper() == CustomerStatus.REJECT)
                 {
                     userName = customer.UserName;
-                    type = NotificationType.TeamLeadReject;
-                    message = string.Format(Message.TeamLeadReject, teamLead, customer.Personal.Name);
+                    type = NotificationType.Reject;
+                    message = string.Format(Message.NotificationReject, teamLead, customer.Personal.Name);
                 }
                 else if (customer.Status.ToUpper() == CustomerStatus.APPROVE)
                 {
@@ -229,7 +229,7 @@ namespace _24hplusdotnetcore.Services
                         _dataMCProcessingServices.CreateOne(dataMCProcessing);
                     }
                     userName = customer.UserName;
-                    type = NotificationType.TeamLeadApprove;
+                    type = NotificationType.Approve;
                     message = string.Format(Message.TeamLeadApprove, teamLead, customer.Personal.Name);
                 }
 
@@ -361,6 +361,18 @@ namespace _24hplusdotnetcore.Services
                 throw;
             }
         }
+        public Customer GetByMCId(int mcId)
+        {
+            try
+            {
+                return _customer.Find(c => c.MCId == mcId).First();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                throw;
+            }
+        }
 
         public async Task<CustomerCheckListRequestModel> GetCustomerCheckListAsync(string id)
         {
@@ -413,15 +425,15 @@ namespace _24hplusdotnetcore.Services
                 var customer = _customer.Find(x => x.Id == dto.CustomerId).FirstOrDefault();
                 if (customer != null)
                 {
-                    string teamLead = "";
+                    string sender = !string.IsNullOrEmpty(dto.LeadSource) ? dto.LeadSource : "";
                     string userName = "";
                     string message = "";
                     string type = "";
 
                     var currUser = _userroleServices.GetUserRoleByUserName(customer.UserName);
-                    if (currUser != null)
+                    if (currUser != null && sender != "")
                     {
-                        teamLead = currUser.TeamLead;
+                        sender = currUser.TeamLead;
                     }
                     customer.Status = dto.Status;
                     if (customer.Result == null)
@@ -439,8 +451,8 @@ namespace _24hplusdotnetcore.Services
                     if (customer.Status.ToUpper() == CustomerStatus.REJECT)
                     {
                         userName = customer.UserName;
-                        type = NotificationType.TeamLeadReject;
-                        message = string.Format(Message.TeamLeadReject, teamLead, customer.Personal.Name);
+                        type = NotificationType.Reject;
+                        message = string.Format(Message.NotificationReject, sender, customer.Personal.Name);
                     }
                     else if (customer.Status.ToUpper() == CustomerStatus.APPROVE)
                     {
@@ -455,8 +467,26 @@ namespace _24hplusdotnetcore.Services
                             _dataMCProcessingServices.CreateOne(dataMCProcessing);
                         }
                         userName = customer.UserName;
-                        type = NotificationType.TeamLeadApprove;
-                        message = string.Format(Message.TeamLeadApprove, teamLead, customer.Personal.Name);
+                        type = NotificationType.Approve;
+                        message = string.Format(Message.TeamLeadApprove, sender, customer.Personal.Name);
+                    }
+                    else if (customer.Status.ToUpper() == CustomerStatus.RETURN)
+                    {
+                        userName = customer.UserName;
+                        type = NotificationType.Reject;
+                        message = string.Format(Message.NotificationReturn, sender, customer.Personal.Name);
+                    }
+                    else if (customer.Status.ToUpper() == CustomerStatus.CANCEL)
+                    {
+                        userName = customer.UserName;
+                        type = NotificationType.Reject;
+                        message = string.Format(Message.NotificationCancel, sender, customer.Personal.Name);
+                    }
+                    else if (customer.Status.ToUpper() == CustomerStatus.SUCCESS)
+                    {
+                        userName = customer.UserName;
+                        type = NotificationType.Approve;
+                        message = string.Format(Message.NotificationSuccess, sender, customer.Personal.Name);
                     }
 
 

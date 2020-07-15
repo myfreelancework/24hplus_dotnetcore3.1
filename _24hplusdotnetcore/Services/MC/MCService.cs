@@ -1,6 +1,7 @@
 
 using _24hplusdotnetcore.Common;
 using _24hplusdotnetcore.Common.Constants;
+using _24hplusdotnetcore.Common.Enums;
 using _24hplusdotnetcore.ModelDtos;
 using _24hplusdotnetcore.Models;
 using _24hplusdotnetcore.Models.MC;
@@ -241,6 +242,7 @@ namespace _24hplusdotnetcore.Services.MC
                             CustomerUpdateStatusDto error = new CustomerUpdateStatusDto();
                             error.CustomerId = objCustomer.Id;
                             error.Status = CustomerStatus.REJECT;
+                            error.LeadSource = LeadSourceType.MC.ToString();
                             error.Reason = content.returnMes != null ? content.returnMes.Value : "Lỗi gửi data qua MC";
                             _customerServices.UpdateStatus(error);
                         }

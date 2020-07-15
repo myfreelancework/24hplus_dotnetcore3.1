@@ -15,8 +15,11 @@ namespace _24hplusdotnetcore.Common
         internal static string VERSION_IS_OLD = "Phiên bản của bạn đã cũ, Vui lòng cập nhập phiên bản mới!";
         internal static string NotificationAdd = "{0} vừa thêm mới khách hàng {1}";
         internal static string NotificationUpdate = "{0} vừa cập nhật lại thông tin khách hàng  {1}";
-        public static string TeamLeadReject = "{0} vừa từ chối khách hàng {1}";
-        public static string TeamLeadApprove = "{0} vừa duyệt thành công khách hàng {1}";
+        public static string NotificationReject = "{0} vừa từ chối hồ sơ khách hàng {1}";
+        public static string NotificationCancel = "{0} vừa hủy hồ sơ khách hàng {1}";
+        public static string NotificationSuccess = "{0} vừa hoàn thành hồ sơ khách hàng {1}";
+        public static string NotificationReturn = "{0} vừa trả thông tin hồ sơ khách hàng {1}";
+        public static string TeamLeadApprove = "{0} vừa duyệt thành công hồ sơ khách hàng {1}";
         public const string NOT_FOUND_KIOS = "Không tìm thấy kios";
         public static string CANT_UPDATE_CUSTOMER_ERROR = "Lỗi hệ thống, Vui lòng thử lại!";
         public const string CUSTOMER_NOT_FOUND = "Không tìm thấy khách hàng!";
@@ -24,7 +27,7 @@ namespace _24hplusdotnetcore.Common
     public enum ResponseCode : int
     {
         SUCCESS = 1,
-        ERROR,        
+        ERROR,
         UNAUTHORIZED,
         IS_LOGGED_IN_ORTHER_DEVICE
     }
