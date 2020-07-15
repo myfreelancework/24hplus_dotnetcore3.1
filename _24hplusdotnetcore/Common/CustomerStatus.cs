@@ -8,6 +8,9 @@
         public static string SUBMIT = "SUBMIT";
         public static string REJECT = "REJECT";
         public static string APPROVE = "APPROVE";
+        public static string CANCEL = "CANCEL";
+        public static string PROCESSING = "PROCESSING";
+        public static string SUCCESS = "SUCCESS";
         public static string POTENTIAL = "POTENTIAL";
         public const string PUSH_MA = "PUSH_MA";
     }

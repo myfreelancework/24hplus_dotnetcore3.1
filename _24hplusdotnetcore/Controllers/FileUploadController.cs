@@ -127,7 +127,7 @@ namespace _24hplusdotnetcore.Controllers
         }
         [HttpPost]
         [Route("api/fileupload/delete")]
-        public ActionResult<ResponseContext> FileUploadDelete([FromBody] string[] FileUploadId)
+        public ActionResult<ResponseContext> FileUploadDelete([FromBody] string customerId, string fileName)
         {
             try
             {
@@ -138,21 +138,27 @@ namespace _24hplusdotnetcore.Controllers
                         message = Common.Message.IS_LOGGED_IN_ORTHER_DEVICE,
                         data = null
                     });
-                var deleteCount = _fileUploadServices.DeleteFileUpload(FileUploadId);
+                var path = string.Format(@"{0}://{1}/{2}/{3}/{4}", Request.Scheme, Request.Host.Value, "FileUpload", customerId, fileName);
+
+                if (System.IO.File.Exists(path))
+                { 
+                    System.IO.File.Delete(path);
+                }
                 return Ok(new ResponseContext
                 {
                     code = (int)Common.ResponseCode.SUCCESS,
                     message = Common.Message.SUCCESS,
-                    data = JsonConvert.SerializeObject("" + deleteCount + " records have been delete")
+                    data = null
                 });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, ex.Message);
-                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseMessage
+                return Ok(new ResponseContext
                 {
-                    status = "ERROR",
-                    message = ex.Message
+                    code = (int)Common.ResponseCode.ERROR,
+                    message = Common.Message.ERROR,
+                    data = null
                 });
             }
         }
@@ -177,7 +183,7 @@ namespace _24hplusdotnetcore.Controllers
                     CustomerId = CustomerId,
                     DocumentCategoryId = DocumentCategoryId,
                     FileUploadName = file.FileName,
-                    FileUploadURL = string.Format(@"{0}://{1}/{2}/{3}/{4}", Request.Scheme, Request.Host.Value, "FileUpload" ,CustomerId, file.FileName)
+                    FileUploadURL = string.Format(@"{0}://{1}/{2}/{3}/{4}", Request.Scheme, Request.Host.Value, "FileUpload", CustomerId, file.FileName)
                 };
 
                 var newFileUpload = _fileUploadServices.CreateFileUpload(fileUpload);
