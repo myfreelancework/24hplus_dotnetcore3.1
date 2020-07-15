@@ -1,27 +1,32 @@
 ﻿using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace _24hplusdotnetcore.ModelDtos
 {
     public class MCCaseNoteListDto
     {
-        public IEnumerable<MCCaseNoteModel> CheckList { get; set; }
+
+        [JsonProperty("app_notes_entries")]
+        public MCNotesEntriesModel MCNotesEntries { get; set; }
     }
 
-    public class MCCaseNoteModel
+    public class MCNotesEntriesModel
     {
-        public int GroupId { get; set; }
-        public string GroupName { get; set; }
-        public int? Mandatory { get; set; }
-        public int? HasAlternate { get; set; }
-        public IEnumerable<MCCaseNoteDocument> Documents { get; set; }
+
+        [JsonProperty("app_notes_entry")]
+        public IEnumerable<MCNotesEntrieModel> MCNotesEntry { get; set; }
     }
 
-    public class MCCaseNoteDocument
+    public class MCNotesEntrieModel
     {
-        public int Id { get; set; }
-        public string DocumentCode { get; set; }
-        public string DocumentName { get; set; }
-        public string InputDocUid { get; set; }
-        public string MapBpmVar { get; set; }
+
+        [JsonProperty("idapp_uid")]
+        public string IdappUid { get; set; }
+        [JsonProperty("note_content")]
+        public string NoteContent { get; set; }
+        [JsonProperty("note_date")]
+        public string NoteDate { get; set; }
+        [JsonProperty("usr_uid")]
+        public string UsrUid { get; set; }
     }
 }
