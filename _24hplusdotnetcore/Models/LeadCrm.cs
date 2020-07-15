@@ -165,12 +165,7 @@ namespace _24hplusdotnetcore.Models
 
         public string GetStatusMessage()
         {
-            if(PostbackMA == null)
-            {
-                return Cf1184;
-            }
-
-            return GetStatusMessage(PostbackMA.Status);
+            return PostbackMA == null ? Cf1184 : GetStatusMessage(PostbackMA.Status);
         }
 
         public string GetStatusMessage(short status)
