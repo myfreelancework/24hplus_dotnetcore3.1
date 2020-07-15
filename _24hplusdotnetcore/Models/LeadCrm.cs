@@ -1,4 +1,5 @@
 ﻿using _24hplusdotnetcore.Common.Constants;
+using _24hplusdotnetcore.Common.Enums;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using System;
@@ -164,17 +165,27 @@ namespace _24hplusdotnetcore.Models
 
         public string GetStatusMessage()
         {
-            if(PostbackMA == null)
-            {
-                return Cf1184;
-            }
+            return PostbackMA == null ? Cf1184 : GetStatusMessage(PostbackMA.Status);
+        }
 
-            string key = string.Format(StatusMapping.STATUS_PREFIX, PostbackMA.Status);
+        public string GetStatusMessage(short status)
+        {
+            string key = string.Format(StatusMapping.STATUS_PREFIX, status);
             if (StatusMapping.CRM_STATUS_MESSAGE_MAPPING.TryGetValue(key, out string message))
             {
                 return message;
             }
             return StatusMapping.CRM_STATUS_MESSAGE_MAPPING[StatusMapping.DEFAULT];
+        }
+
+        public void SetCrmStatus(LeadCrmStatus leadCrmStatus)
+        {
+            if (PostbackMA == null)
+            {
+                Cf1184 = GetStatusMessage((short)leadCrmStatus);
+                return;
+            }
+            PostbackMA.Status = (short)leadCrmStatus;
         }
     }
 

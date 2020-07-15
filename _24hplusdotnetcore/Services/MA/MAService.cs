@@ -1,6 +1,9 @@
 ﻿using _24hplusdotnetcore.Common;
+using _24hplusdotnetcore.Common.Enums;
 using _24hplusdotnetcore.ModelDtos;
 using _24hplusdotnetcore.Models;
+using _24hplusdotnetcore.Models.CRM;
+using _24hplusdotnetcore.Services.CRM;
 using _24hplusdotnetcore.Settings;
 using AutoMapper;
 using Microsoft.Extensions.Logging;
@@ -20,6 +23,7 @@ namespace _24hplusdotnetcore.Services.MA
         private readonly IRestMAService _restMAService;
         private readonly IMapper _mapper;
         private readonly LeadCrmService _leadCrmService;
+        private readonly DataCRMProcessingServices _dataCRMProcessingServices;
 
         public MAService(
             ILogger<MAService> logger,
@@ -27,7 +31,8 @@ namespace _24hplusdotnetcore.Services.MA
             IOptions<MAConfig> mAConfig,
             IRestMAService restMAService,
             IMapper mapper,
-            LeadCrmService leadCrmService)
+            LeadCrmService leadCrmService,
+            DataCRMProcessingServices dataCRMProcessingServices)
         {
             _logger = logger;
             _dataProcessingService = dataProcessingService;
@@ -35,6 +40,7 @@ namespace _24hplusdotnetcore.Services.MA
             _restMAService = restMAService;
             _mapper = mapper;
             _leadCrmService = leadCrmService;
+            _dataCRMProcessingServices = dataCRMProcessingServices;
         }
 
         public async Task PublishAsync()
@@ -73,10 +79,11 @@ namespace _24hplusdotnetcore.Services.MA
 
                     var result = await _restMAService.PushCustomerAsync(request);
 
-                    if (result.Result == true)
-                    {
-                        dataProcessingUpdations.AddRange(dataProcessings.Where(x => x.LeadCrmId == leadCrm.Id));
+                    dataProcessingUpdations.AddRange(dataProcessings.Where(x => x.LeadCrmId == leadCrm.Id));
 
+                    if(result.Result == false)
+                    {
+                        await UpdateErrorLeadCrmAsync(leadCrm, LeadCrmStatus.Cancel);
                     }
                 }
 
@@ -93,6 +100,18 @@ namespace _24hplusdotnetcore.Services.MA
                 _logger.LogError(ex, ex.Message);
                 throw;
             }
+        }
+
+        private async Task UpdateErrorLeadCrmAsync(LeadCrm leadCrm, LeadCrmStatus leadCrmStatus)
+        {
+            leadCrm.SetCrmStatus(leadCrmStatus);
+            await _leadCrmService.ReplaceOneAsync(leadCrm);
+
+            _dataCRMProcessingServices.CreateOne(new DataCRMProcessing
+            {
+                LeadCrmId = leadCrm.Id,
+                LeadSource = LeadSourceType.MA.ToString()
+            });
         }
     }
 }
