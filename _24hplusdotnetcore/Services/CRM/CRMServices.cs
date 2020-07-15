@@ -261,6 +261,7 @@ namespace _24hplusdotnetcore.Services.CRM
                                 Record dataCRM = _mapper.Map<Record>(leadCrm);
                                 dataCRM.Cf1178 = "MIRAE ASSET";
                                 dataCRM.Leadsource = "Telesales 24hPlus -2020";
+                                dataCRM.Cf1206 = "1";
                                 PushDataToCRM(dataCRM, session, dataCRMProcessing);
                             }
                         }
