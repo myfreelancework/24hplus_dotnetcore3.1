@@ -195,6 +195,9 @@ namespace _24hplusdotnetcore.Services
                 }
                 customer.ModifiedDate = Convert.ToDateTime(DateTime.Now);
                 customer.CreatedDate = prvCustomer.CreatedDate;
+                if(customer.Documents == null) {
+                    customer.Documents = prvCustomer.Documents;
+                }
                 updateCount = _customer.ReplaceOne(c => c.Id == customer.Id, customer).ModifiedCount;
 
                 if (customer.Status.ToUpper() == CustomerStatus.SUBMIT)

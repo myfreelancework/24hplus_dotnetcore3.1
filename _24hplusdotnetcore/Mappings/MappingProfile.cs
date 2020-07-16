@@ -231,7 +231,7 @@ namespace _24hplusdotnetcore.Mappings
                 .ForMember(dest => dest.TSA_GROUP, src => src.MapFrom(x => x.Cf1008))
                 .ForMember(dest => dest.TSA_LAST_NOTES, src => src.MapFrom(x => x.Cf1196))
                 .ForMember(dest => dest.OCCUPATION, src => src.MapFrom(x => x.Cf1246))
-                .ForMember(dest => dest.ROUTE, src => src.MapFrom(x => x.Cf1014));
+                .ForMember(dest => dest.ROUTE, src => src.MapFrom(x => x.Cf1404));
 
             #endregion
 
