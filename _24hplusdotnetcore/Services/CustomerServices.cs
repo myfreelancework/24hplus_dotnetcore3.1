@@ -53,8 +53,18 @@ namespace _24hplusdotnetcore.Services
                 }
                 if (!string.IsNullOrEmpty(Status))
                 {
-                    var filterStatus = Builders<Customer>.Filter.Regex(c => c.Status, "/^" + Status + "$/i");
-                    filterUserName = filterUserName & filterStatus;
+                    if (Status.ToUpper() == CustomerStatus.REJECT)
+                    {
+                        var filterStatus = Builders<Customer>.Filter.Or(
+                            Builders<Customer>.Filter.Regex(c => c.Status, "/^Reject$/i"),
+                            Builders<Customer>.Filter.Regex(c => c.Status, "/^Return$/i"));
+                        filterUserName = filterUserName & filterStatus;
+                    }
+                    else
+                    {
+                        var filterStatus = Builders<Customer>.Filter.Regex(c => c.Status, "/^" + Status + "$/i");
+                        filterUserName = filterUserName & filterStatus;
+                    }
                 }
                 if (!string.IsNullOrEmpty(customername))
                 {
