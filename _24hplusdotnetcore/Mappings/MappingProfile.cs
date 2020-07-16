@@ -69,7 +69,7 @@ namespace _24hplusdotnetcore.Mappings
                 .ForMember(dest => dest.Result, src => src.MapFrom(x => x))
                 .AfterMap((src, dest) => dest.UserName = src.Modifiedby.Label.Split("-")[0])
                 .ForMember(dest => dest.CRMId, src => src.MapFrom(x => x.Id))
-                .ForMember(dest => dest.Route, src => src.MapFrom(x => x.Cf1014))
+                .ForMember(dest => dest.Route, src => src.MapFrom(x => x.Cf1404))
                 .ForMember(dest => dest.Counsel, src => src.MapFrom(x => x))
                 .ForMember(dest => dest.Id, src => src.Ignore());
 
@@ -122,7 +122,7 @@ namespace _24hplusdotnetcore.Mappings
 
                 .ForMember(dest => dest.Modifiedby, src => src.MapFrom(x => new AssignedUserId { Label = x.UserName }))
                 .ForMember(dest => dest.Id, src => src.MapFrom(x => x.CRMId))
-                .ForMember(dest => dest.Cf1014, src => src.MapFrom(x => x.Route))
+                .ForMember(dest => dest.Cf1404, src => src.MapFrom(x => x.Route))
                 .ForMember(dest => dest.Cf1206, src => src.MapFrom(x => 1));
 
             #endregion

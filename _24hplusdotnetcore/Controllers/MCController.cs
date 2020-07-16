@@ -163,6 +163,7 @@ namespace _24hplusdotnetcore.Controllers
                     {
                         dto.Status = CustomerStatus.PROCESSING;
                     }
+                    _customerService.UpdateMCAppId(noti);
                     _customerService.UpdateStatus(dto);
                 }
                 return Ok(new ResponseMCContext

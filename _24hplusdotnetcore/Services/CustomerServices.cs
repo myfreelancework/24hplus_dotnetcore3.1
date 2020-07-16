@@ -523,5 +523,28 @@ namespace _24hplusdotnetcore.Services
             }
             return updateCount;
         }
+
+        public long UpdateMCAppId(MCNotificationDto noti)
+        {
+            long updateCount = 0;
+            try
+            {
+                var customer = _customer.Find(x => x.MCId == noti.Id).FirstOrDefault();
+                if (customer != null)
+                {
+                    customer.MCAppId = noti.AppId;
+                    customer.MCAppnumber = Int32.Parse(noti.AppNumber);
+                    customer.ModifiedDate = Convert.ToDateTime(DateTime.Now);
+                    updateCount = _customer.ReplaceOne(c => c.Id == customer.Id, customer).ModifiedCount;
+
+                }
+            }
+            catch (Exception ex)
+            {
+                updateCount = -1;
+                _logger.LogError(ex, ex.Message);
+            }
+            return updateCount;
+        }
     }
 }
