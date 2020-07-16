@@ -175,7 +175,7 @@ namespace _24hplusdotnetcore.Services.MC
                         dataMC.Request.CustomerName = objCustomer.Personal.Name;
                         dataMC.Request.ProductId = product.ProductIdMC;
                         dataMC.Request.TempResidence = objCustomer.IsTheSameResidentAddress == true ? 1 : 2;
-                        dataMC.Request.SaleCode = "RD006011111";
+                        dataMC.Request.SaleCode = "RD006100030";
                         dataMC.Request.CompanyTaxNumber = objCustomer.Working.TaxId;
                         dataMC.Request.ShopCode = objCustomer.Loan.SignAddress.Split('-')[0];
                         dataMC.Request.IssuePlace = objCustomer.Loan.SignAddress.Split('-')[1];
