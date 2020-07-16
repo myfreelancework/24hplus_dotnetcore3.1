@@ -182,6 +182,7 @@ namespace _24hplusdotnetcore.Services.MC
                         dataMC.Request.LoanAmount = Int32.Parse(loanAmount);
                         dataMC.Request.LoanTenor = Int16.Parse(objCustomer.Loan.Term);
                         dataMC.Request.HasInsurance = objCustomer.Loan.BuyInsurance.Equals("true") ? 1 : 0;
+                        dataMC.Request.HasCourier = 0;
 
                         dataMC.AppStatus = 1;
                         dataMC.MobileIssueDateCitizen = objCustomer.Personal.IdCardDate;

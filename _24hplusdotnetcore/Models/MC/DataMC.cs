@@ -68,6 +68,9 @@ namespace _24hplusdotnetcore.Models.MC
         [JsonProperty("hasInsurance")]
         public int HasInsurance { get; set; }
 
+        [JsonProperty("hasCourier")]
+        public int HasCourier { get; set; }
+
         [JsonProperty("issuePlace")]
         public string IssuePlace { get; set; }
 
