@@ -114,13 +114,13 @@ namespace _24hplusdotnetcore.Mappings
 
                 .ForMember(dest => dest.Cf1266, src => src.MapFrom(x => x.Counsel.LastCounselling))
                 .ForMember(dest => dest.Cf1052, src => src.MapFrom(x => x.Counsel.ApptSchedule))
-                .ForMember(dest => dest.AssignedUserId, src => src.MapFrom(x => new AssignedUserId { Value = x.Counsel.TeleSalesCode, Label = x.Counsel.Name }))
+                .ForMember(dest => dest.AssignedUserId, src => src.MapFrom(x => x.Counsel.TeleSalesCode))
                 .ForMember(dest => dest.Cf1196, src => src.MapFrom(x => x.Counsel.Remark))
                 .ForMember(dest => dest.Cf1246, src => src.MapFrom(x => x.Counsel.Occupation))
                 .ForMember(dest => dest.Cf972, src => src.MapFrom(x => x.Counsel.TeamCode))
                 .ForMember(dest => dest.Cf1008, src => src.MapFrom(x => x.Counsel.GroupCode))
 
-                .ForMember(dest => dest.Modifiedby, src => src.MapFrom(x => new AssignedUserId { Label = x.UserName }))
+                // .ForMember(dest => dest.Modifiedby, src => src.MapFrom(x => new AssignedUserId { Label = x.UserName }))
                 .ForMember(dest => dest.Id, src => src.MapFrom(x => x.CRMId))
                 .ForMember(dest => dest.Cf1404, src => src.MapFrom(x => x.Route))
                 .ForMember(dest => dest.Cf1206, src => src.MapFrom(x => 1));
@@ -226,8 +226,8 @@ namespace _24hplusdotnetcore.Mappings
                 .ForMember(dest => dest.GENERATE_TO_LEAD, src => src.MapFrom(x => x.Createdtime))
                 .ForMember(dest => dest.FOLLOWED_DATE, src => src.MapFrom(x => x.Modifiedtime))
                 .ForMember(dest => dest.PERMANENT_ADDR, src => src.MapFrom(x => x.Cf1002))
-                .ForMember(dest => dest.TSA_NAME, src => src.MapFrom(x => x.AssignedUserId.Label))
-                .ForMember(dest => dest.TSA_CAMPAIN, src => src.MapFrom(x => x.AssignedUserId.Value))
+                .ForMember(dest => dest.TSA_NAME, src => src.MapFrom(x => ""))
+                .ForMember(dest => dest.TSA_CAMPAIN, src => src.MapFrom(x => "24H-TE0001"))
                 .ForMember(dest => dest.TSA_GROUP, src => src.MapFrom(x => x.Cf1008))
                 .ForMember(dest => dest.TSA_LAST_NOTES, src => src.MapFrom(x => x.Cf1196))
                 .ForMember(dest => dest.OCCUPATION, src => src.MapFrom(x => x.Cf1246))
