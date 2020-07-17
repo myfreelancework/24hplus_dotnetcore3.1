@@ -306,7 +306,7 @@ namespace _24hplusdotnetcore.Services
                     var all = lstCustomer.Count;
 
                     statusCount.Draft = statusdraft;
-                    statusCount.Return = statusreturn;
+                    statusCount.Return = statusreturn + statusreject;
                     statusCount.Submit = statussubmit;
                     statusCount.Approve = statusapprove;
                     statusCount.All = all;

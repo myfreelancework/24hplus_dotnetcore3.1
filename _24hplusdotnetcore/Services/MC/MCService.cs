@@ -184,7 +184,7 @@ namespace _24hplusdotnetcore.Services.MC
                         dataMC.Request.HasInsurance = objCustomer.Loan.BuyInsurance.Equals("true") ? 1 : 0;
                         dataMC.Request.HasCourier = 0;
 
-                        dataMC.AppStatus = 1;
+                        dataMC.AppStatus = objCustomer.MCId != 0 ? 2 : 1;
                         dataMC.MobileIssueDateCitizen = objCustomer.Personal.IdCardDate;
                         dataMC.MobileProductType = "CashLoan";
                         dataMC.Md5 = hash;
