@@ -170,7 +170,7 @@ namespace _24hplusdotnetcore.Services.MC
                         var loanAmount = objCustomer.Loan.Amount.Replace(",", string.Empty);
                         var dataMC = new DataMC();
                         dataMC.Request = new Models.MC.Request();
-                        dataMC.Request.Id = 0;
+                        dataMC.Request.Id = objCustomer.MCId != 0 ? objCustomer.MCId : 0;
                         dataMC.Request.CitizenId = objCustomer.Personal.IdCard;
                         dataMC.Request.CustomerName = objCustomer.Personal.Name;
                         dataMC.Request.ProductId = product.ProductIdMC;
