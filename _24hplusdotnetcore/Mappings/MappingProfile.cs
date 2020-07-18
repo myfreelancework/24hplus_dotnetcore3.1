@@ -185,8 +185,9 @@ namespace _24hplusdotnetcore.Mappings
 
             CreateMap<LeadCrmUser, AssignedUserId>();
 
-            CreateMap<LeadCrm, Record>()
+            CreateMap<LeadCrm, CRMRequestDto>()
                 .ForMember(dest => dest.Id, src => src.MapFrom(x => x.LeadCrmId))
+                .ForMember(dest => dest.AssignedUserId, src => src.MapFrom(x => x.AssignedUserId.Value))
                 .ForMember(dest => dest.Cf1184, src => src.MapFrom(x => x.GetStatusMessage()));
 
             #endregion
