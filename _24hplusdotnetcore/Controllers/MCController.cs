@@ -355,5 +355,30 @@ namespace _24hplusdotnetcore.Controllers
                 });
             }
         }
+        
+        [HttpGet("api/mc/cases")]
+        public async Task<ActionResult<ResponseContext>> GetCasesAsync([FromQuery] GetCaseRequestDto getCaseRequestDto)
+        {
+            try
+            {
+                IEnumerable<GetCaseMCResponseDto> cases = await _mcService.GetCasesAsync(getCaseRequestDto);
+
+                return Ok(new ResponseContext
+                {
+                    code = (int)Common.ResponseCode.SUCCESS,
+                    message = Common.Message.SUCCESS,
+                    data = cases
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return Ok(new ResponseContext
+                {
+                    code = (int)Common.ResponseCode.ERROR,
+                    message = ex.Message,
+                });
+            }
+        }
     }
 }

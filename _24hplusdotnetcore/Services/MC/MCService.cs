@@ -5,6 +5,7 @@ using _24hplusdotnetcore.Common.Enums;
 using _24hplusdotnetcore.ModelDtos;
 using _24hplusdotnetcore.Models;
 using _24hplusdotnetcore.Models.MC;
+using AutoMapper;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -13,7 +14,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 
@@ -28,13 +28,16 @@ namespace _24hplusdotnetcore.Services.MC
         private readonly CustomerServices _customerServices;
         private readonly ProductServices _productServices;
         private readonly IRestMCService _restMCService;
+        private readonly IMapper _mapper;
+
         public MCService(ILogger<MCService> logger,
         FileUploadServices fileUploadServices,
         IWebHostEnvironment webHostEnvironment,
         DataMCProcessingServices dataMCProcessingServices,
         CustomerServices customerServices,
         ProductServices productServices,
-        IRestMCService restMCService)
+        IRestMCService restMCService,
+        IMapper mapper)
         {
             _logger = logger;
             _fileUploadServices = fileUploadServices;
@@ -43,6 +46,7 @@ namespace _24hplusdotnetcore.Services.MC
             _restMCService = restMCService;
             _customerServices = customerServices;
             _productServices = productServices;
+            _mapper = mapper;
         }
         public dynamic CheckDuplicate(string citizenID)
         {
@@ -382,7 +386,7 @@ namespace _24hplusdotnetcore.Services.MC
             try
             {
                 Customer customer = _customerServices.GetCustomer(cancelCaseRequestDto.CustomerId);
-                if(customer == null)
+                if (customer == null)
                 {
                     throw new ArgumentException(Message.CUSTOMER_NOT_FOUND);
                 }
@@ -486,6 +490,17 @@ namespace _24hplusdotnetcore.Services.MC
                 _logger.LogError(ex, ex.Content);
                 var error = await ex.GetContentAsAsync<MCErrorResponseDto>();
                 throw new ArgumentException(error.ReturnMes);
+            }
+        }
+        public async Task<IEnumerable<GetCaseMCResponseDto>> GetCasesAsync(GetCaseRequestDto getCaseRequestDto)
+        {
+            try
+            {
+                GetCaseMCRequestDto request = _mapper.Map<GetCaseMCRequestDto>(getCaseRequestDto);
+
+                IEnumerable<GetCaseMCResponseDto> cases = await _restMCService.GetCasesAsync(request);
+
+                return cases;
             }
             catch (Exception ex)
             {

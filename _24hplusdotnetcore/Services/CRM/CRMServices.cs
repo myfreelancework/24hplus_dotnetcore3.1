@@ -258,7 +258,7 @@ namespace _24hplusdotnetcore.Services.CRM
                             LeadCrm leadCrm = leadCrms.FirstOrDefault(x => x.Id == dataCRMProcessing.LeadCrmId);
                             if (leadCrm != null)
                             {
-                                Record dataCRM = _mapper.Map<Record>(leadCrm);
+                                var dataCRM = _mapper.Map<CRMRequestDto>(leadCrm);
                                 dataCRM.Cf1178 = "MIRAE ASSET";
                                 dataCRM.Leadsource = "Telesales 24hPlus -2020";
                                 dataCRM.Cf1206 = "1";
@@ -313,7 +313,7 @@ namespace _24hplusdotnetcore.Services.CRM
             }
         }
 
-        private void PushDataToCRM(Record dataCRM, string session, DataCRMProcessing dataCRMProcessing)
+        private void PushDataToCRM(CRMBaseModel dataCRM, string session, DataCRMProcessing dataCRMProcessing)
         {
             try
             {
