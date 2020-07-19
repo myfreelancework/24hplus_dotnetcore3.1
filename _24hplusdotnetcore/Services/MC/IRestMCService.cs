@@ -26,5 +26,13 @@ namespace _24hplusdotnetcore.Services.MC
         [Post("/mcMobileService/service/v1.0/mobile-4sales/send-case-note")]
         [Headers("Authorization: Bearer")]
         Task<MCSuccessResponseDto> SendCaseNoteAsync(MCSendCaseNoteRequestDto mCSendCaseNoteRequestDto);
+
+        [Get("/mcMobileService/service/v1.0/mobile-4sales/third-party/checklist")]
+        [Headers("Authorization: Bearer")]
+        Task<CustomerCheckListResponseModel> GetReturnCheckListAsync(string appId);
+        
+        [Get("/mcMobileService/service/v1.0/mobile-4sales/cases")]
+        [Headers("Authorization: Bearer")]
+        Task<IEnumerable<GetCaseMCResponseDto>> GetCasesAsync([Query] GetCaseMCRequestDto getCaseMCRequestDto);
     }
 }
