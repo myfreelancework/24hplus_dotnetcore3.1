@@ -131,6 +131,7 @@ namespace _24hplusdotnetcore.Models
         public string GroupName { get; set; }
         public bool Mandatory { get; set; }
         public bool HasAlternate { get; set; }
+        public bool Locked { get; set; }
         public IEnumerable<DocumentUpload> Documents { get; set; }
         // public IEnumerable<int> AlternateGroups { get; set; }
     }

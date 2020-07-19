@@ -292,7 +292,7 @@ namespace _24hplusdotnetcore.Controllers
                 {
                     code = (int)Common.ResponseCode.SUCCESS,
                     message = Common.Message.SUCCESS,
-                    data = mCCaseNoteListDto
+                    data = mCCaseNoteListDto.MCNotesEntries.MCNotesEntry.Last()
                 });
             }
             catch (Exception ex)
