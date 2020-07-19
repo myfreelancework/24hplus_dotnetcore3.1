@@ -246,6 +246,9 @@ namespace _24hplusdotnetcore.Mappings
                 .ForMember(dest => dest.PostbackMA, src => src.MapFrom(x => x));
 
             #endregion
+
+            CreateMap<GetCaseRequestDto, GetCaseMCRequestDto>()
+                .ForMember(dest => dest.Status, src => src.MapFrom(x => x.Status.ToString()));
         }
     }
 }
