@@ -179,7 +179,7 @@ namespace _24hplusdotnetcore.Services.MC
                         dataMC.Request.CustomerName = objCustomer.Personal.Name;
                         dataMC.Request.ProductId = product.ProductIdMC;
                         dataMC.Request.TempResidence = objCustomer.IsTheSameResidentAddress == true ? 1 : 2;
-                        dataMC.Request.SaleCode = "RD006100030";
+                        dataMC.Request.SaleCode = Config.MC_TLS_SALECODE;
                         dataMC.Request.CompanyTaxNumber = objCustomer.Working.TaxId;
                         dataMC.Request.ShopCode = objCustomer.Loan.SignAddress.Split('-')[0];
                         dataMC.Request.IssuePlace = objCustomer.Loan.SignAddress.Split('-')[1];
@@ -238,8 +238,8 @@ namespace _24hplusdotnetcore.Services.MC
                         dynamic content = JsonConvert.DeserializeObject<dynamic>(response.Content);
                         if (content.id != null)
                         {
-                            objCustomer.MCId = Int32.Parse(content.id.Value.ToString());
-                            _customerServices.UpdateCustomerPostback(objCustomer);
+                            int mcId = Int32.Parse(content.id.Value.ToString());
+                            _customerServices.UpdateCustomerMCId(objCustomer.Id, mcId);
                             uploadCount++;
                         }
                         else

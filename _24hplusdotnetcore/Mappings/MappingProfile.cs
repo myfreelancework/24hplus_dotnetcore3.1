@@ -249,6 +249,12 @@ namespace _24hplusdotnetcore.Mappings
 
             CreateMap<GetCaseRequestDto, GetCaseMCRequestDto>()
                 .ForMember(dest => dest.Status, src => src.MapFrom(x => x.Status.ToString()));
+
+
+            #region Checklist
+            CreateMap<GroupDtoModel, GroupDocument>();
+            CreateMap<DocumentDtoModel, DocumentUpload>();
+            #endregion
         }
     }
 }

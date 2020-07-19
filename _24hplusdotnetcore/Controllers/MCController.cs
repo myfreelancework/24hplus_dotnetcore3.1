@@ -6,6 +6,7 @@ using _24hplusdotnetcore.Models;
 using _24hplusdotnetcore.Models.MC;
 using _24hplusdotnetcore.Services;
 using _24hplusdotnetcore.Services.MC;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -25,17 +26,20 @@ namespace _24hplusdotnetcore.Controllers
         private readonly CustomerServices _customerService;
         private readonly MCNotificationService _mcNotificationService;
         private readonly MCCheckCICService _mcCheckCICService;
+        private readonly IMapper _mapper;
         public MCController(ILogger<MCController> logger,
         MCService mcService,
         CustomerServices customerService,
         MCCheckCICService mcCheckCICService,
-        MCNotificationService mcNotificationService)
+        MCNotificationService mcNotificationService,
+        IMapper mapper)
         {
             _logger = logger;
             _mcService = mcService;
             _mcCheckCICService = mcCheckCICService;
             _mcNotificationService = mcNotificationService;
             _customerService = customerService;
+            _mapper = mapper;
         }
 
         [HttpGet]
@@ -135,7 +139,7 @@ namespace _24hplusdotnetcore.Controllers
 
         [HttpPost]
         [Route("api/mc/notification")]
-        public ActionResult<ResponseContext> PushNotification(MCNotificationDto noti)
+        public async Task<ActionResult<ResponseContext>> PushNotification(MCNotificationDto noti)
         {
             try
             {
@@ -150,6 +154,28 @@ namespace _24hplusdotnetcore.Controllers
                     if (MCNotificationMessage.Return.Where(x => x == noti.CurrentStatus).Any())
                     {
                         dto.Status = CustomerStatus.RETURN;
+                        // Get return checklist
+                        CustomerCheckListResponseModel returnChecklist = await _mcService.GetReturnCheckListAsync(customer.Id);
+                        if (returnChecklist != null)
+                        {
+                            var returnDocuments = _mapper.Map<IEnumerable<GroupDocument>>(returnChecklist.CheckList);
+                            _customerService.UpdateCustomerMCReturnDocuments(customer.Id, returnDocuments);
+                        }
+                        // get reason return
+                        GetCaseRequestDto getCaseRequestDto = new GetCaseRequestDto();
+                        getCaseRequestDto.Status = CaseStatus.ABORT;
+                        getCaseRequestDto.Keyword = customer.Personal.Name;
+                        getCaseRequestDto.SaleCode = Config.MC_TLS_SALECODE;
+                        IEnumerable<GetCaseMCResponseDto> cases = await _mcService.GetCasesAsync(getCaseRequestDto);
+                        if (cases.Any())
+                        {
+                            var fistCase = cases.First();
+                            if (fistCase.Id == customer.MCId && fistCase.Reasons.Any())
+                            {
+                                var reason = fistCase.Reasons.First().Reason;
+                                _customerService.UpdateCustomerMCReason(customer.Id, reason);
+                            }
+                        }
                     }
                     else if (MCNotificationMessage.Cancel.Where(x => x == noti.CurrentStatus).Any())
                     {
@@ -163,7 +189,10 @@ namespace _24hplusdotnetcore.Controllers
                     {
                         dto.Status = CustomerStatus.PROCESSING;
                     }
-                    _customerService.UpdateMCAppId(noti);
+                    if (customer.MCAppnumber == 0)
+                    {
+                        _customerService.UpdateMCAppId(noti);
+                    }
                     _customerService.UpdateStatus(dto);
                 }
                 return Ok(new ResponseMCContext
@@ -226,6 +255,7 @@ namespace _24hplusdotnetcore.Controllers
             }
         }
 
+        [AllowAnonymous]
         [HttpGet]
         [Route("api/mc/push-mc")]
         public ActionResult<ResponseContext> CheckList()
@@ -292,7 +322,7 @@ namespace _24hplusdotnetcore.Controllers
                 {
                     code = (int)Common.ResponseCode.SUCCESS,
                     message = Common.Message.SUCCESS,
-                    data = mCCaseNoteListDto
+                    data = mCCaseNoteListDto.MCNotesEntries.MCNotesEntry.Last()
                 });
             }
             catch (Exception ex)
@@ -355,7 +385,7 @@ namespace _24hplusdotnetcore.Controllers
                 });
             }
         }
-        
+
         [HttpGet("api/mc/cases")]
         public async Task<ActionResult<ResponseContext>> GetCasesAsync([FromQuery] GetCaseRequestDto getCaseRequestDto)
         {

@@ -159,14 +159,15 @@ namespace _24hplusdotnetcore.Services
             }
         }
 
-        public long UpdateCustomerPostback(Customer customer)
+        public long UpdateCustomerMCId(string customerId, int MCId)
         {
             long updateCount = 0;
             try
             {
-                dynamic prvCustomer = _customer.Find(c => c.Id == customer.Id).FirstOrDefault();
+
+                var customer = _customer.Find(c => c.Id == customerId).FirstOrDefault();
                 customer.ModifiedDate = Convert.ToDateTime(DateTime.Now);
-                customer.CreatedDate = prvCustomer.CreatedDate;
+                customer.MCId = MCId;
                 updateCount = _customer.ReplaceOne(c => c.Id == customer.Id, customer).ModifiedCount;
 
             }
@@ -541,6 +542,53 @@ namespace _24hplusdotnetcore.Services
                     updateCount = _customer.ReplaceOne(c => c.Id == customer.Id, customer).ModifiedCount;
 
                 }
+            }
+            catch (Exception ex)
+            {
+                updateCount = -1;
+                _logger.LogError(ex, ex.Message);
+            }
+            return updateCount;
+        }
+
+        public long UpdateCustomerMCReason(string customerId, string reason)
+        {
+            long updateCount = 0;
+            try
+            {
+
+                var customer = _customer.Find(c => c.Id == customerId).FirstOrDefault();
+                customer.ModifiedDate = Convert.ToDateTime(DateTime.Now);
+                customer.Result.Reason = reason;
+                updateCount = _customer.ReplaceOne(c => c.Id == customer.Id, customer).ModifiedCount;
+
+            }
+            catch (Exception ex)
+            {
+                updateCount = -1;
+                _logger.LogError(ex, ex.Message);
+            }
+            return updateCount;
+        }
+
+        public long UpdateCustomerMCReturnDocuments(string customerId, IEnumerable<GroupDocument> documents)
+        {
+            long updateCount = 0;
+            try
+            {
+
+                var customer = _customer.Find(c => c.Id == customerId).FirstOrDefault();
+                customer.ModifiedDate = Convert.ToDateTime(DateTime.Now);
+                customer.ReturnDocuments = documents;
+                var currentDocuments = customer.Documents;
+                foreach (var item in documents)
+                {
+                    var group = currentDocuments.Where(x=>x.GroupId == item.GroupId).First();
+                    group.Locked = false;
+                }
+                customer.Documents = currentDocuments;
+                updateCount = _customer.ReplaceOne(c => c.Id == customer.Id, customer).ModifiedCount;
+
             }
             catch (Exception ex)
             {
