@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace _24hplusdotnetcore.Models.CRM
 {
-    public partial class CrmCustomerData
+    public class CrmCustomerData
     {
         [JsonProperty("success")]
         public bool Success { get; set; }
@@ -15,7 +15,7 @@ namespace _24hplusdotnetcore.Models.CRM
         public Result Result { get; set; }
     }
 
-    public partial class Result
+    public class Result
     {
         [JsonProperty("records")]
         public Record[] Records { get; set; }
@@ -24,7 +24,7 @@ namespace _24hplusdotnetcore.Models.CRM
         public string NextPage { get; set; }
     }
 
-    public partial class Record
+    public class CRMBaseModel
     {
         [JsonProperty("potentialname")]
         public string Potentialname { get; set; }
@@ -53,8 +53,7 @@ namespace _24hplusdotnetcore.Models.CRM
         [JsonProperty("sales_stage")]
         public string SalesStage { get; set; }
 
-        [JsonProperty("assigned_user_id")]
-        public AssignedUserId AssignedUserId { get; set; }
+
 
         [JsonProperty("probability")]
         public string Probability { get; set; }
@@ -476,12 +475,24 @@ namespace _24hplusdotnetcore.Models.CRM
         public string Id { get; set; }
     }
 
-    public partial class AssignedUserId
+    public class Record : CRMBaseModel
+    {
+        [JsonProperty("assigned_user_id")]
+        public AssignedUserId AssignedUserId { get; set; }
+    }
+
+    public class AssignedUserId
     {
         [JsonProperty("value")]
         public string Value { get; set; }
 
         [JsonProperty("label")]
         public string Label { get; set; }
+    }
+
+    public class CRMRequestDto : CRMBaseModel
+    {
+        [JsonProperty("assigned_user_id")]
+        public string AssignedUserId { get; set; }
     }
 }
