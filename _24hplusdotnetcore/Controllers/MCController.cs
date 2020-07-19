@@ -330,5 +330,30 @@ namespace _24hplusdotnetcore.Controllers
                 });
             }
         }
+
+        [HttpGet("api/mc/return-check-list")]
+        public async Task<ActionResult<ResponseContext>> GetReturnCheckListAsync(string customerId)
+        {
+            try
+            {
+                CustomerCheckListResponseModel customerCheckListResponseModel = await _mcService.GetReturnCheckListAsync(customerId);
+
+                return Ok(new ResponseContext
+                {
+                    code = (int)Common.ResponseCode.SUCCESS,
+                    message = Common.Message.SUCCESS,
+                    data = customerCheckListResponseModel
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return Ok(new ResponseContext
+                {
+                    code = (int)Common.ResponseCode.ERROR,
+                    message = ex.Message,
+                });
+            }
+        }
     }
 }

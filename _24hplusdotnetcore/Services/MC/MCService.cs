@@ -467,5 +467,31 @@ namespace _24hplusdotnetcore.Services.MC
                 throw;
             }
         }
+
+        public async Task<CustomerCheckListResponseModel> GetReturnCheckListAsync(string customerId)
+        {
+            try
+            {
+                Customer customer = _customerServices.GetCustomer(customerId);
+                if (customer == null)
+                {
+                    throw new ArgumentException(Message.CUSTOMER_NOT_FOUND);
+                }
+
+                CustomerCheckListResponseModel customerCheckListResponseModel = await _restMCService.GetReturnCheckListAsync(customer.MCAppId);
+                return customerCheckListResponseModel;
+            }
+            catch (Refit.ApiException ex)
+            {
+                _logger.LogError(ex, ex.Content);
+                var error = await ex.GetContentAsAsync<MCErrorResponseDto>();
+                throw new ArgumentException(error.ReturnMes);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                throw;
+            }
+        }
     }
 }
