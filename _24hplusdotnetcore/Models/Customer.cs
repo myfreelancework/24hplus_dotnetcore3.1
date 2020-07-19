@@ -38,6 +38,7 @@ namespace _24hplusdotnetcore.Models
         public Sale SaleInfo { get; set; }
         public Result Result { get; set; }
         public IEnumerable<GroupDocument> Documents  { get; set; }
+        public IEnumerable<GroupDocument> ReturnDocuments  { get; set; }
         public Counsel Counsel { get; set; }
     }
 
