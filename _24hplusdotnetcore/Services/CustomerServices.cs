@@ -199,6 +199,11 @@ namespace _24hplusdotnetcore.Services
                 if(customer.Documents == null) {
                     customer.Documents = prvCustomer.Documents;
                 }
+                customer.MCId = prvCustomer.MCId;
+                customer.MCAppId = prvCustomer.MCAppId;
+                customer.MCAppnumber = prvCustomer.MCAppnumber;
+                customer.ReturnDocuments = prvCustomer.ReturnDocuments;
+                customer.Result = prvCustomer.Result;
                 updateCount = _customer.ReplaceOne(c => c.Id == customer.Id, customer).ModifiedCount;
 
                 if (customer.Status.ToUpper() == CustomerStatus.SUBMIT)
