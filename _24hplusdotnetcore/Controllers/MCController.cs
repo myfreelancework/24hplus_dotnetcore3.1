@@ -137,6 +137,7 @@ namespace _24hplusdotnetcore.Controllers
         }
 
 
+        [AllowAnonymous]
         [HttpPost]
         [Route("api/mc/notification")]
         public async Task<ActionResult<ResponseContext>> PushNotification(MCNotificationDto noti)
@@ -172,8 +173,7 @@ namespace _24hplusdotnetcore.Controllers
                             var fistCase = cases.First();
                             if (fistCase.Id == customer.MCId && fistCase.Reasons.Any())
                             {
-                                var reason = fistCase.Reasons.First().Reason;
-                                _customerService.UpdateCustomerMCReason(customer.Id, reason);
+                                dto.Reason = fistCase.Reasons.First().Reason + ", " + fistCase.Reasons.First().ReasonDetail;
                             }
                         }
                     }
