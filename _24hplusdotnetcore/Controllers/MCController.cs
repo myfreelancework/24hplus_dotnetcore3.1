@@ -173,7 +173,7 @@ namespace _24hplusdotnetcore.Controllers
                             var fistCase = cases.First();
                             if (fistCase.Id == customer.MCId && fistCase.Reasons.Any())
                             {
-                                dto.Reason = fistCase.Reasons.First().Reason;
+                                dto.Reason = fistCase.Reasons.First().Reason + ", " + fistCase.Reasons.First().ReasonDetail;
                             }
                         }
                     }
