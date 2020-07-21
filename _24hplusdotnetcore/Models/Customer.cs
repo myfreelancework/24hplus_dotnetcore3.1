@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using Newtonsoft.Json;
 
 namespace _24hplusdotnetcore.Models
 {
@@ -38,6 +39,7 @@ namespace _24hplusdotnetcore.Models
         public Sale SaleInfo { get; set; }
         public Result Result { get; set; }
         public IEnumerable<GroupDocument> Documents  { get; set; }
+        [JsonProperty("returnDocuments")]
         public IEnumerable<GroupDocument> ReturnDocuments  { get; set; }
         public Counsel Counsel { get; set; }
     }
