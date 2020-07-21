@@ -1,4 +1,5 @@
 ﻿using _24hplusdotnetcore.Common;
+using _24hplusdotnetcore.Common.Attributes;
 using _24hplusdotnetcore.Common.Constants;
 using _24hplusdotnetcore.Common.Enums;
 using _24hplusdotnetcore.ModelDtos;
@@ -137,9 +138,8 @@ namespace _24hplusdotnetcore.Controllers
         }
 
 
-        [AllowAnonymous]
-        [HttpPost]
-        [Route("api/mc/notification")]
+        [MCAuthorize]
+        [HttpPost("api/mc/notification")]
         public async Task<ActionResult<ResponseContext>> PushNotification(MCNotificationDto noti)
         {
             try
@@ -212,9 +212,8 @@ namespace _24hplusdotnetcore.Controllers
             }
         }
 
-        [AllowAnonymous]
-        [HttpPost]
-        [Route("api/mc/update-cic")]
+        [MCAuthorize]
+        [HttpPost("api/mc/update-cic")]
         public async Task<ActionResult<ResponseContext>> UpdateCICAsync(MCUpdateCICDto dto)
         {
             try

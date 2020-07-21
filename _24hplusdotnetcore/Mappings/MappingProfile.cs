@@ -188,7 +188,8 @@ namespace _24hplusdotnetcore.Mappings
             CreateMap<LeadCrm, CRMRequestDto>()
                 .ForMember(dest => dest.Id, src => src.MapFrom(x => x.LeadCrmId))
                 .ForMember(dest => dest.AssignedUserId, src => src.MapFrom(x => x.AssignedUserId.Value))
-                .ForMember(dest => dest.Cf1184, src => src.MapFrom(x => x.GetStatusMessage()));
+                .ForMember(dest => dest.Cf1184, src => src.MapFrom(x => x.GetStatusMessage()))
+                .ForMember(dest => dest.Cf1174, src => src.MapFrom(x => x.PostbackMA != null ? x.PostbackMA.DcLastNote : x.Cf1174));
 
             #endregion
 
