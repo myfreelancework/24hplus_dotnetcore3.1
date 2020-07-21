@@ -166,9 +166,38 @@ namespace _24hplusdotnetcore.Services.MC
                     {
                         var objCustomer = _customerServices.GetCustomer(item.CustomerId);
                         var product = _productServices.GetProductByProductId(objCustomer.Loan.ProductId);
-                        // var lstFileUpload = _fileUploadServices.GetListFileUploadByCustomerId(item.CustomerId);
-                        // lstFileUpload = lstFileUpload.Where(l => !string.IsNullOrEmpty(l.DocumentCode)).ToList();
-                        var fileZipInfo = ZipFiles(objCustomer.Id);
+                        var listInfo = new List<Info>();
+                        List<string> listFile = new List<string>();
+                        var documents = objCustomer.MCId != 0 ? objCustomer.ReturnDocuments : objCustomer.Documents;
+                        
+                        foreach (var group in documents)
+                        {
+                            var groupId = group.GroupId;
+                            foreach (var doc in group.Documents)
+                            {
+                                foreach (var media in doc.UploadedMedias)
+                                {
+                                    string mimeType = "";
+                                    if (media.Type != null && media.Type.IndexOf("/") > -1)
+                                    {
+                                        mimeType = media.Type.Split("/")[1];
+                                    }
+                                    else
+                                    {
+                                        mimeType = media.Type;
+                                    }
+                                    var dataMCFileInfo = new Info();
+                                    dataMCFileInfo.GroupId = group.GroupId.ToString();
+                                    dataMCFileInfo.DocumentCode = doc.DocumentCode;
+                                    dataMCFileInfo.FileName = media.Name;
+                                    dataMCFileInfo.MimeType = mimeType;
+                                    listInfo.Add(dataMCFileInfo);
+                                    listFile.Add(media.Name);
+                                }
+                            }
+                        }
+                        
+                        var fileZipInfo = ZipFiles(objCustomer.Id, listFile);
                         var filePath = fileZipInfo[0];
                         var hash = fileZipInfo[1];
                         var loanAmount = objCustomer.Loan.Amount.Replace(",", string.Empty);
@@ -192,39 +221,8 @@ namespace _24hplusdotnetcore.Services.MC
                         dataMC.MobileIssueDateCitizen = objCustomer.Personal.IdCardDate;
                         dataMC.MobileProductType = "CashLoan";
                         dataMC.Md5 = hash;
-                        dataMC.Info = new List<Info>();
+                        dataMC.Info = listInfo;
 
-                        foreach (var group in objCustomer.Documents)
-                        {
-                            var groupId = group.GroupId;
-                            foreach (var doc in group.Documents)
-                            {
-                                foreach (var media in doc.UploadedMedias)
-                                {
-                                    string mimeType = "";
-                                    if (media.Type != null && media.Type.IndexOf("/") > -1)
-                                    {
-                                        mimeType = media.Type.Split("/")[1];
-                                    }
-                                    else
-                                    {
-                                        mimeType = media.Type;
-                                    }
-                                    var dataMCFileInfo = new Info();
-                                    dataMCFileInfo.GroupId = group.GroupId.ToString();
-                                    dataMCFileInfo.DocumentCode = doc.DocumentCode;
-                                    dataMCFileInfo.FileName = media.Name;
-                                    dataMCFileInfo.MimeType = mimeType;
-                                    dataMC.Info.Add(dataMCFileInfo);
-                                }
-                            }
-                            // var dataMCFileInfo = new Info();
-                            // dataMCFileInfo.DocumentCode = f.DocumentCode;
-                            // dataMCFileInfo.FileName = f.FileUploadName;
-                            // dataMCFileInfo.MimeType = "jpg";
-                            // dataMCFileInfo.GroupId = f.GroupId;
-                            // dataMC.Info.Add(dataMCFileInfo);
-                        }
                         var client = new RestClient(Url.MC_BASE_URL + Url.MC_UPLOAD_DOCUMENT);
                         client.Timeout = -1;
                         var request = new RestRequest(Method.POST);
@@ -265,21 +263,22 @@ namespace _24hplusdotnetcore.Services.MC
             }
         }
 
-        public string[] ZipFiles(string customerId)
+        public string[] ZipFiles(string customerId, List<string> listFile)
         {
             try
             {
                 //var listFile = _fileUploadServices.GetListFileUploadByCustomerId(customerId);
-                string serverPath = Path.Combine(_hostingEnvironment.ContentRootPath, "FileUpload");
-                //Directory.CreateDirectory(Path.Combine(serverPath, customerId));
-                string d = Path.Combine(serverPath, customerId);
-                //for (int i = 0; i < listFile.Count; i++)
-                //{
-                //    string s = Path.Combine(serverPath, listFile[i].FileUploadName);
-                //    File.Copy(s, Path.Combine(d, listFile[i].FileUploadName), true);
-                //}
-                ZipFile.CreateFromDirectory(d, Path.Combine(serverPath, customerId + ".zip"), CompressionLevel.Optimal, false);
-                string fileZip = Path.Combine(serverPath, customerId + ".zip");
+                string serverPath = Path.Combine(_hostingEnvironment.ContentRootPath, "FileUpload/" + customerId);
+                String timeStamp = DateTime.Now.ToString("yyyyMMddHHmmssffff");
+                Directory.CreateDirectory(Path.Combine(serverPath, timeStamp));
+                string d = Path.Combine(serverPath, timeStamp);
+                for (int i = 0; i < listFile.Count; i++)
+                {
+                   string s = Path.Combine(serverPath, listFile[i]);
+                   File.Copy(s, Path.Combine(d, listFile[i]), true);
+                }
+                ZipFile.CreateFromDirectory(d, Path.Combine(serverPath, timeStamp + ".zip"), CompressionLevel.Optimal, false);
+                string fileZip = Path.Combine(serverPath, timeStamp + ".zip");
                 var md5 = MD5.Create();
                 var stream = File.OpenRead(fileZip);
                 var hash = md5.ComputeHash(stream);
