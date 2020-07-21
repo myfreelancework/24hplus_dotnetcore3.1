@@ -199,11 +199,15 @@ namespace _24hplusdotnetcore.Services
                 if(customer.Documents == null) {
                     customer.Documents = prvCustomer.Documents;
                 }
+                if (customer.ReturnDocuments == null) {
+                    customer.ReturnDocuments = prvCustomer.ReturnDocuments;
+                }
+                if (customer.Result == null) {
+                    customer.Result = prvCustomer.Result;
+                }
                 customer.MCId = prvCustomer.MCId;
                 customer.MCAppId = prvCustomer.MCAppId;
                 customer.MCAppnumber = prvCustomer.MCAppnumber;
-                customer.ReturnDocuments = prvCustomer.ReturnDocuments;
-                customer.Result = prvCustomer.Result;
                 updateCount = _customer.ReplaceOne(c => c.Id == customer.Id, customer).ModifiedCount;
 
                 if (customer.Status.ToUpper() == CustomerStatus.SUBMIT)
