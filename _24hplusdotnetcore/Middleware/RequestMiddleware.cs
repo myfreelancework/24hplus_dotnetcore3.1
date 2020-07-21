@@ -1,16 +1,11 @@
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+using _24hplusdotnetcore.Common.Attributes;
 using _24hplusdotnetcore.Services;
-using Microsoft.AspNetCore.Builder;
-using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
-using System;
-using _24hplusdotnetcore.Models;
-using System.Runtime.Serialization;
 using _24hplusdotnetcore.Settings;
-using Microsoft.Extensions.Options;
-using System.Linq;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Options;
+using System.Threading.Tasks;
 
 namespace _24hplusdotnetcore.Middleware
 {
@@ -18,13 +13,13 @@ namespace _24hplusdotnetcore.Middleware
     {
         private readonly RequestDelegate _next;
         private readonly UserLoginServices _userLoginSerivces;
-        private readonly AuthenConfig _authenConfig;
+        private readonly MCConfig _mCConfig;
 
-        public RequestMiddleware(RequestDelegate next, UserLoginServices userLoginSerivces, IOptions<AuthenConfig> options)
+        public RequestMiddleware(RequestDelegate next, UserLoginServices userLoginSerivces, IOptions<MCConfig> options)
         {
             _next = next;
             _userLoginSerivces = userLoginSerivces;
-            _authenConfig = options.Value;
+            _mCConfig = options.Value;
         }
 
         public async Task InvokeAsync(HttpContext context)
@@ -34,6 +29,18 @@ namespace _24hplusdotnetcore.Middleware
             {
                 await _next(context);
                 return;
+            }
+
+            if(endpoint?.Metadata?.GetMetadata<MCAuthorizeAttribute>() is object)
+            {
+                string username = context.Request.Headers["username"];
+                string password = context.Request.Headers["password"];
+
+                if(string.Equals(_mCConfig.UserName, username) && string.Equals(_mCConfig.Password, password))
+                {
+                    await _next(context);
+                    return;
+                }
             }
 
 
