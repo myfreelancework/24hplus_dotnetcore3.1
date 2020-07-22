@@ -272,7 +272,7 @@ namespace _24hplusdotnetcore.Services.CRM
                             {
                                 Record dataCRM = new Record
                                 {
-                                    Cf1178 = "MC",
+                                    Cf1178 = "MCREDIT",
                                     Potentialname = customer.Personal.Name,
                                     Cf1026 = customer.Personal.Gender,
                                     Leadsource = "MobileGreenC",
@@ -298,9 +298,15 @@ namespace _24hplusdotnetcore.Services.CRM
                                     Cf1244 = "AS",
                                     Cf1256 = "-",
                                     Cf1264 = "????",
-                                    Cf1230 = ""
+                                    Cf1230 = "",
+                                    Id = customer.CRMId
                                 };
-                                PushDataToCRM(dataCRM, session, dataCRMProcessing);
+                                var crmCustomer =  PushDataToCRM(dataCRM, session, dataCRMProcessing);
+                                if(crmCustomer?.Result?.Record != null && string.IsNullOrEmpty(customer.CRMId))
+                                {
+                                    customer.CRMId = crmCustomer.Result.Record.Id;
+                                    _customerServices.ReplaceOne(customer);
+                                }
                             }
                         }
                     }
@@ -313,7 +319,7 @@ namespace _24hplusdotnetcore.Services.CRM
             }
         }
 
-        private void PushDataToCRM(CRMBaseModel dataCRM, string session, DataCRMProcessing dataCRMProcessing)
+        private UpSertCrmResponse PushDataToCRM(CRMBaseModel dataCRM, string session, DataCRMProcessing dataCRMProcessing)
         {
             try
             {
@@ -332,11 +338,13 @@ namespace _24hplusdotnetcore.Services.CRM
                 dataCRMProcessing.FinishDate = DateTime.UtcNow;
                 _dataCRMProcessingServices.UpdateByCustomerId(dataCRMProcessing, Common.DataCRMProcessingStatus.Done);
                 _logger.LogInformation("User was pushed to CRM: {0} - Status: {1}", dataCRMProcessing.CustomerId, Common.DataCRMProcessingStatus.Done);
+
+                return JsonConvert.DeserializeObject<UpSertCrmResponse>(response.Content);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, ex.Message);
-
+                return null;
             }
         }
 

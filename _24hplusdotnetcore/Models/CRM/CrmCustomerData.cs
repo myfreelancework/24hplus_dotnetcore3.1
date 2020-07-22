@@ -98,7 +98,7 @@ namespace _24hplusdotnetcore.Models.CRM
         public string Cf884 { get; set; }
 
         [JsonProperty("cf_892")]
-        public string Cf892 { get; set; }
+        public string Cf892 { get; set; } = "-";
 
         [JsonProperty("cf_948")]
         public string Cf948 { get; set; }
@@ -155,7 +155,7 @@ namespace _24hplusdotnetcore.Models.CRM
         public string Cf998 { get; set; }
 
         [JsonProperty("cf_1002")]
-        public string Cf1002 { get; set; }
+        public string Cf1002 { get; set; } = "-";
 
         [JsonProperty("cf_1004")]
         public string Cf1004 { get; set; }
@@ -329,7 +329,7 @@ namespace _24hplusdotnetcore.Models.CRM
         public string Cf1208 { get; set; }
 
         [JsonProperty("cf_1210")]
-        public string Cf1210 { get; set; }
+        public string Cf1210 { get; set; } = "-";
 
         [JsonProperty("cf_1214")]
         public string Cf1214 { get; set; }
@@ -469,7 +469,7 @@ namespace _24hplusdotnetcore.Models.CRM
         [JsonProperty("cf_1350")]
         public string Cf1350 { get; set; }
         [JsonProperty("cf_1404")]
-        public string Cf1404 { get; set; }
+        public string Cf1404 { get; set; } = "-";
 
         [JsonProperty("id")]
         public string Id { get; set; }
@@ -494,5 +494,29 @@ namespace _24hplusdotnetcore.Models.CRM
     {
         [JsonProperty("assigned_user_id")]
         public string AssignedUserId { get; set; }
+    }
+
+    public class CRMError
+    {
+        [JsonProperty("code")]
+        public string Code { get; set; }
+        [JsonProperty("message")]
+        public string Message { get; set; }
+    }
+
+    public class UpSertCrmResponse
+    {
+        [JsonProperty("success")]
+        public bool Success { get; set; }
+        [JsonProperty("result")]
+        public UpSertCrmResult Result { get; set; }
+        [JsonProperty("error")]
+        public CRMError Error { get; set; }
+    }
+
+    public class UpSertCrmResult
+    {
+        [JsonProperty("record")]
+        public Record Record { get; set; }
     }
 }
