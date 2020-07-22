@@ -205,7 +205,7 @@ namespace _24hplusdotnetcore.Mappings
                 .ForMember(dest => dest.T_STATUS_DATE, src => src.MapFrom(x => x.Cf1266))
                 .ForMember(dest => dest.APPOINTMENT_DATE, src => src.MapFrom(x => x.Cf1052))
                 .ForMember(dest => dest.APPOINTMENT_ADDRESS, src => src.MapFrom(x => x.Cf892))
-                .ForMember(dest => dest.TSA_IN_CHARGE, src => src.MapFrom(x => x.AssignedUserId.Value))
+                .ForMember(dest => dest.TSA_IN_CHARGE, src => src.MapFrom(x => "24H-TE0001"))
                 .ForMember(dest => dest.TST_TEAM, src => src.MapFrom(x => x.Cf972))
                 .ForMember(dest => dest.REQUEST_DOCUMENT, src => src.MapFrom(x => x.Cf1036))
                 .ForMember(dest => dest.DOB, src => src.MapFrom(x => x.Cf948))

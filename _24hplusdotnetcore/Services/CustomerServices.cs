@@ -569,13 +569,6 @@ namespace _24hplusdotnetcore.Services
                 var customer = _customer.Find(c => c.Id == customerId).FirstOrDefault();
                 customer.ModifiedDate = Convert.ToDateTime(DateTime.Now);
                 customer.ReturnDocuments = documents;
-                var currentDocuments = customer.Documents;
-                foreach (var item in documents)
-                {
-                    var group = currentDocuments.Where(x=>x.GroupId == item.GroupId).First();
-                    group.Locked = false;
-                }
-                customer.Documents = currentDocuments;
                 updateCount = _customer.ReplaceOne(c => c.Id == customer.Id, customer).ModifiedCount;
 
             }
