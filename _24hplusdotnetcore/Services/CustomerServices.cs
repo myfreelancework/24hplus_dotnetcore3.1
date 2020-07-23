@@ -206,6 +206,7 @@ namespace _24hplusdotnetcore.Services
                     customer.Result = prvCustomer.Result;
                 }
                 customer.MCId = prvCustomer.MCId;
+                customer.CRMId = prvCustomer.CRMId;
                 customer.MCAppId = prvCustomer.MCAppId;
                 customer.MCAppnumber = prvCustomer.MCAppnumber;
                 updateCount = _customer.ReplaceOne(c => c.Id == customer.Id, customer).ModifiedCount;
