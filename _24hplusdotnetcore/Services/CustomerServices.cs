@@ -579,5 +579,18 @@ namespace _24hplusdotnetcore.Services
             }
             return updateCount;
         }
+
+        public void ReplaceOne(Customer customer)
+        {
+            try
+            {
+                _customer.ReplaceOne(c => c.Id == customer.Id, customer);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                throw;
+            }
+        }
     }
 }
