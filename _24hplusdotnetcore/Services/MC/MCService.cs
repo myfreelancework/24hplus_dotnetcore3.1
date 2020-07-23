@@ -227,7 +227,7 @@ namespace _24hplusdotnetcore.Services.MC
                         client.Timeout = -1;
                         var request = new RestRequest(Method.POST);
                         request.AddHeader("Authorization", "Bearer " + token + "");
-                        request.AddHeader("x-security", "MEKONG-CREDIT-57d733a9-bcb5-4bff-aca1-f58163122fae");
+                        request.AddHeader("x-security", Config.CredMC_Security_Key);
                         request.AddHeader("Content-Type", "multipart/form-data");
                         request.AddFile("file", "" + filePath + "");
                         request.AddParameter("object", JsonConvert.SerializeObject(dataMC));
@@ -332,7 +332,7 @@ namespace _24hplusdotnetcore.Services.MC
                     var request = new RestRequest(Method.GET);
                     request.AddHeader("Content-type", "application/json");
                     request.AddHeader("Authorization", "Bearer " + token + "");
-                    request.AddHeader("x-security", "MEKONG-CREDIT-57d733a9-bcb5-4bff-aca1-f58163122fae");
+                    request.AddHeader("x-security", Config.CredMC_Security_Key);
                     IRestResponse response = client.Execute(request);
                     Console.WriteLine(response.Content);
                     List<MCProduct> content = JsonConvert.DeserializeObject<List<MCProduct>>(response.Content);

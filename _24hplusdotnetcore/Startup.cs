@@ -214,14 +214,14 @@ namespace _24hplusdotnetcore
             services.AddHttpClient("restLoginService")
                 .ConfigureHttpClient((serviceProvider, conf) =>
                 {
-                    conf.BaseAddress = new Uri("https://uat-mfs-v2.mcredit.com.vn:8043");
+                    conf.BaseAddress = new Uri("https://mfs-v2.mcredit.com.vn:8043");
                     conf.DefaultRequestHeaders.Add("x-security", Common.Config.CredMC_Security_Key);
                 });
 
             services.AddRefitClient<IRestMCService>()
                 .ConfigureHttpClient((serviceProvider, conf) =>
                 {
-                    conf.BaseAddress = new Uri("https://uat-mfs-v2.mcredit.com.vn:8043");
+                    conf.BaseAddress = new Uri("https://mfs-v2.mcredit.com.vn:8043");
                     conf.DefaultRequestHeaders.Add("x-security", Common.Config.CredMC_Security_Key);
                 })
                 .ConfigurePrimaryHttpMessageHandler((serviceProvider) =>

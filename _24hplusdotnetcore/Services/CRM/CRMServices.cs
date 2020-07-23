@@ -273,29 +273,45 @@ namespace _24hplusdotnetcore.Services.CRM
                                 Record dataCRM = new Record
                                 {
                                     Cf1178 = "MCREDIT",
-                                    Potentialname = customer.Personal.Name,
-                                    Cf1026 = customer.Personal.Gender,
                                     Leadsource = "MobileGreenC",
-                                    Cf854 = customer.Personal.Phone,
+                                    Potentialname = customer.Personal.Name,
                                     Cf1050 = customer.Personal.IdCard,
-                                    Cf1028 = customer.Working.Job,
+                                    Cf1350 = customer.Personal.IdCardDate,
+                                    Cf1408 = customer.Personal.IdCardProvince,
+                                    Cf1026 = customer.Personal.Gender,
+                                    Cf948 = customer.Personal.DateOfBirth,
+                                    Cf854 = customer.Personal.Phone,
+                                    // @todo
+                                    Cf1002 = customer.ResidentAddress.Street,
+                                    Cf1246 = customer.Working.Job,
+                                    Cf964 = customer.Working.CompanyAddress.Street,
                                     Cf884 = customer.Working.Income,
                                     Cf1020 = customer.ResidentAddress.Province,
+                                    Cf1410 = customer.Working.IncomeMethod,
+                                    Cf1412 = customer.Working.OtherLoans,
+                                    Cf990 = customer.Loan.Term,
                                     Cf1032 = customer.Loan.Category,
                                     Cf1040 = customer.Loan.Product,
                                     Cf968 = customer.Loan.Amount,
-                                    Cf990 = customer.Loan.Term,
-                                    Cf1052 = "-",
                                     Cf1054 = customer.Loan.SignAddress,
+
+                                    Cf1414 = customer.SaleInfo.Name,
+                                    Cf1416 = customer.SaleInfo.Code,
+                                    Cf1418 = customer.SaleInfo.Phone,
+                                    Cf1196 = customer.SaleInfo.Note,
+
+                                    Cf1208 = customer.ContractCode,
+                                    Cf1420 = customer.Result != null ? customer.Result.Reason : "",
+                                    Cf1052 = "-",
                                     Cf1036 = "CHỨNG MINH NHÂN DÂN |##| HỘ KHẨU",
                                     SalesStage = "1.KH mới",
+                                    // @todo
                                     Cf1184 = "-",
                                     Cf1188 = "-",
                                     AssignedUserId = new AssignedUserId
                                     {
                                         Value = "19x2335"
                                     },
-                                    Cf1244 = "AS",
                                     Cf1256 = "-",
                                     Cf1264 = "????",
                                     Cf1230 = "",

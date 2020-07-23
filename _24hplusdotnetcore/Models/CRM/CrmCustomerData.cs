@@ -470,6 +470,20 @@ namespace _24hplusdotnetcore.Models.CRM
         public string Cf1350 { get; set; }
         [JsonProperty("cf_1404")]
         public string Cf1404 { get; set; } = "-";
+        [JsonProperty("cf_1408")]
+        public string Cf1408 { get; set; }
+        [JsonProperty("cf_1410")]
+        public string Cf1410 { get; set; }
+        [JsonProperty("cf_1412")]
+        public string Cf1412 { get; set; }
+        [JsonProperty("cf_1414")]
+        public string Cf1414 { get; set; }
+        [JsonProperty("cf_1416")]
+        public string Cf1416 { get; set; }
+        [JsonProperty("cf_1418")]
+        public string Cf1418 { get; set; }
+        [JsonProperty("cf_1420")]
+        public string Cf1420 { get; set; }
 
         [JsonProperty("id")]
         public string Id { get; set; }
