@@ -43,5 +43,13 @@ namespace _24hplusdotnetcore.Services.MC
         [Get("/mcMobileService/service/v1.0/mobile-4sales/products")]
         [Headers("Authorization: Bearer")]
         Task<IEnumerable<MCProduct>> GetProductAsync();
+
+        [Get("/mcMobileService/service/v1.0/mobile-4sales/check-identifier")]
+        [Headers("Authorization: Bearer")]
+        Task<MCResponseDto> CheckCitizendAsync(string citizenId);
+
+        [Get("/mcMobileService/service/v1.0/mobile-4sales/check-cic/check")]
+        [Headers("Authorization: Bearer")]
+        Task<IEnumerable<MCCheckCICInfoResponseDto>> CheckCICInnfoAsync(string citizenID, string customerName);
     }
 }
