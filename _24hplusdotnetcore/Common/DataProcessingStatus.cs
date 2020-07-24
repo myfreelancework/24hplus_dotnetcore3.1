@@ -5,5 +5,7 @@
         public const string IN_PROGRESS = "InProgress";
 
         public const string DONE = "Done";
+        
+        public const string ERROR = "Error";
     }
 }

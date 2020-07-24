@@ -67,6 +67,7 @@ namespace _24hplusdotnetcore.Services.MA
 
                 foreach (var leadCrm in leadCrms)
                 {
+                    var dataProcessing = dataProcessings.Where(x => x.LeadCrmId == leadCrm.Id).First();
                     var requestData = _mapper.Map<MARequestDataModel>(leadCrm);
                     requestData.REQUEST_ID = _mAConfig.RequestId;
                     requestData.REQUEST_DOCUMENT = requestData.REQUEST_DOCUMENT.Replace(" |##| ", ",");
@@ -83,13 +84,13 @@ namespace _24hplusdotnetcore.Services.MA
 
                     if(result.Result == false)
                     {
+                        dataProcessing.Status = DataProcessingStatus.ERROR;
+                        dataProcessing.Message = result.ErrorMessage;
                         await UpdateErrorLeadCrmAsync(leadCrm, LeadCrmStatus.Cancel);
+                    } else {
+                        dataProcessing.Status = DataProcessingStatus.ERROR;
                     }
-                }
-
-                foreach (var dataProcessing in dataProcessingUpdations)
-                {
-                    dataProcessing.Status = DataProcessingStatus.DONE;
+                    
                     dataProcessing.FinishDate = DateTime.UtcNow;
                     await _dataProcessingService.ReplaceOneAsync(dataProcessing);
                 }

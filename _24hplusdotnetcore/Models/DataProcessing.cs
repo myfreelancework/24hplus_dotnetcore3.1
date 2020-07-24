@@ -18,6 +18,7 @@ namespace _24hplusdotnetcore.Models
         public string CustomerId { get; set; }
         public string LeadCrmId { get; set; }
         public string Status { get; set; }
+        public string Message { get; set; }
         public string DataProcessingType { get; set; }
 
         public DateTime CreateDate { get; set; }

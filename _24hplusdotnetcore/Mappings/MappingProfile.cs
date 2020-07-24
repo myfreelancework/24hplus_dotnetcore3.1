@@ -228,7 +228,7 @@ namespace _24hplusdotnetcore.Mappings
                 .ForMember(dest => dest.GENERATE_TO_LEAD, src => src.MapFrom(x => x.Createdtime))
                 .ForMember(dest => dest.FOLLOWED_DATE, src => src.MapFrom(x => x.Modifiedtime))
                 .ForMember(dest => dest.PERMANENT_ADDR, src => src.MapFrom(x => x.Cf1002))
-                .ForMember(dest => dest.TSA_NAME, src => src.MapFrom(x => x.AssignedUserId.Label))
+                .ForMember(dest => dest.TSA_NAME, src => src.MapFrom(x => x.Cf1414))
                 .ForMember(dest => dest.TSA_CAMPAIN, src => src.MapFrom(x => "24H-TE0001"))
                 .ForMember(dest => dest.TSA_GROUP, src => src.MapFrom(x => x.Cf1008))
                 .ForMember(dest => dest.TSA_LAST_NOTES, src => src.MapFrom(x => x.Cf1196))

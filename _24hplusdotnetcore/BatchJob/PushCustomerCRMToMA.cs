@@ -30,6 +30,7 @@ namespace _24hplusdotnetcore.BatchJob
             {
                 await _cRMServices.GetCustomerFromCrmAsync(query);
                 await _mAService.PublishAsync();
+                await _cRMServices.AddingDataToCRM();
 
                 await Task.Delay(_mAConfig.MillisecondsDelay, cancellationToken);
             }
