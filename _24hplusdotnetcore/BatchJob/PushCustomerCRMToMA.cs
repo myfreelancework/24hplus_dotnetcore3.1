@@ -1,10 +1,8 @@
 ﻿using _24hplusdotnetcore.Services.CRM;
 using _24hplusdotnetcore.Services.MA;
+using _24hplusdotnetcore.Services.MC;
 using _24hplusdotnetcore.Settings;
 using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -17,7 +15,10 @@ namespace _24hplusdotnetcore.BatchJob
         private readonly MAService _mAService;
         private readonly MAConfig _mAConfig;
 
-        public PushCustomerCRMToMA(CRMServices cRMServices, MAService mAService, IOptions<MAConfig> mAConfig)
+        public PushCustomerCRMToMA(
+            CRMServices cRMServices, 
+            MAService mAService, 
+            IOptions<MAConfig> mAConfig)
         {
             _cRMServices = cRMServices;
             _mAService = mAService;

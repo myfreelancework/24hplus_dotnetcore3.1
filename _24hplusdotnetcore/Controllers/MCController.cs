@@ -45,20 +45,19 @@ namespace _24hplusdotnetcore.Controllers
 
         [HttpGet]
         [Route("api/getmcproduct")]
-        public ActionResult<dynamic> GetMCProduct()
+        public async Task<ActionResult<ResponseContext>> GetMCProductAsync()
         {
             try
             {
-                List<MCProduct> lstMCProduct = new List<MCProduct>();
-                lstMCProduct = _mcService.GetProduct();
+                IEnumerable<MCProduct> mCProducts = await _mcService.GetProductAsync();
                 return Ok(new ResponseContext
                 {
-                    code = (int)Common.ResponseCode.SUCCESS,
-                    message = Common.Message.SUCCESS,
-                    data = lstMCProduct
+                    code = (int)ResponseCode.SUCCESS,
+                    message = Message.SUCCESS,
+                    data = mCProducts
                 });
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 _logger.LogError(ex, ex.Message);
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseMessage { status = "ERROR", message = ex.Message });
@@ -257,11 +256,11 @@ namespace _24hplusdotnetcore.Controllers
         [AllowAnonymous]
         [HttpGet]
         [Route("api/mc/push-mc")]
-        public ActionResult<ResponseContext> CheckList()
+        public async Task<ActionResult<ResponseContext>> CheckListAsync()
         {
             try
             {
-                _mcService.PushDataToMC();
+                await _mcService.PushDataToMCAsync();
                 return Ok(new ResponseContext
                 {
                     code = (int)Common.ResponseCode.SUCCESS,
