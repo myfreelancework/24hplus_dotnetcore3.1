@@ -9,6 +9,6 @@ namespace _24hplusdotnetcore.Common
         public static string CredMC_Password = "MK$2DG@4";
         public static string MC_CheckInfo_URL = "https://mfs-v2.mcredit.com.vn:8043/mcMobileService/service/v1.0/mobile-4sales/check-cic/check?citizenID={0}&customerName={1}";
         public static string MC_CheckDuplicate_URL = "https://mfs-v2.mcredit.com.vn:8043/mcMobileService/service/v1.0/mobile-4sales/check-identifier?citizenId={0}";
-        public static string MC_TLS_SALECODE = "RD006100031";
+        public const string MC_TLS_SALECODE = "RD006100031";
     }
 }

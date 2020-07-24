@@ -114,10 +114,11 @@ namespace _24hplusdotnetcore
 
 
             //Add batchjob
-            services.AddSingleton<IHostedService, AddNewCustomerFromCRM>();
-            services.AddSingleton<IHostedService, PushCustomerToCRM>();
-            services.AddSingleton<IHostedService, PushDataToMC>();
-            services.AddSingleton<IHostedService, PushCustomerCRMToMA>();
+            services.AddHostedService<AddNewCustomerFromCRM>();
+            services.AddHostedService<PushCustomerToCRM>();
+            services.AddHostedService<PushDataToMC>();
+            services.AddHostedService<PushCustomerCRMToMA>();
+
             #endregion
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
@@ -211,34 +212,42 @@ namespace _24hplusdotnetcore
 
         private void ConfigureMCRestClient(IServiceCollection services)
         {
+            MCConfig mCConfig = services.BuildServiceProvider().GetService<IOptions<MCConfig>>().Value;
+
             services.AddHttpClient("restLoginService")
                 .ConfigureHttpClient((serviceProvider, conf) =>
                 {
-                    conf.BaseAddress = new Uri("https://mfs-v2.mcredit.com.vn:8043");
-                    conf.DefaultRequestHeaders.Add("x-security", Common.Config.CredMC_Security_Key);
+                    conf.BaseAddress = new Uri(mCConfig.Host);
+                    conf.DefaultRequestHeaders.Add("x-security", mCConfig.SecurityKey);
+                });
+
+            services.AddRefitClient<IRestLoginService>()
+                .ConfigureHttpClient((serviceProvider, conf) =>
+                {
+                    conf.BaseAddress = new Uri(mCConfig.Host);
+                    conf.DefaultRequestHeaders.Add("x-security", mCConfig.SecurityKey);
                 });
 
             services.AddRefitClient<IRestMCService>()
                 .ConfigureHttpClient((serviceProvider, conf) =>
                 {
-                    conf.BaseAddress = new Uri("https://mfs-v2.mcredit.com.vn:8043");
-                    conf.DefaultRequestHeaders.Add("x-security", Common.Config.CredMC_Security_Key);
+                    conf.BaseAddress = new Uri(mCConfig.Host);
+                    conf.DefaultRequestHeaders.Add("x-security", mCConfig.SecurityKey);
                 })
                 .ConfigurePrimaryHttpMessageHandler((serviceProvider) =>
                 {
-                    var httpFactory = serviceProvider.GetService<IHttpClientFactory>();
-                    var restMCService = RestService.For<IRestLoginService>(httpFactory.CreateClient("restLoginService"));
+                    var restMCService = serviceProvider.GetRequiredService<IRestLoginService>();
                     Func<Task<string>> getToken = async () =>
                     {
                         try
                         {
                             LoginResponseModel result = await restMCService.GetTokenAsync(new LoginRequestModel
                             {
-                                Username = Common.Config.CredMC_Username,
-                                Password = Common.Config.CredMC_Password,
-                                NotificationId = "notificationId.mekongcredit.3rd",
-                                Imei = "imei.mekongcredit.3rd",
-                                OsType = "ANDROID"
+                                Username = mCConfig.Username,
+                                Password = mCConfig.Password,
+                                NotificationId = mCConfig.NotificationId,
+                                Imei = mCConfig.Imei,
+                                OsType = mCConfig.OsType
                             });
                             return result.Token;
                         }
@@ -268,7 +277,7 @@ namespace _24hplusdotnetcore
     class RestHttpClientHandler : HttpClientHandler
     {
         private readonly Func<Task<string>> _getToken;
-        
+
         public RestHttpClientHandler()
         {
 

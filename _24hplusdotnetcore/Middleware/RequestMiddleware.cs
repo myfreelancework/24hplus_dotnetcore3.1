@@ -36,7 +36,7 @@ namespace _24hplusdotnetcore.Middleware
                 string username = context.Request.Headers["username"];
                 string password = context.Request.Headers["password"];
 
-                if(string.Equals(_mCConfig.UserName, username) && string.Equals(_mCConfig.Password, password))
+                if(string.Equals(_mCConfig.CallbackUserName, username) && string.Equals(_mCConfig.CallbackPassword, password))
                 {
                     await _next(context);
                     return;

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using _24hplusdotnetcore.Services.MC;
 using _24hplusdotnetcore.Models;
+using System.Threading.Tasks;
 
 namespace _24hplusdotnetcore.Controllers
 {
@@ -20,11 +21,11 @@ namespace _24hplusdotnetcore.Controllers
 
         [Route("api/upload-mc-doc")]
         [HttpPost]
-        public ActionResult<dynamic> UploadDocumentMC()
+        public async Task<ActionResult> UploadDocumentMCAsync()
         {
             try
             {
-                int fileupload = _mcServices.PushDataToMC();
+                int fileupload = await _mcServices.PushDataToMCAsync();
                 return Ok("number of uploaded documents: " + fileupload + "");
             }
             catch (Exception ex)

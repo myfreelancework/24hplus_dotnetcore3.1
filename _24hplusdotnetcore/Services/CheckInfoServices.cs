@@ -153,13 +153,13 @@ namespace _24hplusdotnetcore.Services
                 return null;
             }
         }
-        public dynamic CheckCAT(string GreenType, string companyTaxNumber)
+        public  async Task<MCCheckCatResponseDto> CheckCatAsync(string GreenType, string companyTaxNumber)
         {
             try
             {
                 if (GreenType.ToUpper() == Common.GeenType.GreenC)
                 {
-                    return _mcServices.CheckCAT(companyTaxNumber);
+                    return await _mcServices.CheckCatAsync(companyTaxNumber);
                 }
                 else
                 {

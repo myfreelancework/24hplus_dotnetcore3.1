@@ -1,4 +1,5 @@
 ﻿using _24hplusdotnetcore.ModelDtos;
+using _24hplusdotnetcore.Models.MC;
 using Refit;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -34,5 +35,13 @@ namespace _24hplusdotnetcore.Services.MC
         [Get("/mcMobileService/service/v1.0/mobile-4sales/cases")]
         [Headers("Authorization: Bearer")]
         Task<IEnumerable<GetCaseMCResponseDto>> GetCasesAsync([Query] GetCaseMCRequestDto getCaseMCRequestDto);
+
+        [Get("/mcMobileService/service/v1.0/mobile-4sales/check-cat")]
+        [Headers("Authorization: Bearer")]
+        Task<MCCheckCatResponseDto> CheckCatAsync(string companyTaxNumber);
+
+        [Get("/mcMobileService/service/v1.0/mobile-4sales/products")]
+        [Headers("Authorization: Bearer")]
+        Task<IEnumerable<MCProduct>> GetProductAsync();
     }
 }

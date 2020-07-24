@@ -73,7 +73,7 @@ namespace _24hplusdotnetcore.Controllers
 
         [HttpGet]
         [Route("api/checkcat")]
-        public ActionResult<ResponseContext> CheckCat([FromQuery] string greentype, [FromQuery] string companyTaxNumber)
+        public async Task<ActionResult<ResponseContext>> CheckCatAsync([FromQuery] string greentype, [FromQuery] string companyTaxNumber)
         {
             try
             {
@@ -84,7 +84,7 @@ namespace _24hplusdotnetcore.Controllers
                 //officeNumber = "",
                 //companyTaxNumber = "1801210593",
                 //};
-                dynamic response = _checkInforServices.CheckCAT(greentype, companyTaxNumber);
+                MCCheckCatResponseDto response = await _checkInforServices.CheckCatAsync(greentype, companyTaxNumber);
                 return Ok(new ResponseContext
                 {
                     code = (int)Common.ResponseCode.SUCCESS,
