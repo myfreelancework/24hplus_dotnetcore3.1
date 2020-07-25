@@ -1,11 +1,11 @@
 ﻿using _24hplusdotnetcore.ModelDtos;
 using _24hplusdotnetcore.Models.MC;
 using _24hplusdotnetcore.Services.MC;
+using AutoMapper;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using RestSharp;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace _24hplusdotnetcore.Services
@@ -15,23 +15,30 @@ namespace _24hplusdotnetcore.Services
         private readonly ILogger<CheckInfoServices> _logger;
         private readonly MCService _mcServices;
         private readonly MCCheckCICService _mcCheckCICService;
+        private readonly IRestMCService _restMCService;
+        private readonly IMapper _mapper;
 
         public CheckInfoServices(
             ILogger<CheckInfoServices> logger,
             MCCheckCICService mcCheckCICService,
-            MCService mcServices)
+            MCService mcServices,
+            IRestMCService restMCService,
+            IMapper mapper)
         {
             _logger = logger;
             _mcServices = mcServices;
             _mcCheckCICService = mcCheckCICService;
+            _restMCService = restMCService;
+            _mapper = mapper;
         }
-        public dynamic CheckInfoByType(string greentype, string citizenID, string customerName)
+        
+        public async Task<MCCheckCICInfoResponseDto> CheckInfoByTypeAsync(string greentype, string citizenID, string customerName)
         {
             try
             {
                 if (greentype.ToUpper() == "C")
                 {
-                    return CheckInforFromMC(citizenID, customerName);
+                    return await CheckInforFromMCAsync(citizenID, customerName);
                 }
                 else
                 {
@@ -41,21 +48,42 @@ namespace _24hplusdotnetcore.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, ex.Message);
-                return null;
+                throw;
             }
         }
-        public dynamic CheckDuplicateByType(string greentype, string citizenID)
+        
+        public async Task<MCResponseDto> CheckDuplicateByTypeAsync(string greentype, string citizenID)
         {
             try
             {
                 if (greentype.ToUpper() == "C")
                 {
-                    return CheckMCCitizendId(citizenID);
+                    return await CheckCitizendAsync(citizenID);
                 }
                 else
                 {
                     return null;
                 }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                throw;
+            }
+        }
+
+        private async Task<MCResponseDto> CheckCitizendAsync(string citizenID)
+        {
+            try
+            {
+                MCResponseDto result = await _restMCService.CheckCitizendAsync(citizenID);
+                return result;
+            }
+            catch (Refit.ApiException ex)
+            {
+                _logger.LogError(ex, ex.Content);
+                var error = await ex.GetContentAsAsync<MCResponseDto>();
+                throw new ArgumentException(error.ReturnMes);
             }
             catch (Exception ex)
             {
@@ -64,96 +92,51 @@ namespace _24hplusdotnetcore.Services
             }
         }
 
-        private dynamic CheckMCCitizendId(string citizenID)
+        public async Task<MCCheckCICInfoResponseDto> CheckInforFromMCAsync(string citizenID, string customerName)
         {
             try
             {
-                var token = GetMCToken();
-                if (string.IsNullOrEmpty(token))
+                IEnumerable<MCCheckCICInfoResponseDto> mCCheckCICInfos = await _restMCService.CheckCICInnfoAsync(citizenID, customerName);
+
+                var mCCheckCICInfo = mCCheckCICInfos.FirstOrDefault();
+                if (mCCheckCICInfo == null)
                 {
                     return null;
                 }
-                else
-                {
-                    var client = new RestClient(string.Format(Common.Config.MC_CheckDuplicate_URL, citizenID));
-                    var request = new RestRequest(Method.GET);
-                    request.AddHeader("Content-type", "application/json");
-                    request.AddHeader("Authorization", "Bearer " + token + "");
-                    request.AddHeader("x-security", "" + Common.Config.CredMC_Security_Key + "");
-                    IRestResponse response = client.Execute(request);
-                    dynamic content = JsonConvert.DeserializeObject(response.Content);
-                    return content;
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, ex.Message);
-                return null;
-            }
-        }
 
-        public dynamic CheckInforFromMC(string citizenID, string customerName)
-        {
-            try
-            {
-                string token = GetMCToken();
-                if (!string.IsNullOrEmpty(token))
+                MCCheckCICModel cic = _mapper.Map<MCCheckCICModel>(mCCheckCICInfo);
+                if (mCCheckCICInfo.Status == "NEW")
                 {
-                    var client = new RestClient(string.Format(Common.Config.MC_CheckInfo_URL, citizenID, customerName));
-                    var request = new RestRequest(Method.GET);
-                    request.AddHeader("Content-type", "application/json");
-                    request.AddHeader("Authorization", "Bearer " + token + "");
-                    request.AddHeader("x-security", "" + Common.Config.CredMC_Security_Key + "");
-                    IRestResponse response = client.Execute(request);
-                    List<dynamic> content = JsonConvert.DeserializeObject<List<dynamic>>(response.Content);
-                    var result = content.ToArray()[0];
-                    if (result.status == "NEW")
+                    _mcCheckCICService.CreateOne(cic);
+                }
+                else if (mCCheckCICInfo.Status == "CHECKING")
+                {
+                    var oldCic = _mcCheckCICService.FindOneByIdentity(mCCheckCICInfo.Identifier);
+                    if (oldCic == null)
                     {
-                        var cic = new MCCheckCICModel();
-                        cic.RequestId = result.requestId;
-                        cic.Identifier = result.identifier;
-                        cic.CustomerName = result.customerName;
-                        cic.CicResult = result.cicResult;
-                        cic.Description = result.description;
-                        cic.CicImageLink = result.cicImageLink;
-                        cic.LastUpdateTime = result.lastUpdateTime;
-                        cic.Status = result.status;
-                        cic.CreateDate = Convert.ToDateTime(DateTime.Now);
                         _mcCheckCICService.CreateOne(cic);
                     }
-                    else if (result.status == "CHECKING")
-                    {
-                        var oldCic = _mcCheckCICService.FindOneByIdentity(result.identifier);
-                        if (oldCic == null)
-                        {
-                            var cic = new MCCheckCICModel();
-                            cic.RequestId = result.requestId;
-                            cic.Identifier = result.identifier;
-                            cic.CustomerName = result.customerName;
-                            cic.CicResult = result.cicResult;
-                            cic.Description = result.description;
-                            cic.CicImageLink = result.cicImageLink;
-                            cic.LastUpdateTime = result.lastUpdateTime;
-                            cic.Status = result.status;
-                            cic.CreateDate = Convert.ToDateTime(DateTime.Now);
-                            _mcCheckCICService.CreateOne(cic);
-                        }
-                    }
+                }
 
-                    return result;
-                }
-                else
-                {
-                    return null;
-                }
+                var a = _mcCheckCICService.FindOneByIdentity(mCCheckCICInfo.Identifier);
+
+                return mCCheckCICInfo;
+            }
+            catch (Refit.ApiException ex)
+            {
+                _logger.LogError(ex, ex.Content);
+                var error = await ex.GetContentAsAsync<MCResponseDto>();
+                throw new ArgumentException(error.ReturnMes);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, ex.Message);
-                return null;
+                throw;
             }
         }
-        public  async Task<MCCheckCatResponseDto> CheckCatAsync(string GreenType, string companyTaxNumber)
+
+        
+        public async Task<MCCheckCatResponseDto> CheckCatAsync(string GreenType, string companyTaxNumber)
         {
             try
             {
@@ -171,29 +154,6 @@ namespace _24hplusdotnetcore.Services
                 _logger.LogError(ex, ex.Message);
                 return null;
             }
-        }
-        public string GetMCToken()
-        {
-            string token = "";
-            try
-            {
-                var client = new RestClient("" + Common.Config.CredMC_URL + "");
-                var request = new RestRequest(Method.POST);
-                request.AddHeader("Content-Type", "application/json");
-                request.AddHeader("x-security", "" + Common.Config.CredMC_Security_Key + "");
-                request.AddParameter("application/json", "{\n    \"username\": \"" + Common.Config.CredMC_Username + "\",\n    \"password\": \"" + Common.Config.CredMC_Password + "\",\n    \"notificationId\": \"notificationId.mekongcredit.3rd\",\n    \"imei\": \"imei.mekongcredit.3rd\",\n    \"osType\": \"ANDROID\"\n}", ParameterType.RequestBody);
-                IRestResponse response = client.Execute(request);
-                dynamic content = JsonConvert.DeserializeObject<dynamic>(response.Content);
-                if (content.token != null)
-                {
-                    token = content.token;
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, ex.Message);
-            }
-            return token;
         }
     }
 }

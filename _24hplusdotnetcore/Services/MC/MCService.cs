@@ -149,7 +149,7 @@ namespace _24hplusdotnetcore.Services.MC
                     dataMC.Request.CustomerName = objCustomer.Personal.Name;
                     dataMC.Request.ProductId = product.ProductIdMC;
                     dataMC.Request.TempResidence = objCustomer.IsTheSameResidentAddress == true ? 1 : 0;
-                    dataMC.Request.SaleCode = Config.MC_TLS_SALECODE;
+                    dataMC.Request.SaleCode = _mCConfig.SaleCode;
                     dataMC.Request.CompanyTaxNumber = objCustomer.Working.TaxId;
                     dataMC.Request.ShopCode = objCustomer.Loan.SignAddress.Split('-')[0];
                     dataMC.Request.IssuePlace = objCustomer.Loan.SignAddress.Split('-')[1];
@@ -168,7 +168,7 @@ namespace _24hplusdotnetcore.Services.MC
                     client.Timeout = -1;
                     var request = new RestRequest(Method.POST);
                     request.AddHeader("Authorization", "Bearer " + token + "");
-                    request.AddHeader("x-security", Config.CredMC_Security_Key);
+                    request.AddHeader("x-security", _mCConfig.SecurityKey);
                     request.AddHeader("Content-Type", "multipart/form-data");
                     request.AddFile("file", "" + filePath + "");
                     request.AddParameter("object", JsonConvert.SerializeObject(dataMC));
@@ -304,7 +304,7 @@ namespace _24hplusdotnetcore.Services.MC
             catch (Refit.ApiException ex)
             {
                 _logger.LogError(ex, ex.Content);
-                var error = await ex.GetContentAsAsync<MCErrorResponseDto>();
+                var error = await ex.GetContentAsAsync<MCResponseDto>();
                 throw new ArgumentException(error.ReturnMes);
             }
             catch (Exception ex)
@@ -330,7 +330,7 @@ namespace _24hplusdotnetcore.Services.MC
             catch (Refit.ApiException ex)
             {
                 _logger.LogError(ex, ex.Content);
-                var error = await ex.GetContentAsAsync<MCErrorResponseDto>();
+                var error = await ex.GetContentAsAsync<MCResponseDto>();
                 throw new ArgumentException(error.ReturnMes);
             }
             catch (Exception ex)
@@ -362,7 +362,7 @@ namespace _24hplusdotnetcore.Services.MC
             catch (Refit.ApiException ex)
             {
                 _logger.LogError(ex, ex.Content);
-                var error = await ex.GetContentAsAsync<MCErrorResponseDto>();
+                var error = await ex.GetContentAsAsync<MCResponseDto>();
                 throw new ArgumentException(error.ReturnMes);
             }
             catch (Exception ex)
@@ -388,7 +388,7 @@ namespace _24hplusdotnetcore.Services.MC
             catch (Refit.ApiException ex)
             {
                 _logger.LogError(ex, ex.Content);
-                var error = await ex.GetContentAsAsync<MCErrorResponseDto>();
+                var error = await ex.GetContentAsAsync<MCResponseDto>();
                 throw new ArgumentException(error.ReturnMes);
             }
         }

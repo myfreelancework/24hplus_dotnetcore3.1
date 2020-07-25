@@ -11,5 +11,6 @@
         public string NotificationId { get; set; }
         public string Imei { get; set; }
         public string OsType { get; set; }
+        public string SaleCode { get; set; }
     }
 }
