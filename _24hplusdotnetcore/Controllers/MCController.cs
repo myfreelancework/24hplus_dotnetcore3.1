@@ -315,12 +315,21 @@ namespace _24hplusdotnetcore.Controllers
             try
             {
                 MCCaseNoteListDto mCCaseNoteListDto = await _mcService.GetCaseNoteAsync(customerId);
+                MCNotesEntrieModel entry = new MCNotesEntrieModel();
+
+                if (mCCaseNoteListDto.MCNotesEntries.MCNotesEntry != null && mCCaseNoteListDto.MCNotesEntries.MCNotesEntry.Count() > 0)
+                {
+                    entry = mCCaseNoteListDto.MCNotesEntries.MCNotesEntry.First();
+                }
+                 else {
+                     entry.NoteContent = "Không có casenote";
+                 }
 
                 return Ok(new ResponseContext
                 {
                     code = (int)Common.ResponseCode.SUCCESS,
                     message = Common.Message.SUCCESS,
-                    data = mCCaseNoteListDto.MCNotesEntries.MCNotesEntry.Last()
+                    data = entry
                 });
             }
             catch (Exception ex)
