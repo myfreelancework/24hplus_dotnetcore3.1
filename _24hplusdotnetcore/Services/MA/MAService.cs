@@ -86,7 +86,7 @@ namespace _24hplusdotnetcore.Services.MA
                     {
                         dataProcessing.Status = DataProcessingStatus.ERROR;
                         dataProcessing.Message = result.ErrorMessage;
-                        await UpdateErrorLeadCrmAsync(leadCrm, LeadCrmStatus.Cancel);
+                        await UpdateErrorLeadCrmAsync(leadCrm, result.ErrorMessage);
                     } else {
                         dataProcessing.Status = DataProcessingStatus.ERROR;
                     }
@@ -103,9 +103,9 @@ namespace _24hplusdotnetcore.Services.MA
             }
         }
 
-        private async Task UpdateErrorLeadCrmAsync(LeadCrm leadCrm, LeadCrmStatus leadCrmStatus)
+        private async Task UpdateErrorLeadCrmAsync(LeadCrm leadCrm, string errorMessage)
         {
-            leadCrm.SetCrmStatus(leadCrmStatus);
+            leadCrm.SetDCNote(errorMessage);
             await _leadCrmService.ReplaceOneAsync(leadCrm);
 
             _dataCRMProcessingServices.CreateOne(new DataCRMProcessing
