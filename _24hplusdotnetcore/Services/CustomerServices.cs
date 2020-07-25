@@ -1,9 +1,11 @@
 ﻿using _24hplusdotnetcore.Common;
+using _24hplusdotnetcore.Common.Constants;
 using _24hplusdotnetcore.Common.Enums;
 using _24hplusdotnetcore.ModelDtos;
 using _24hplusdotnetcore.Models;
 using _24hplusdotnetcore.Models.CRM;
 using _24hplusdotnetcore.Models.MC;
+using _24hplusdotnetcore.Services.MC;
 using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
@@ -23,7 +25,14 @@ namespace _24hplusdotnetcore.Services
         private readonly UserRoleServices _userroleServices;
         private readonly CRM.DataCRMProcessingServices _dataCRMProcessingServices;
         private readonly MC.DataMCProcessingServices _dataMCProcessingServices;
-        public CustomerServices(IMongoDbConnection connection, ILogger<CustomerServices> logger, NotificationServices notificationServices, UserRoleServices userroleServices, CRM.DataCRMProcessingServices dataCRMProcessingServices, MC.DataMCProcessingServices dataMCProcessingServices)
+        private readonly MCCheckCICService _mcCheckCICService;
+        public CustomerServices(IMongoDbConnection connection,
+        ILogger<CustomerServices> logger,
+        NotificationServices notificationServices,
+        UserRoleServices userroleServices,
+        CRM.DataCRMProcessingServices dataCRMProcessingServices,
+        MC.DataMCProcessingServices dataMCProcessingServices,
+        MCCheckCICService mcCheckCICService)
         {
             var client = new MongoClient(connection.ConnectionString);
             var database = client.GetDatabase(connection.DataBase);
@@ -33,6 +42,7 @@ namespace _24hplusdotnetcore.Services
             _userroleServices = userroleServices;
             _dataCRMProcessingServices = dataCRMProcessingServices;
             _dataMCProcessingServices = dataMCProcessingServices;
+            _mcCheckCICService = mcCheckCICService;
         }
         public List<Customer> GetList(string UserName, DateTime? DateFrom, DateTime? DateTo, string Status, string greentype, string customername, int? pagenumber, int? pagesize, ref int totalPage, ref int totalrecord)
         {
@@ -184,7 +194,6 @@ namespace _24hplusdotnetcore.Services
             try
             {
                 string teamLead = "";
-                string userName = "";
                 string message = "";
                 string type = "";
 
@@ -196,13 +205,16 @@ namespace _24hplusdotnetcore.Services
                 }
                 customer.ModifiedDate = Convert.ToDateTime(DateTime.Now);
                 customer.CreatedDate = prvCustomer.CreatedDate;
-                if(customer.Documents == null) {
+                if (customer.Documents == null)
+                {
                     customer.Documents = prvCustomer.Documents;
                 }
-                if (customer.ReturnDocuments == null) {
+                if (customer.ReturnDocuments == null)
+                {
                     customer.ReturnDocuments = prvCustomer.ReturnDocuments;
                 }
-                if (customer.Result == null) {
+                if (customer.Result == null)
+                {
                     customer.Result = prvCustomer.Result;
                 }
                 customer.MCId = prvCustomer.MCId;
@@ -221,55 +233,29 @@ namespace _24hplusdotnetcore.Services
                         LeadSource = LeadSourceType.MC.ToString()
                     };
                     _dataCRMProcessingServices.CreateOne(dataCRMProcessing);
-                    // Notification
-                    userName = teamLead;
-                    if (!String.IsNullOrEmpty(customer.Result?.Reason))
-                    {
-                        type = NotificationType.Edit;
-                        message = string.Format(Message.NotificationUpdate, customer.UserName, customer.Personal.Name);
-                    }
-                    else
-                    {
-                        type = NotificationType.Add;
-                        message = string.Format(Message.NotificationAdd, customer.UserName, customer.Personal.Name);
-                    }
-                }
-                else if (customer.Status.ToUpper() == CustomerStatus.REJECT)
-                {
-                    userName = customer.UserName;
-                    type = NotificationType.Reject;
-                    message = string.Format(Message.NotificationReject, teamLead, customer.Personal.Name);
-                }
-                else if (customer.Status.ToUpper() == CustomerStatus.APPROVE)
-                {
-                    // send data to MC
-                    if (customer.GreenType == GeenType.GreenC)
-                    {
-                        var dataMCProcessing = new DataMCProcessing
-                        {
-                            CustomerId = customer.Id,
-                            Status = DataCRMProcessingStatus.InProgress
-                        };
-                        _dataMCProcessingServices.CreateOne(dataMCProcessing);
-                    }
-                    userName = customer.UserName;
-                    type = NotificationType.Approve;
-                    message = string.Format(Message.TeamLeadApprove, teamLead, customer.Personal.Name);
-                }
 
-                if (message != "")
-                {
-                    var objNoti = new Notification
+                    // Notification
+                    var cic = _mcCheckCICService.FindOneByIdentity(customer.Personal.IdCard);
+                    if (cic != null && cic.Status == "SUCCESS")
                     {
-                        green = GeenType.GreenC,
-                        recordId = customer.Id,
-                        isRead = false,
-                        type = type,
-                        userName = userName,
-                        message = message,
-                        createAt = Convert.ToDateTime(DateTime.Today.ToLongDateString())
-                    };
-                    _notificationServices.CreateOne(objNoti);
+                        if (MCCicMapping.APPROVE_CIC_RESULT_LIST.Where(x => x == cic.CicResult).Any())
+                        {
+                            type = NotificationType.Add;
+                            message = string.Format(Message.NotificationAdd, customer.UserName, customer.Personal.Name);
+
+                            var objNoti = new Notification
+                            {
+                                green = GeenType.GreenC,
+                                recordId = customer.Id,
+                                isRead = false,
+                                type = type,
+                                userName = teamLead,
+                                message = message,
+                                createAt = Convert.ToDateTime(DateTime.Today.ToLongDateString())
+                            };
+                            _notificationServices.CreateOne(objNoti);
+                        }
+                    }
                 }
             }
             catch (Exception ex)
@@ -358,6 +344,19 @@ namespace _24hplusdotnetcore.Services
                 _logger.LogError(ex, ex.Message);
             }
             return customer;
+        }
+
+        public IEnumerable<Customer> GetListSubmitedCustomerByIdCard(string IdCard)
+        {
+            try
+            {
+                return _customer.Find(c => c.Personal.IdCard == IdCard && c.Status == CustomerStatus.SUBMIT).ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                throw;
+            }
         }
 
         public IEnumerable<Customer> GetByIdCards(IEnumerable<string> idCards)
@@ -464,10 +463,12 @@ namespace _24hplusdotnetcore.Services
                     {
                         customer.Result = new Models.Result();
                         customer.Result.Reason = dto.Reason;
+                        customer.Result.ReturnStatus = dto.ReturnStatus;
                     }
                     else
                     {
                         customer.Result.Reason = dto.Reason;
+                        customer.Result.ReturnStatus = dto.ReturnStatus;
                     }
                     customer.ModifiedDate = Convert.ToDateTime(DateTime.Now);
                     updateCount = _customer.ReplaceOne(c => c.Id == customer.Id, customer).ModifiedCount;

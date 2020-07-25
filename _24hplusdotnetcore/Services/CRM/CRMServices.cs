@@ -305,8 +305,7 @@ namespace _24hplusdotnetcore.Services.CRM
                                     Cf1052 = "-",
                                     Cf1036 = "CHỨNG MINH NHÂN DÂN |##| HỘ KHẨU",
                                     SalesStage = "1.KH mới",
-                                    // @todo
-                                    Cf1184 = "-",
+                                    Cf1184 = customer.Result.ReturnStatus,
                                     Cf1188 = "-",
                                     AssignedUserId = new AssignedUserId
                                     {

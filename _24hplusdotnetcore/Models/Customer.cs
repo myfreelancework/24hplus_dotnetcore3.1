@@ -125,6 +125,7 @@ namespace _24hplusdotnetcore.Models
         public string DetailStatus { get; set; }
         public string DetailStatusValue { get; set; }
         public string Reason { get; set; }
+        public string ReturnStatus { get; set; }
         public string Note { get; set; }
     }
 

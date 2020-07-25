@@ -29,6 +29,8 @@ namespace _24hplusdotnetcore.Controllers
         private readonly CustomerServices _customerService;
         private readonly MCNotificationService _mcNotificationService;
         private readonly MCCheckCICService _mcCheckCICService;
+        private readonly UserRoleServices _userroleServices;
+        private readonly NotificationServices _notificationServices;
         private readonly IMapper _mapper;
         private readonly MCConfig _mCConfig;
 
@@ -37,6 +39,8 @@ namespace _24hplusdotnetcore.Controllers
         CustomerServices customerService,
         MCCheckCICService mcCheckCICService,
         MCNotificationService mcNotificationService,
+        UserRoleServices userroleServices,
+        NotificationServices notificationServices,
         IMapper mapper,
         IOptions<MCConfig> mCConfigOption)
         {
@@ -45,6 +49,8 @@ namespace _24hplusdotnetcore.Controllers
             _mcCheckCICService = mcCheckCICService;
             _mcNotificationService = mcNotificationService;
             _customerService = customerService;
+            _userroleServices = userroleServices;
+            _notificationServices = notificationServices;
             _mapper = mapper;
             _mCConfig = mCConfigOption.Value;
         }
@@ -156,7 +162,7 @@ namespace _24hplusdotnetcore.Controllers
                     var dto = new CustomerUpdateStatusDto();
                     dto.LeadSource = LeadSourceType.MC.ToString();
                     dto.CustomerId = customer.Id;
-                    dto.Reason = noti.CurrentStatus;
+                    dto.ReturnStatus = noti.CurrentStatus;
                     if (MCNotificationMessage.Return.Where(x => x == noti.CurrentStatus).Any())
                     {
                         dto.Status = CustomerStatus.RETURN;
@@ -233,6 +239,33 @@ namespace _24hplusdotnetcore.Controllers
                     oldCic.LastUpdateTime = dto.LastUpdateTime;
                     oldCic.Status = dto.Status;
                     await _mcCheckCICService.ReplaceOneAsync(oldCic);
+
+                    if (dto.Status == "SUCCESS" && MCCicMapping.APPROVE_CIC_RESULT_LIST.Where(x => x == dto.CicResult).Any())
+                    {
+                        var customers = _customerService.GetListSubmitedCustomerByIdCard(dto.Identifier);
+                        foreach (var customer in customers)
+                        {
+                            string teamLead = "";
+                            string message = string.Format(Message.NotificationAdd, customer.UserName, customer.Personal.Name);
+
+                            var currUser = _userroleServices.GetUserRoleByUserName(customer.UserName);
+                            if (currUser != null)
+                            {
+                                teamLead = currUser.TeamLead;
+                            }
+                            var objNoti = new Notification
+                            {
+                                green = GeenType.GreenC,
+                                recordId = customer.Id,
+                                isRead = false,
+                                type = NotificationType.Add,
+                                userName = teamLead,
+                                message = message,
+                                createAt = Convert.ToDateTime(DateTime.Today.ToLongDateString())
+                            };
+                            _notificationServices.CreateOne(objNoti);
+                        }
+                    }
                 }
                 else
                 {
@@ -327,9 +360,10 @@ namespace _24hplusdotnetcore.Controllers
                 {
                     entry = mCCaseNoteListDto.MCNotesEntries.MCNotesEntry.First();
                 }
-                 else {
-                     entry.NoteContent = "Không có casenote";
-                 }
+                else
+                {
+                    entry.NoteContent = "Không có casenote";
+                }
 
                 return Ok(new ResponseContext
                 {

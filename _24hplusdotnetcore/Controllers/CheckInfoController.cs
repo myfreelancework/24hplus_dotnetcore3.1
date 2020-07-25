@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using _24hplusdotnetcore.Common.Constants;
 using _24hplusdotnetcore.ModelDtos;
 using _24hplusdotnetcore.Models;
 using _24hplusdotnetcore.Services;
@@ -30,6 +31,9 @@ namespace _24hplusdotnetcore.Controllers
             try
             {
                 var response = await _checkInforServices.CheckInfoByTypeAsync(greentype, citizenId, customerName);
+                string key = string.Format(MCCicMapping.CIC_PREFIX, response.CicResult);
+                MCCicMapping.MC_CHECK_CIC_MESSAGE_MAPPING.TryGetValue(key, out string message);
+                response.CicResult = message;
                 return Ok(new ResponseContext
                 {
                     code = (int)Common.ResponseCode.SUCCESS,
@@ -71,7 +75,7 @@ namespace _24hplusdotnetcore.Controllers
                     data = response
                 });
             }
-            catch(ArgumentException ex)
+            catch (ArgumentException ex)
             {
                 _logger.LogError(ex, ex.Message);
                 return Ok(new ResponseContext

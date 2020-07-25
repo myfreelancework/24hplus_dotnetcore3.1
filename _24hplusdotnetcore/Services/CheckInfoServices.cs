@@ -31,7 +31,7 @@ namespace _24hplusdotnetcore.Services
             _restMCService = restMCService;
             _mapper = mapper;
         }
-        
+
         public async Task<MCCheckCICInfoResponseDto> CheckInfoByTypeAsync(string greentype, string citizenID, string customerName)
         {
             try
@@ -51,7 +51,7 @@ namespace _24hplusdotnetcore.Services
                 throw;
             }
         }
-        
+
         public async Task<MCResponseDto> CheckDuplicateByTypeAsync(string greentype, string citizenID)
         {
             try
@@ -105,20 +105,17 @@ namespace _24hplusdotnetcore.Services
                 }
 
                 MCCheckCICModel cic = _mapper.Map<MCCheckCICModel>(mCCheckCICInfo);
-                if (mCCheckCICInfo.Status == "NEW")
+                var oldCic = _mcCheckCICService.FindOneByIdentity(mCCheckCICInfo.Identifier);
+                if (oldCic == null)
                 {
                     _mcCheckCICService.CreateOne(cic);
                 }
-                else if (mCCheckCICInfo.Status == "CHECKING")
+                else
                 {
-                    var oldCic = _mcCheckCICService.FindOneByIdentity(mCCheckCICInfo.Identifier);
-                    if (oldCic == null)
-                    {
-                        _mcCheckCICService.CreateOne(cic);
-                    }
+                    cic.Id = oldCic.Id;
+                    await _mcCheckCICService.ReplaceOneAsync(cic);
                 }
 
-                var a = _mcCheckCICService.FindOneByIdentity(mCCheckCICInfo.Identifier);
 
                 return mCCheckCICInfo;
             }
@@ -135,7 +132,7 @@ namespace _24hplusdotnetcore.Services
             }
         }
 
-        
+
         public async Task<MCCheckCatResponseDto> CheckCatAsync(string GreenType, string companyTaxNumber)
         {
             try
