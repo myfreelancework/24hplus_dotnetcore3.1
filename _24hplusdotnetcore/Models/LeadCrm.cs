@@ -173,7 +173,7 @@ namespace _24hplusdotnetcore.Models
 
         public string GetStatusMessage()
         {
-            return PostbackMA == null ? Cf1184 : GetStatusMessage(PostbackMA.Status);
+            return PostbackMA == null ? Cf1190 : GetStatusMessage(PostbackMA.Status);
         }
 
         public string GetStatusMessage(short status)
@@ -186,14 +186,9 @@ namespace _24hplusdotnetcore.Models
             return StatusMapping.CRM_STATUS_MESSAGE_MAPPING[StatusMapping.DEFAULT];
         }
 
-        public void SetCrmStatus(LeadCrmStatus leadCrmStatus)
+        public void SetDCNote(string errorMessage)
         {
-            if (PostbackMA == null)
-            {
-                Cf1184 = GetStatusMessage((short)leadCrmStatus);
-                return;
-            }
-            PostbackMA.Status = (short)leadCrmStatus;
+            Cf1174 = errorMessage;
         }
     }
 
