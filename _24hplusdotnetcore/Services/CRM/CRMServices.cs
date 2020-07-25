@@ -270,7 +270,7 @@ namespace _24hplusdotnetcore.Services.CRM
                             Customer customer = customers.FirstOrDefault(x => x.Id == dataCRMProcessing.CustomerId);
                             if (customer != null)
                             {
-                                Record dataCRM = new Record
+                                CRMRequestDto dataCRM = new CRMRequestDto
                                 {
                                     Cf1178 = "MCREDIT",
                                     Leadsource = "MobileGreenC",
@@ -285,14 +285,14 @@ namespace _24hplusdotnetcore.Services.CRM
                                     Cf1002 = customer.ResidentAddress.Street,
                                     Cf1246 = customer.Working.Job,
                                     Cf964 = customer.Working.CompanyAddress.Street,
-                                    Cf884 = customer.Working.Income,
+                                    Cf884 = customer.Working.Income.Replace(",", string.Empty),
                                     Cf1020 = customer.ResidentAddress.Province,
                                     Cf1410 = customer.Working.IncomeMethod,
-                                    Cf1412 = customer.Working.OtherLoans,
+                                    Cf1412 = customer.Working.OtherLoans.Replace(",", string.Empty),
                                     Cf990 = customer.Loan.Term,
                                     Cf1032 = customer.Loan.Category,
                                     Cf1040 = customer.Loan.Product,
-                                    Cf968 = customer.Loan.Amount,
+                                    Cf968 = customer.Loan.Amount.Replace(",", string.Empty),
                                     Cf1054 = customer.Loan.SignAddress,
 
                                     Cf1414 = customer.SaleInfo.Name,
@@ -307,10 +307,7 @@ namespace _24hplusdotnetcore.Services.CRM
                                     SalesStage = "1.KH mới",
                                     Cf1184 = customer.Result.ReturnStatus,
                                     Cf1188 = "-",
-                                    AssignedUserId = new AssignedUserId
-                                    {
-                                        Value = "19x2335"
-                                    },
+                                    AssignedUserId = "19x2685",
                                     Cf1256 = "-",
                                     Cf1264 = "????",
                                     Cf1230 = "",
