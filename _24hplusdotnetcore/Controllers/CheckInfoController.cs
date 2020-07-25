@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using _24hplusdotnetcore.ModelDtos;
 using _24hplusdotnetcore.Models;
 using _24hplusdotnetcore.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -21,18 +22,28 @@ namespace _24hplusdotnetcore.Controllers
             _logger = logger;
             _checkInforServices = checkInforServices;
         }
+
         [HttpGet]
         [Route("api/checkinfo")]
-        public ActionResult<ResponseContext> CheckInfo([FromQuery] string greentype, [FromQuery] string citizenId, [FromQuery] string customerName)
+        public async Task<ActionResult<ResponseContext>> CheckInfo([FromQuery] string greentype, [FromQuery] string citizenId, [FromQuery] string customerName)
         {
             try
             {
-                var response = _checkInforServices.CheckInfoByType(greentype, citizenId, customerName);
+                var response = await _checkInforServices.CheckInfoByTypeAsync(greentype, citizenId, customerName);
                 return Ok(new ResponseContext
                 {
                     code = (int)Common.ResponseCode.SUCCESS,
                     message = Common.Message.SUCCESS,
                     data = response
+                });
+            }
+            catch (ArgumentException ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return Ok(new ResponseContext
+                {
+                    code = (int)Common.ResponseCode.ERROR,
+                    message = ex.Message,
                 });
             }
             catch (Exception ex)
@@ -48,16 +59,25 @@ namespace _24hplusdotnetcore.Controllers
 
         [HttpGet]
         [Route("api/checkduplicate")]
-        public ActionResult<ResponseContext> CheckDuplicate([FromQuery] string greentype, [FromQuery] string citizenId)
+        public async Task<ActionResult<ResponseContext>> CheckDuplicate([FromQuery] string greentype, [FromQuery] string citizenId)
         {
             try
             {
-                var response = _checkInforServices.CheckDuplicateByType(greentype, citizenId);
+                var response = await _checkInforServices.CheckDuplicateByTypeAsync(greentype, citizenId);
                 return Ok(new ResponseContext
                 {
                     code = (int)Common.ResponseCode.SUCCESS,
-                    message = response.returnMes,
+                    message = response?.ReturnMes,
                     data = response
+                });
+            }
+            catch(ArgumentException ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return Ok(new ResponseContext
+                {
+                    code = (int)Common.ResponseCode.ERROR,
+                    message = ex.Message,
                 });
             }
             catch (Exception ex)

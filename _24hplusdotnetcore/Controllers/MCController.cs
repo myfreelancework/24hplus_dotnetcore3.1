@@ -7,11 +7,13 @@ using _24hplusdotnetcore.Models;
 using _24hplusdotnetcore.Models.MC;
 using _24hplusdotnetcore.Services;
 using _24hplusdotnetcore.Services.MC;
+using _24hplusdotnetcore.Settings;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,12 +30,15 @@ namespace _24hplusdotnetcore.Controllers
         private readonly MCNotificationService _mcNotificationService;
         private readonly MCCheckCICService _mcCheckCICService;
         private readonly IMapper _mapper;
+        private readonly MCConfig _mCConfig;
+
         public MCController(ILogger<MCController> logger,
         MCService mcService,
         CustomerServices customerService,
         MCCheckCICService mcCheckCICService,
         MCNotificationService mcNotificationService,
-        IMapper mapper)
+        IMapper mapper,
+        IOptions<MCConfig> mCConfigOption)
         {
             _logger = logger;
             _mcService = mcService;
@@ -41,6 +46,7 @@ namespace _24hplusdotnetcore.Controllers
             _mcNotificationService = mcNotificationService;
             _customerService = customerService;
             _mapper = mapper;
+            _mCConfig = mCConfigOption.Value;
         }
 
         [HttpGet]
@@ -165,7 +171,7 @@ namespace _24hplusdotnetcore.Controllers
                         GetCaseRequestDto getCaseRequestDto = new GetCaseRequestDto();
                         getCaseRequestDto.Status = CaseStatus.ABORT;
                         getCaseRequestDto.Keyword = customer.Personal.Name;
-                        getCaseRequestDto.SaleCode = Config.MC_TLS_SALECODE;
+                        getCaseRequestDto.SaleCode = _mCConfig.SaleCode;
                         IEnumerable<GetCaseMCResponseDto> cases = await _mcService.GetCasesAsync(getCaseRequestDto);
                         if (cases.Any())
                         {

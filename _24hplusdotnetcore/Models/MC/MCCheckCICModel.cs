@@ -30,6 +30,7 @@ namespace _24hplusdotnetcore.Models.MC
         public string Status { get; set; }
 
         [AliasAs("createDate")]
-        public DateTime CreateDate { get; set; }
+        [BsonDateTimeOptions(Kind = DateTimeKind.Local)]
+        public DateTime CreateDate { get; set; } = DateTime.Now;
     }
 }

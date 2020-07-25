@@ -2,6 +2,7 @@
 using _24hplusdotnetcore.ModelDtos;
 using _24hplusdotnetcore.Models;
 using _24hplusdotnetcore.Models.CRM;
+using _24hplusdotnetcore.Models.MC;
 using AutoMapper;
 
 namespace _24hplusdotnetcore.Mappings
@@ -256,6 +257,8 @@ namespace _24hplusdotnetcore.Mappings
             CreateMap<GroupDtoModel, GroupDocument>();
             CreateMap<DocumentDtoModel, DocumentUpload>();
             #endregion
+
+            CreateMap<MCCheckCICInfoResponseDto, MCCheckCICModel>();
         }
     }
 }
