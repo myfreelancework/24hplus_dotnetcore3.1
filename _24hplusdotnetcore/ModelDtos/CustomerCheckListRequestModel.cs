@@ -19,7 +19,7 @@ namespace _24hplusdotnetcore.ModelDtos
         [AliasAs("loanTenor")]
         public string LoanTenor { get; set; }
         [AliasAs("hasInsurance")]
-        public string HasInsurance { get; set; }
+        public bool HasInsurance { get; set; }
         [AliasAs("companyTaxNumber")]
         public string CompanyTaxNumber { get; set; }
         [AliasAs("hasCourier")]
