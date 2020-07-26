@@ -309,6 +309,7 @@ namespace _24hplusdotnetcore.Services.CRM
                                     Cf854 = customer.Personal.Phone,
                                     // @todo
                                     Cf1002 = customer.ResidentAddress.Street,
+                                    Cf1238 = customer.IsTheSameResidentAddress == true ? "1" : "0",
                                     Cf1246 = customer.Working.Job,
                                     Cf964 = customer.Working.CompanyAddress.Street,
                                     Cf884 = customer.Working.Income.Replace(",", string.Empty),
@@ -318,6 +319,7 @@ namespace _24hplusdotnetcore.Services.CRM
                                     Cf990 = customer.Loan.Term,
                                     Cf1210 = customer.Loan.Category,
                                     Cf1040 = customer.Loan.Product,
+                                    Cf1220 = customer.Loan.BuyInsurance == true ? "1" : "0",
                                     Cf968 = amount.ToString(),
                                     Cf1424 = totalAmount.ToString(),
                                     Cf1054 = customer.Loan.SignAddress,
