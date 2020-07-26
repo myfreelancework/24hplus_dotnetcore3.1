@@ -20,6 +20,7 @@ namespace _24hplusdotnetcore.Models.CRM
         public string LeadCrmId { get; set; }
         public string Status { get; set; }
         public string LeadSource { get; set; }
+        public string Message { get; set; }
 
         public DateTime CreateDate { get; set; }
         public DateTime? FinishDate { get; set; }

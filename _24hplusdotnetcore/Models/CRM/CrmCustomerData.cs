@@ -484,6 +484,12 @@ namespace _24hplusdotnetcore.Models.CRM
         public string Cf1418 { get; set; }
         [JsonProperty("cf_1420")]
         public string Cf1420 { get; set; }
+        [JsonProperty("cf_1422")]
+        public string Cf1422 { get; set; }
+        [JsonProperty("cf_1424")]
+        public string Cf1424 { get; set; }
+        [JsonProperty("cf_1426")]
+        public string Cf1426 { get; set; }
 
         [JsonProperty("id")]
         public string Id { get; set; }

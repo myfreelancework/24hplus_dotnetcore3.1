@@ -168,7 +168,9 @@ namespace _24hplusdotnetcore.Models
         public string Cf1416 { get; set; }
         public string Cf1418 { get; set; }
         public string Cf1420 { get; set; }
-
+        public string Cf1422 { get; set; }
+        public string Cf1424 { get; set; }
+        public string Cf1426 { get; set; }
         public PostbackMA PostbackMA { get; set; }
 
         public string GetStatusMessage()

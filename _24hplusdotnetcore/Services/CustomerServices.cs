@@ -549,6 +549,7 @@ namespace _24hplusdotnetcore.Services
                 {
                     customer.MCAppId = noti.AppId;
                     customer.MCAppnumber = Int32.Parse(noti.AppNumber);
+                    customer.ContractCode = "MC-" + customer.MCAppnumber;
                     customer.ModifiedDate = Convert.ToDateTime(DateTime.Now);
                     updateCount = _customer.ReplaceOne(c => c.Id == customer.Id, customer).ModifiedCount;
 

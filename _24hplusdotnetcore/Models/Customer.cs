@@ -39,6 +39,8 @@ namespace _24hplusdotnetcore.Models
         public Sale SaleInfo { get; set; }
         public Result Result { get; set; }
         public IEnumerable<GroupDocument> Documents  { get; set; }
+        [JsonProperty("recordFile")]
+        public UploadedMedia RecordFile  { get; set; }
         [JsonProperty("returnDocuments")]
         public IEnumerable<GroupDocument> ReturnDocuments  { get; set; }
         public Counsel Counsel { get; set; }
@@ -107,7 +109,7 @@ namespace _24hplusdotnetcore.Models
         public string Product { get; set; }
         public string ProductId { get; set; }
         public string Amount { get; set; }
-        public string BuyInsurance { get; set; }
+        public Boolean BuyInsurance { get; set; }
         public string SignAddress { get; set; }
         public string RequestDocuments { get; set; }
         public DateTime? AppDate { get; set; }
