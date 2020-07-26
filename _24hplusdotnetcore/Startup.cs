@@ -52,6 +52,7 @@ namespace _24hplusdotnetcore
             services.Configure<MongoDbConnection>(Configuration.GetSection(nameof(MongoDbConnection)));
             services.Configure<MAConfig>(Configuration.GetSection("MAConfig"));
             services.Configure<MCConfig>(Configuration.GetSection("MCConfig"));
+            services.Configure<FIBOConfig>(Configuration.GetSection("FIBOConfig"));
 
             services.AddCors(options =>
             {

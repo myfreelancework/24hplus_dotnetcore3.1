@@ -3,6 +3,7 @@
     public enum LeadSourceType
     {
         MA,
-        MC
+        MC,
+        FIBO
     }
 }

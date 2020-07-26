@@ -6,7 +6,7 @@ namespace _24hplusdotnetcore.ModelDtos
     {
         public MARequestModel()
         {
-            TimeStamp = DateTime.UtcNow;
+            TimeStamp = DateTime.Now;
             Tag = Guid.NewGuid().ToString();
         }
 
