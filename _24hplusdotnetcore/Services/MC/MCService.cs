@@ -180,6 +180,7 @@ namespace _24hplusdotnetcore.Services.MC
                         int mcId = Int32.Parse(content.id.Value.ToString());
                         _customerServices.UpdateCustomerMCId(objCustomer.Id, mcId);
                         uploadCount++;
+                        _dataMCProcessingServices.UpdateById(item.Id, Common.DataCRMProcessingStatus.Done);
                     }
                     else
                     {
@@ -189,8 +190,8 @@ namespace _24hplusdotnetcore.Services.MC
                         error.LeadSource = LeadSourceType.MC.ToString();
                         error.Reason = content.returnMes != null ? content.returnMes.Value : "Lỗi gửi data qua MC";
                         _customerServices.UpdateStatus(error);
+                        _dataMCProcessingServices.UpdateById(item.Id, Common.DataCRMProcessingStatus.Error);
                     }
-                    _dataMCProcessingServices.UpdateById(item.Id, Common.DataCRMProcessingStatus.Done);
                     File.Delete(filePath);
                 }
 

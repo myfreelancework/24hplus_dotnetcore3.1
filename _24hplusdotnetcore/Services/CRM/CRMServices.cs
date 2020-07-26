@@ -270,16 +270,42 @@ namespace _24hplusdotnetcore.Services.CRM
                             Customer customer = customers.FirstOrDefault(x => x.Id == dataCRMProcessing.CustomerId);
                             if (customer != null)
                             {
+                                Int32.TryParse(customer.Loan.Amount.Replace(",", string.Empty), out int amount);
+                                double totalAmount = amount;
+                                if (customer.Loan.BuyInsurance == true)
+                                {
+                                    totalAmount += totalAmount * 0.055;
+                                }
+
+                                var idCarDate = customer.Personal.IdCardDate.Split("/");
+                                var dob = customer.Personal.DateOfBirth.Split("/");
+                                string listLinkDocuments = "";
+                                string listTypeDocuments = "";
+
+                                foreach (var group in customer.Documents)
+                                {
+                                    var groupId = group.GroupId;
+                                    foreach (var doc in group.Documents)
+                                    {
+                                        foreach (var media in doc.UploadedMedias)
+                                        {
+                                            listLinkDocuments += media.Uri + "; ";
+                                            listTypeDocuments += doc.DocumentName + " |##| ";
+                                        }
+                                    }
+                                }
+
+
                                 CRMRequestDto dataCRM = new CRMRequestDto
                                 {
                                     Cf1178 = "MCREDIT",
                                     Leadsource = "MobileGreenC",
                                     Potentialname = customer.Personal.Name,
                                     Cf1050 = customer.Personal.IdCard,
-                                    Cf1350 = customer.Personal.IdCardDate,
+                                    Cf1350 = idCarDate[2] + "-" + idCarDate[1] + "-" + idCarDate[0],
                                     Cf1408 = customer.Personal.IdCardProvince,
                                     Cf1026 = customer.Personal.Gender,
-                                    Cf948 = customer.Personal.DateOfBirth,
+                                    Cf948 = dob[2] + "-" + dob[1] + "-" + dob[0],
                                     Cf854 = customer.Personal.Phone,
                                     // @todo
                                     Cf1002 = customer.ResidentAddress.Street,
@@ -290,34 +316,44 @@ namespace _24hplusdotnetcore.Services.CRM
                                     Cf1410 = customer.Working.IncomeMethod,
                                     Cf1412 = customer.Working.OtherLoans.Replace(",", string.Empty),
                                     Cf990 = customer.Loan.Term,
-                                    Cf1032 = customer.Loan.Category,
+                                    Cf1210 = customer.Loan.Category,
                                     Cf1040 = customer.Loan.Product,
-                                    Cf968 = customer.Loan.Amount.Replace(",", string.Empty),
+                                    Cf968 = amount.ToString(),
+                                    Cf1424 = totalAmount.ToString(),
                                     Cf1054 = customer.Loan.SignAddress,
 
                                     Cf1414 = customer.SaleInfo.Name,
-                                    Cf1416 = customer.SaleInfo.Code,
+                                    Cf1422 = customer.SaleInfo.Code,
                                     Cf1418 = customer.SaleInfo.Phone,
-                                    Cf1196 = customer.SaleInfo.Note,
+                                    Cf1196 = customer.SaleInfo.Note + " ",
 
                                     Cf1208 = customer.ContractCode,
                                     Cf1420 = customer.Result != null ? customer.Result.Reason : "",
                                     Cf1052 = "-",
-                                    Cf1036 = "CHỨNG MINH NHÂN DÂN |##| HỘ KHẨU",
+                                    Cf1036 = listTypeDocuments,
+                                    Cf1426 = listLinkDocuments,
                                     SalesStage = "1.KH mới",
-                                    Cf1184 = customer.Result.ReturnStatus,
+                                    Cf1184 = customer.Result != null ? customer.Result.ReturnStatus : "",
                                     Cf1188 = "-",
-                                    AssignedUserId = "19x2685",
+                                    AssignedUserId = "19x2629",
                                     Cf1256 = "-",
                                     Cf1264 = "????",
                                     Cf1230 = "",
                                     Id = customer.CRMId
                                 };
-                                var crmCustomer =  PushDataToCRM(dataCRM, session, dataCRMProcessing);
-                                if(crmCustomer?.Result?.Record != null && string.IsNullOrEmpty(customer.CRMId))
+                                var crmCustomer = PushDataToCRM(dataCRM, session, dataCRMProcessing);
+                                if (crmCustomer?.Result?.Record != null && string.IsNullOrEmpty(customer.CRMId))
                                 {
                                     customer.CRMId = crmCustomer.Result.Record.Id;
                                     _customerServices.ReplaceOne(customer);
+                                    dataCRMProcessing.FinishDate = DateTime.UtcNow;
+                                    _dataCRMProcessingServices.UpdateByCustomerId(dataCRMProcessing, Common.DataCRMProcessingStatus.Done);
+                                }
+                                else
+                                {
+                                    dataCRMProcessing.FinishDate = DateTime.UtcNow;
+                                    dataCRMProcessing.Message = crmCustomer.Error != null ? crmCustomer.Error.Message : "";
+                                    _dataCRMProcessingServices.UpdateByCustomerId(dataCRMProcessing, Common.DataCRMProcessingStatus.Error);
                                 }
                             }
                         }
@@ -346,9 +382,6 @@ namespace _24hplusdotnetcore.Services.CRM
                 //request.AddParameter("record", "13x55730");
                 IRestResponse response = client.Execute(request);
                 Console.WriteLine(response.Content);
-                dataCRMProcessing.Status = Common.DataCRMProcessingStatus.Done;
-                dataCRMProcessing.FinishDate = DateTime.UtcNow;
-                _dataCRMProcessingServices.UpdateByCustomerId(dataCRMProcessing, Common.DataCRMProcessingStatus.Done);
                 _logger.LogInformation("User was pushed to CRM: {0} - Status: {1}", dataCRMProcessing.CustomerId, Common.DataCRMProcessingStatus.Done);
 
                 return JsonConvert.DeserializeObject<UpSertCrmResponse>(response.Content);
