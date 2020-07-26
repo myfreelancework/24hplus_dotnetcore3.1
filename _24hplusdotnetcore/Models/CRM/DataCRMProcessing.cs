@@ -22,7 +22,9 @@ namespace _24hplusdotnetcore.Models.CRM
         public string LeadSource { get; set; }
         public string Message { get; set; }
 
+        [BsonDateTimeOptions(Kind = DateTimeKind.Local)]
         public DateTime CreateDate { get; set; }
+        [BsonDateTimeOptions(Kind = DateTimeKind.Local)]
         public DateTime? FinishDate { get; set; }
     }
 }

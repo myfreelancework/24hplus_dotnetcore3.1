@@ -255,6 +255,7 @@ namespace _24hplusdotnetcore.Services.CRM
 
                     foreach (var dataCRMProcessing in dataCRMProcessings)
                     {
+                        UpSertCrmResponse crmCustomerResponse = null;
 
                         if (string.Equals(dataCRMProcessing.LeadSource, LeadSourceType.MA.ToString()))
                         {
@@ -265,7 +266,22 @@ namespace _24hplusdotnetcore.Services.CRM
                                 dataCRM.Cf1178 = "MIRAE ASSET";
                                 dataCRM.Leadsource = "Telesales 24hPlus -2020";
                                 dataCRM.Cf1206 = "1";
-                                PushDataToCRM(dataCRM, session, dataCRMProcessing);
+                                crmCustomerResponse = PushDataToCRM(dataCRM, session, dataCRMProcessing);
+                            }
+                        }
+                        else if (string.Equals(dataCRMProcessing.LeadSource, LeadSourceType.FIBO.ToString()))
+                        {
+                            LeadCrm leadCrm = leadCrms.FirstOrDefault(x => x.Id == dataCRMProcessing.LeadCrmId);
+                            if (leadCrm != null)
+                            {
+                                var dataCRM = _mapper.Map<CRMRequestDto>(leadCrm);
+                                crmCustomerResponse = PushDataToCRM(dataCRM, session, dataCRMProcessing);
+                                if (crmCustomerResponse?.Result?.Record != null)
+                                {
+                                    leadCrm.LeadCrmId = crmCustomerResponse.Result.Record.Id;
+                                    leadCrm.PotentialNo = crmCustomerResponse.Result.Record.PotentialNo;
+                                    _leadCrmService.ReplaceOne(leadCrm);
+                                }
                             }
                         }
                         else
@@ -361,17 +377,23 @@ namespace _24hplusdotnetcore.Services.CRM
                                 {
                                     customer.CRMId = crmCustomer.Result.Record.Id;
                                     _customerServices.ReplaceOne(customer);
-                                    dataCRMProcessing.FinishDate = DateTime.UtcNow;
-                                    _dataCRMProcessingServices.UpdateByCustomerId(dataCRMProcessing, Common.DataCRMProcessingStatus.Done);
-                                }
-                                else
-                                {
-                                    dataCRMProcessing.FinishDate = DateTime.UtcNow;
-                                    dataCRMProcessing.Message = crmCustomer.Error != null ? crmCustomer.Error.Message : "";
-                                    _dataCRMProcessingServices.UpdateByCustomerId(dataCRMProcessing, Common.DataCRMProcessingStatus.Error);
+
                                 }
                             }
                         }
+
+                        // Update result to data crm processing
+                        if(crmCustomerResponse?.Success == true)
+                        {
+                            dataCRMProcessing.FinishDate = DateTime.Now;
+                            _dataCRMProcessingServices.UpdateByCustomerId(dataCRMProcessing, DataCRMProcessingStatus.Done);
+                        }else
+                        {
+                            dataCRMProcessing.FinishDate = DateTime.Now;
+                            dataCRMProcessing.Message = crmCustomerResponse?.Error?.Message ?? "";
+                            _dataCRMProcessingServices.UpdateByCustomerId(dataCRMProcessing, DataCRMProcessingStatus.Error);
+                        }
+
                     }
                 }
             }
