@@ -40,6 +40,11 @@ namespace _24hplusdotnetcore.Services
             await _leadCrmCollection.ReplaceOneAsync(c => c.Id == leadCrm.Id, leadCrm);
         }
 
+        public void ReplaceOne(LeadCrm leadCrm)
+        {
+            _leadCrmCollection.ReplaceOne(c => c.Id == leadCrm.Id, leadCrm);
+        }
+
         public IEnumerable<LeadCrm> GetByIds(IEnumerable<string> ids)
         {
             return _leadCrmCollection.Find(c => ids.Contains(c.Id)).ToList();

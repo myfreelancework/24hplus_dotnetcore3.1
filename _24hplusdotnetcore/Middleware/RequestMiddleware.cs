@@ -14,12 +14,18 @@ namespace _24hplusdotnetcore.Middleware
         private readonly RequestDelegate _next;
         private readonly UserLoginServices _userLoginSerivces;
         private readonly MCConfig _mCConfig;
+        private readonly FIBOConfig _fIBOConfig;
 
-        public RequestMiddleware(RequestDelegate next, UserLoginServices userLoginSerivces, IOptions<MCConfig> options)
+        public RequestMiddleware(
+            RequestDelegate next, 
+            UserLoginServices userLoginSerivces, 
+            IOptions<MCConfig> MCConfigOptions,
+             IOptions<FIBOConfig> fIBOConfigOptions)
         {
             _next = next;
             _userLoginSerivces = userLoginSerivces;
-            _mCConfig = options.Value;
+            _mCConfig = MCConfigOptions.Value;
+            _fIBOConfig = fIBOConfigOptions.Value;
         }
 
         public async Task InvokeAsync(HttpContext context)
@@ -43,6 +49,17 @@ namespace _24hplusdotnetcore.Middleware
                 }
             }
 
+            if (endpoint?.Metadata?.GetMetadata<FIBOAuthorizeAttribute>() is object)
+            {
+                string clientId = context.Request.Headers["client_id"];
+                string clientSecret = context.Request.Headers["client_secret"];
+
+                if (string.Equals(_fIBOConfig.ClientId, clientId) && string.Equals(_fIBOConfig.ClientSecret, clientSecret))
+                {
+                    await _next(context);
+                    return;
+                }
+            }
 
             if (context.Request.Headers["Authorization"].Count > 0)
             {
