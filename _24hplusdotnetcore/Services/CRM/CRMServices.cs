@@ -290,7 +290,7 @@ namespace _24hplusdotnetcore.Services.CRM
                                         foreach (var media in doc.UploadedMedias)
                                         {
                                             listLinkDocuments += media.Uri + "; ";
-                                            listTypeDocuments += doc.DocumentName + " |##| ";
+                                            listTypeDocuments += doc.DocumentName.ToUpper() + " |##| ";
                                         }
                                     }
                                 }
