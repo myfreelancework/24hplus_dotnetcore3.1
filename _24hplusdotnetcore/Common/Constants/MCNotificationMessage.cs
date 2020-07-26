@@ -8,7 +8,8 @@ namespace _24hplusdotnetcore.Common.Constants
         // GCC url
         public static string[] Return = {
             "SALE Đang chờ nhập liệu bổ sung - Return",
-            "DE1 Từ chối nhập liệu" 
+            "DE1 Từ chối nhập liệu",
+            "CA Đang đợi thẩm định điện thoại - Return",
             };
         public static string[] Cancel = {
             "DC Từ chối khoản vay",

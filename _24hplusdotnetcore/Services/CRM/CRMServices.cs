@@ -21,6 +21,7 @@ namespace _24hplusdotnetcore.Services.CRM
         private readonly CustomerServices _customerServices;
         private readonly DataCRMProcessingServices _dataCRMProcessingServices;
         private readonly DataProcessingService _dataProcessingService;
+        private readonly ConfigServices _configServices;
         private readonly IMapper _mapper;
         private readonly LeadCrmService _leadCrmService;
 
@@ -28,6 +29,7 @@ namespace _24hplusdotnetcore.Services.CRM
             CustomerServices customerServices,
             DataCRMProcessingServices dataCRMProcessingServices,
             DataProcessingService dataProcessingService,
+            ConfigServices configServices,
             IMapper mapper,
             LeadCrmService leadCrmService)
         {
@@ -37,6 +39,7 @@ namespace _24hplusdotnetcore.Services.CRM
             _dataProcessingService = dataProcessingService;
             _mapper = mapper;
             _leadCrmService = leadCrmService;
+            _configServices = configServices;
         }
 
         private string CRMLogin()
@@ -286,17 +289,26 @@ namespace _24hplusdotnetcore.Services.CRM
                             Customer customer = customers.FirstOrDefault(x => x.Id == dataCRMProcessing.CustomerId);
                             if (customer != null)
                             {
+                                string listLinkDocuments = "";
+                                string listTypeDocuments = "";
+                                string residentAddress = customer.ResidentAddress.Street + ", "
+                                + customer.ResidentAddress.Ward + ", "
+                                + customer.ResidentAddress.District + ", "
+                                + customer.ResidentAddress.Province + ", ";
+                                string tempAddress = customer.TemporaryAddress.Street + ", "
+                                + customer.TemporaryAddress.Ward + ", "
+                                + customer.TemporaryAddress.District + ", "
+                                + customer.TemporaryAddress.Province + ", ";
+
+                                var idCarDate = customer.Personal.IdCardDate.Split("/");
+                                var dob = customer.Personal.DateOfBirth.Split("/");
+
                                 Int32.TryParse(customer.Loan.Amount.Replace(",", string.Empty), out int amount);
                                 double totalAmount = amount;
                                 if (customer.Loan.BuyInsurance == true)
                                 {
                                     totalAmount += totalAmount * 0.055;
                                 }
-
-                                var idCarDate = customer.Personal.IdCardDate.Split("/");
-                                var dob = customer.Personal.DateOfBirth.Split("/");
-                                string listLinkDocuments = "";
-                                string listTypeDocuments = "";
 
                                 foreach (var group in customer.Documents)
                                 {
@@ -324,12 +336,13 @@ namespace _24hplusdotnetcore.Services.CRM
                                     Cf948 = dob[2] + "-" + dob[1] + "-" + dob[0],
                                     Cf854 = customer.Personal.Phone,
                                     // @todo
-                                    Cf1002 = customer.ResidentAddress.Street,
+                                    Cf1002 = residentAddress,
                                     Cf1238 = customer.IsTheSameResidentAddress == true ? "1" : "0",
+                                    Cf892 = customer.IsTheSameResidentAddress == true ? residentAddress : tempAddress,
                                     Cf1246 = customer.Working.Job,
                                     Cf964 = customer.Working.CompanyAddress.Street,
                                     Cf884 = customer.Working.Income.Replace(",", string.Empty),
-                                    Cf1020 = customer.ResidentAddress.Province,
+                                    // Cf1020 = customer.ResidentAddress.Province,
                                     Cf1410 = customer.Working.IncomeMethod,
                                     Cf1412 = customer.Working.OtherLoans.Replace(",", string.Empty),
                                     Cf990 = customer.Loan.Term,

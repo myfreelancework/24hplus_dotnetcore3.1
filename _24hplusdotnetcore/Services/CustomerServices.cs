@@ -221,6 +221,7 @@ namespace _24hplusdotnetcore.Services
                 customer.CRMId = prvCustomer.CRMId;
                 customer.MCAppId = prvCustomer.MCAppId;
                 customer.MCAppnumber = prvCustomer.MCAppnumber;
+                customer.ContractCode = prvCustomer.ContractCode;
                 updateCount = _customer.ReplaceOne(c => c.Id == customer.Id, customer).ModifiedCount;
 
                 if (customer.Status.ToUpper() == CustomerStatus.SUBMIT)
@@ -241,7 +242,7 @@ namespace _24hplusdotnetcore.Services
                         if (MCCicMapping.APPROVE_CIC_RESULT_LIST.Where(x => x == cic.CicResult).Any())
                         {
                             type = NotificationType.Add;
-                            message = string.Format(Message.NotificationAdd, customer.UserName, customer.Personal.Name);
+                            message = string.Format(Message.NotificationAdd, customer.SaleInfo.Name, customer.Personal.Name);
 
                             var objNoti = new Notification
                             {
@@ -255,6 +256,19 @@ namespace _24hplusdotnetcore.Services
                             };
                             _notificationServices.CreateOne(objNoti);
                         }
+                    }
+                }
+                else if (customer.Status.ToUpper() == CustomerStatus.APPROVE)
+                {
+                    // send data to MC
+                    if (customer.GreenType == GeenType.GreenC)
+                    {
+                        var dataMCProcessing = new DataMCProcessing
+                        {
+                            CustomerId = customer.Id,
+                            Status = DataCRMProcessingStatus.InProgress
+                        };
+                        _dataMCProcessingServices.CreateOne(dataMCProcessing);
                     }
                 }
             }
@@ -448,7 +462,7 @@ namespace _24hplusdotnetcore.Services
                 var customer = _customer.Find(x => x.Id == dto.CustomerId).FirstOrDefault();
                 if (customer != null)
                 {
-                    string sender = !string.IsNullOrEmpty(dto.LeadSource) ? dto.LeadSource : "";
+                    string sender = dto.LeadSource + string.Empty;
                     string userName = "";
                     string message = "";
                     string type = "";

@@ -40,6 +40,7 @@ namespace _24hplusdotnetcore.Services.MC
             {
                 var dataMC = _dataMCProcessing.Find(d => d.Id == id).FirstOrDefault();
                 dataMC.Status = Status;
+                dataMC.FinishDate = DateTime.Now;
                 var modifiedCount = _dataMCProcessing.ReplaceOne(d => d.Id == dataMC.Id, dataMC).ModifiedCount;
                 return modifiedCount;
             }
