@@ -528,6 +528,14 @@ namespace _24hplusdotnetcore.Services
                         message = string.Format(Message.NotificationSuccess, sender, customer.Personal.Name);
                     }
 
+                    // Update to CRM
+                    var dataCRMProcessing = new DataCRMProcessing
+                    {
+                        CustomerId = customer.Id,
+                        Status = DataCRMProcessingStatus.InProgress,
+                        LeadSource = LeadSourceType.MC.ToString()
+                    };
+                    _dataCRMProcessingServices.CreateOne(dataCRMProcessing);
 
                     if (message != "")
                     {
