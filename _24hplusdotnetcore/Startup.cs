@@ -17,6 +17,7 @@ using _24hplusdotnetcore.Services.CRM;
 using _24hplusdotnetcore.Services.GCC;
 using _24hplusdotnetcore.Services.MA;
 using _24hplusdotnetcore.Services.MC;
+using _24hplusdotnetcore.Services.OCR;
 using _24hplusdotnetcore.Settings;
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -53,6 +54,7 @@ namespace _24hplusdotnetcore
             services.Configure<MAConfig>(Configuration.GetSection("MAConfig"));
             services.Configure<MCConfig>(Configuration.GetSection("MCConfig"));
             services.Configure<FIBOConfig>(Configuration.GetSection("FIBOConfig"));
+            services.Configure<OCRConfig>(Configuration.GetSection("OCRConfig"));
 
             services.AddCors(options =>
             {
@@ -112,7 +114,8 @@ namespace _24hplusdotnetcore
             services.AddSingleton<DataCRMProcessingServices>();
             services.AddSingleton<LeadCrmService>();
 
-
+            //OCR
+            services.AddSingleton<IOCRService, OCRService>();
 
             //Add batchjob
             services.AddHostedService<AddNewCustomerFromCRM>();
@@ -161,6 +164,8 @@ namespace _24hplusdotnetcore
             services.AddMvcCore().AddNewtonsoftJson();
             ConfigureMCRestClient(services);
             ConfigureMARestClient(services);
+            ConfigureOCRRestClient(services);
+
             // Auto Mapper Configurations
             var mappingConfig = new MapperConfiguration(mc =>
             {
@@ -268,9 +273,17 @@ namespace _24hplusdotnetcore
                {
                    MAConfig maConfig = serviceProvider.GetRequiredService<IOptions<MAConfig>>().Value;
                    conf.BaseAddress = new Uri(maConfig.Host);
-               }).ConfigurePrimaryHttpMessageHandler((serviceProvider) =>
+               });
+        }
+
+        private void ConfigureOCRRestClient(IServiceCollection services)
+        {
+            services.AddRefitClient<IRestOCRService>()
+               .ConfigureHttpClient((serviceProvider, conf) =>
                {
-                   return new RestHttpClientHandler();
+                   var config = serviceProvider.GetRequiredService<IOptions<OCRConfig>>().Value;
+                   conf.BaseAddress = new Uri(config.Host);
+                   conf.DefaultRequestHeaders.Add("x-api-key", config.APIKey);
                });
         }
     }
