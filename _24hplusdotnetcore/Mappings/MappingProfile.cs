@@ -199,7 +199,12 @@ namespace _24hplusdotnetcore.Mappings
                 .ForMember(dest => dest.Cf1196, src => src.MapFrom(x => x.Cf1196 ?? "-"))
                 .ForMember(dest => dest.Cf1210, src => src.MapFrom(x => x.Cf1210 ?? "-"))
                 .ForMember(dest => dest.Cf1264, src => src.MapFrom(x => x.Cf1264 ?? "-"))
-                .ForMember(dest => dest.Cf1404, src => src.MapFrom(x => x.Cf1404 ?? "-"));
+                .ForMember(dest => dest.Cf1404, src => src.MapFrom(x => x.Cf1404 ?? "-"))
+                .ForMember(dest => dest.Cf968, src => src.MapFrom(x => x.Cf968 ?? "-"))
+                .ForMember(dest => dest.Cf1026, src => src.MapFrom(x => x.Cf1026 ?? "-"))
+                .ForMember(dest => dest.Cf1036, src => src.MapFrom(x => x.Cf1036 ?? "-"))
+                .ForMember(dest => dest.Cf1040, src => src.MapFrom(x => x.Cf1040 ?? "-"))
+                .ForMember(dest => dest.Cf1178, src => src.MapFrom(x => x.Cf1178 ?? "-"));
 
             #endregion
 
@@ -270,23 +275,9 @@ namespace _24hplusdotnetcore.Mappings
             CreateMap<MCCheckCICInfoResponseDto, MCCheckCICModel>();
 
             CreateMap<FIBOResquestDto, LeadCrm>()
-                .ForMember(dest => dest.Cf1178, src => src.MapFrom(x => x.FinaceCom))
                 .ForMember(dest => dest.Potentialname, src => src.MapFrom(x => x.ContactName))
-                .ForMember(dest => dest.Cf1026, src => src.MapFrom(x => x.Gender))
-                .ForMember(dest => dest.Leadsource, src => src.MapFrom(x => x.Leadsource))
                 .ForMember(dest => dest.Cf854, src => src.MapFrom(x => x.Phone))
-                .ForMember(dest => dest.Cf1050, src => src.MapFrom(x => x.IdNo))
-                .ForMember(dest => dest.Cf1028, src => src.MapFrom(x => x.Email))
-                .ForMember(dest => dest.Cf1026, src => src.MapFrom(x => x.Job))
-                .ForMember(dest => dest.Cf1088, src => src.MapFrom(x => x.Income))
-                .ForMember(dest => dest.Cf1020, src => src.MapFrom(x => x.City))
-                .ForMember(dest => dest.Cf1032, src => src.MapFrom(x => x.Prod))
-                .ForMember(dest => dest.Cf1040, src => src.MapFrom(x => x.SubProd))
-                .ForMember(dest => dest.Cf968, src => src.MapFrom(x => x.LoanAmount))
-                .ForMember(dest => dest.Cf990, src => src.MapFrom(x => x.Tenor))
-                .ForMember(dest => dest.Cf1052, src => src.MapFrom(x => x.AppointmentDate.HasValue ? x.AppointmentDate.Value.ToString("yyyy-MM-dd") : null))
-                .ForMember(dest => dest.Cf1054, src => src.MapFrom(x => x.AppointmentAdd))
-                .ForMember(dest => dest.Cf1036, src => src.MapFrom(x => x.RequestDoc));
+                .ForMember(dest => dest.Cf1050, src => src.MapFrom(x => x.Cmnd));
 
         }
     }
