@@ -3,6 +3,7 @@ using _24hplusdotnetcore.Common.Enums;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using System;
+using System.Text.RegularExpressions;
 
 namespace _24hplusdotnetcore.Models
 {
@@ -191,6 +192,21 @@ namespace _24hplusdotnetcore.Models
         public void SetDCNote(string errorMessage)
         {
             Cf1174 = errorMessage;
+        }
+        public string GetSalesStaffName()
+        {
+            if(!string.IsNullOrEmpty(Cf1414))
+            {
+                return Cf1414;
+            }
+
+            var match = Regex.Match(AssignedUserId?.Label ?? string.Empty, "^([\\d\\w-]*) (.*)$");
+            if (match.Success)
+            {
+                return match.Groups[2].Value;
+            }
+
+            return string.Empty;
         }
     }
 
