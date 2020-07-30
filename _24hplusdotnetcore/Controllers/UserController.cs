@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace _24hplusdotnetcore.Controllers
 {
     [ApiController]
-    
+
     public class UserController : ControllerBase
     {
         private readonly UserServices _userService;
@@ -17,19 +17,31 @@ namespace _24hplusdotnetcore.Controllers
         {
             _userService = userServices;
         }
-        
+
         [HttpPost]
-        [Route("api/user")]        
-        public ActionResult<User> Create(User user)
+        [Route("api/user")]
+        public ActionResult<IEnumerable<User>> Create(IEnumerable<User> users)
         {
             try
             {
-                var newUser = _userService.Create(user);
-                return Ok(newUser);
+                var results = new List<User>();
+                foreach (var user in users)
+                {
+                    var existedUser = _userService.Get(user.UserName);
+                    if (existedUser == null)
+                    {
+                        var newUser = _userService.Create(user);
+                    }
+                    else 
+                    {
+                        results.Add(user);
+                    }
+                }
+                return Ok(results);
             }
             catch (System.Exception ex)
             {
-                    return StatusCode(StatusCodes.Status500InternalServerError ,new ResponseMessage{status = "ERROR", message = ex.Message});
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseMessage { status = "ERROR", message = ex.Message });
             }
         }
 
@@ -47,7 +59,8 @@ namespace _24hplusdotnetcore.Controllers
                         data = null
                     });
                 var lstUser = _userService.Get();
-                return Ok(new ResponseContext{
+                return Ok(new ResponseContext
+                {
                     code = (int)Common.ResponseCode.SUCCESS,
                     message = Common.Message.SUCCESS,
                     data = lstUser
@@ -55,8 +68,8 @@ namespace _24hplusdotnetcore.Controllers
             }
             catch (System.Exception ex)
             {
-                
-                 return StatusCode(StatusCodes.Status500InternalServerError ,new ResponseMessage{status = "ERROR", message = ex.Message});
+
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseMessage { status = "ERROR", message = ex.Message });
             }
         }
 
@@ -74,7 +87,8 @@ namespace _24hplusdotnetcore.Controllers
                         data = null
                     });
                 var objUser = _userService.Get(userName);
-                return Ok(new ResponseContext{
+                return Ok(new ResponseContext
+                {
                     code = (int)Common.ResponseCode.SUCCESS,
                     message = Common.Message.SUCCESS,
                     data = objUser
@@ -82,9 +96,9 @@ namespace _24hplusdotnetcore.Controllers
             }
             catch (System.Exception ex)
             {
-                 return StatusCode(StatusCodes.Status500InternalServerError ,new ResponseMessage{status = "ERROR", message = ex.Message});
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseMessage { status = "ERROR", message = ex.Message });
             }
-            
+
         }
 
     }

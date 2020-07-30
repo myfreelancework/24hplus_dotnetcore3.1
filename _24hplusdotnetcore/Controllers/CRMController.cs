@@ -91,6 +91,7 @@ namespace _24hplusdotnetcore.Controllers
             try
             {
                 var leadCrm = _mapper.Map<LeadCrm>(fIBOResquestDto);
+                leadCrm.Leadsource = "FO001";
                 await _leadCrmService.InsertAsync(leadCrm);
 
                 _dataCRMProcessingServices.CreateOne(new DataCRMProcessing

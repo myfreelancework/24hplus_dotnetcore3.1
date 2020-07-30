@@ -34,6 +34,7 @@ namespace _24hplusdotnetcore.Services
                 userModel.UserEmail = user.UserEmail;
                 userModel.UserPassword = user.UserPassword;//cipher.Encrypt(user.UserPassword);
                 userModel.RoleName = user.RoleName;
+                userModel.Phone = user.Phone;
                 _user.InsertOne(userModel);
                 _logger.LogInformation("Create user successfully: "+ JsonConvert.SerializeObject(userModel) +"");
                 return userModel;
