@@ -275,6 +275,7 @@ namespace _24hplusdotnetcore.Services.CRM
                             if (leadCrm != null)
                             {
                                 var dataCRM = _mapper.Map<CRMRequestDto>(leadCrm);
+                                dataCRM.AssignedUserId = "19x2719";
                                 crmCustomerResponse = PushDataToCRM(dataCRM, session, dataCRMProcessing);
                                 if (crmCustomerResponse?.Result?.Record != null)
                                 {
