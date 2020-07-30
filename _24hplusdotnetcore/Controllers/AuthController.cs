@@ -60,6 +60,7 @@ namespace _24hplusdotnetcore.Controllers
             }
 
         }
+        [AllowAnonymous]
         [HttpPost]
         [Route("api/auth/userlogin")]
         public ActionResult Login(RequestLoginInfo requestLoginInfo)
